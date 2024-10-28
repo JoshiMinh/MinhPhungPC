@@ -1,0 +1,133 @@
+body.dark-mode {
+    background-color: #121212;
+    color: white;
+}
+
+.navbar-main {
+    background-color: #ffffff;
+}
+
+.navbar-main.dark-mode {
+    background-color: #121212;
+}
+
+.navbar-brand {
+    color: #000;
+}
+
+.navbar-secondary {
+    background-color: #0071bc;
+}
+
+.navbar-secondary.dark-mode {
+    background-color: #2e3192;
+}
+
+.navbar-gradient {
+    background: linear-gradient(to right, #0071bc, #2e3192);
+}
+
+.navbar-secondary a {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    color: white;
+}
+
+.navbar-secondary a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-secondary.dark-mode a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.search-input-container {
+    display: flex;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px 0 0 4px;
+    border: 1px solid #ccc;
+}
+
+.search-input.dark-mode {
+    background-color: #2e2e2e;
+    color: white;
+    border: 1px solid #444;
+}
+
+.search-button {
+    background-color: #0071bc;
+    border: 1px solid #0071bc;
+    border-radius: 0 4px 4px 0;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: white;
+}
+
+.search-button:hover {
+    background-color: #0071bc;
+    border-color: #2e3192;
+}
+
+.search-button.dark-mode {
+    background-color: #2e3192;
+    border-color: #666;
+}
+
+.search-button.dark-mode:hover {
+    background-color: #555;
+}
+
+.component-card {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.component-card.bg-dark {
+    background-color: #1e1e1e;
+}
+
+.component-card.bg-white {
+    background-color: #ffffff;
+}
+
+.component-card.text-dark {
+    color: black;
+}
+
+.component-card.text-white {
+    color: white;
+}
+
+.icon {
+    font-size: 1.5rem;
+}
+
+.footer-gradient {
+    background: linear-gradient(to right, #0071bc, #2e3192);
+}
+
+.footer-gradient a {
+    color: white;
+    text-decoration: none;
+}
+
+.footer-gradient a:hover {
+    color: #d3d3d3;
+}
+
+.footer-gradient h5 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
