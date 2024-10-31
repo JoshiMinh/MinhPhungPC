@@ -6,46 +6,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.querySelector('.search-input');
     const searchButton = document.querySelector('.search-button');
     const icon = document.querySelector('.icon');
+    const switchBtn = document.getElementById('switchBtn');
+    const isDarkModeEnabled = localStorage.getItem('dark-mode') === 'enabled';
 
-    if (localStorage.getItem('dark-mode') === 'enabled') enableDarkMode();
+    if (isDarkModeEnabled) toggleDarkMode(true);
 
-    document.getElementById('switchBtn').onclick = () => {
-        const isDarkMode = body.classList.toggle('dark-mode');
-        mainNavbar.classList.toggle('dark-mode');
-        secondaryNavbar.classList.toggle('dark-mode');
+    switchBtn.onclick = () => toggleDarkMode(body.classList.toggle('dark-mode'));
 
-        componentCards.forEach(card => {
-            card.classList.toggle('bg-dark', isDarkMode);
-            card.classList.toggle('text-white', isDarkMode);
-            card.classList.toggle('bg-white', !isDarkMode);
-            card.classList.toggle('text-dark', !isDarkMode);
-        });
-
-        searchInput.classList.toggle('dark-mode', isDarkMode);
-        searchButton.classList.toggle('dark-mode', isDarkMode);
-
-        icon.classList.toggle('bi-moon', !isDarkMode);
-        icon.classList.toggle('bi-brightness-high', isDarkMode);
-        icon.style.color = isDarkMode ? 'white' : 'black';
-
-        localStorage.setItem('dark-mode', isDarkMode ? 'enabled' : 'disabled');
-    };
-
-    function enableDarkMode() {
-        body.classList.add('dark-mode');
-        mainNavbar.classList.add('dark-mode');
-        secondaryNavbar.classList.add('dark-mode');
+    function toggleDarkMode(enable) {
+        [body, mainNavbar, secondaryNavbar].forEach(el => 
+            el.classList.toggle('dark-mode', enable)
+        );
 
         componentCards.forEach(card => {
-            card.classList.add('bg-dark', 'text-white');
-            card.classList.remove('bg-white', 'text-dark');
+            card.classList.toggle('bg-dark', enable);
+            card.classList.toggle('text-white', enable);
+            card.classList.toggle('bg-white', !enable);
+            card.classList.toggle('text-dark', !enable);
         });
 
-        searchInput.classList.add('dark-mode');
-        searchButton.classList.add('dark-mode');
+        searchInput.classList.toggle('dark-mode', enable);
+        searchButton.classList.toggle('dark-mode', enable);
 
-        icon.classList.remove('bi-moon');
-        icon.classList.add('bi-brightness-high');
-        icon.style.color = 'white';
+        icon.classList.toggle('bi-moon', !enable);
+        icon.classList.toggle('bi-brightness-high', enable);
+        icon.style.color = enable ? 'white' : 'black';
+
+        localStorage.setItem('dark-mode', enable ? 'enabled' : 'disabled');
     }
 });

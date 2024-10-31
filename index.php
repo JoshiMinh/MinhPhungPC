@@ -1,3 +1,4 @@
+<?php include 'db.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,246 +13,150 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-main">
-    <a class="navbar-brand" href="index.php" style="width: 10%;">
-        <img src="logo.png" alt="MinhPhungPC Logo" style="width: 100%;">
-    </a>
-    <div class="mx-auto" style="width: 50%;">
-        <div class="search-input-container d-flex">
-            <input class="search-input flex-grow-1" type="text" placeholder="Find component" aria-label="Search">
-            <button class="search-button" aria-label="Search">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-    </div>
-    <div class="d-flex align-items-center ml-auto">
-        <button id="switchBtn" class="btn btn-link p-0 ml-2" aria-label="Toggle dark mode">
-            <i class="bi bi-moon icon" style="color: black;"></i>
-        </button>
-        <button class="btn btn-primary mx-2" type="button">
-            <i class="fas fa-user"></i> Account
-        </button>
-        <button class="btn btn-secondary" type="button">
-            <i class="fas fa-shopping-cart"></i> Cart
-        </button>
-    </div>
-</nav>
+    <?php include 'web_sections/navbar.php'; ?>
 
-<nav class="navbar navbar-expand-lg navbar-secondary navbar-gradient">
-    <div class="collapse navbar-collapse">
-        <ul class="navbar-nav flex-row w-100">
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Motherboard</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">CPU</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">RAM</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Graphics Card</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Storage</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Power Supply</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Cooler</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Case Fan</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Operating System</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Monitor</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Mouse</a></li>
-            <li class="nav-item flex-fill"><a class="nav-link" href="#">Keyboard</a></li>
-        </ul>
-    </div>
-</nav>
-
-<main class="container">
-    <div class="row">
-        <div class="col text-center my-5">
-            <h2>Build Your First PC!</h2>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Motherboard" data-component-icon="motherboard.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Motherboard</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/motherboard.png" alt="Motherboard" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
+    <main class="container">
+        <div class="row text-center my-5">
+            <div class="col">
+                <h2>Build Your First PC!</h2>
             </div>
         </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="CPU" data-component-icon="processor.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>CPU</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/processor.png" alt="CPU" width="32">
+        <div class="container">
+            <?php foreach ([
+                ["name" => "CPU", "icon" => "processor.png"],
+                ["name" => "Motherboard", "icon" => "motherboard.png"],
+                ["name" => "RAM", "icon" => "memory.png"],
+                ["name" => "GPU", "icon" => "vga-card.png"],
+                ["name" => "Hard Drive", "icon" => "solid-state-drive.png"],
+                ["name" => "Power Supply", "icon" => "power-supply.png"],
+                ["name" => "CPU Cooler", "icon" => "cpu cooler.png"],
+                ["name" => "Case", "icon" => "case.png"],
+                ["name" => "Operating System", "icon" => "operating-system.png"],
+            ] as $component): ?>
+                <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" 
+                     data-component-name="<?= htmlspecialchars($component['name']); ?>" 
+                     data-component-icon="<?= htmlspecialchars($component['icon']); ?>">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-center" style="width: 120px;"><?= htmlspecialchars($component['name']); ?></span>
+                            <div class="rounded p-2 mx-2" style="width: 48px; background-color: #f8f9fa;">
+                                <img src="Component Icons/<?= htmlspecialchars($component['icon']); ?>" 
+                                     alt="<?= htmlspecialchars($component['name']); ?>" 
+                                     width="32" style="opacity: 0.6;">
+                            </div>
+                            <span class="text-muted">Please select a component</span>
+                        </div>
+                        <button class="btn btn-primary px-4 select-btn" 
+                                data-toggle="modal" 
+                                data-target="#componentModal" 
+                                data-component-name="<?= htmlspecialchars($component['name']); ?>" 
+                                data-component-icon="<?= htmlspecialchars($component['icon']); ?>">Select</button>
                     </div>
-                    <span class="text-muted">Please select a component</span>
                 </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
+            <?php endforeach; ?>
         </div>
+    </main>
 
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="RAM" data-component-icon="memory.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>RAM</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/memory.png" alt="RAM" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
+    <div class="modal fade" id="componentModal" tabindex="-1" aria-labelledby="componentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="componentModalLabel">Select Component</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="GPU" data-component-icon="vga-card.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>GPU</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/vga-card.png" alt="GPU" width="32">
+                <div class="modal-body text-center">
+                    <img id="modalComponentIcon" src="" alt="" width="80" class="mb-3">
+                    <h6 id="modalComponentName">Component Name</h6>
+                    <p>Please confirm your selection.</p>
+                    <div id="motherboardTableContainer" style="display: none;">
+                        <h6>Available Motherboards</h6>
+                        <table class="table table-bordered" id="motherboardTable">
+                            <thead>
+                                <tr>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Socket Type</th>
+                                    <th>Chipset</th>
+                                    <th>CPU Support</th>
+                                    <th>Memory Slots</th>
+                                    <th>Max Memory Capacity</th>
+                                    <th>DDR Type</th>
+                                    <th>Expansion Slots</th>
+                                    <th>Price</th>
+                                    <th>Image</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
-                    <span class="text-muted">Please select a component</span>
                 </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Hard Drive" data-component-icon="solid-state-drive.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Hard Drive</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/solid-state-drive.png" alt="Hard Drive" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="confirmSelect">Confirm Selection</button>
                 </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Power Supply" data-component-icon="power-supply.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Power Supply</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/power-supply.png" alt="Power Supply" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="CPU Cooler" data-component-icon="cpu cooler.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>CPU Cooler</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/cpu cooler.png" alt="CPU Cooler" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Case Fan" data-component-icon="case fan.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Case Fan</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/case.png" alt="Case Fan" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Operating System" data-component-icon="operating-system.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Operating System</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/windows.png" alt="Operating System" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Monitor" data-component-icon="monitor.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Monitor</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/monitor.png" alt="Monitor" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Mouse" data-component-icon="mouse.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Mouse</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/mouse.png" alt="Mouse" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
-            </div>
-        </div>
-
-        <div class="component-card my-4 rounded p-3 shadow-sm bg-white text-dark" data-component-name="Keyboard" data-component-icon="keyboard.png">
-            <div class="d-flex justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <span>Keyboard</span>
-                    <div class="rounded p-2 d-flex align-items-center mx-2" style="width: 48px; background-color: #f8f9fa;">
-                        <img src="Component Icons/keyboard.png" alt="Keyboard" width="32">
-                    </div>
-                    <span class="text-muted">Please select a component</span>
-                </div>
-                <button class="btn btn-primary px-4">Select</button>
             </div>
         </div>
     </div>
-</main>
 
-<footer class="footer-gradient py-4 text-white">
-    <div class="container text-center">
-        <div class="row">
-            <div class="col-md-4">
-                <h5>Contact Us</h5>
-                <p>
-                    <strong>Email:</strong> <a href="mailto:binhangia241273@gmail.com" class="text-white">binhangia241273@gmail.com</a><br>
-                    <strong>Phone:</strong> <a href="tel:+84907067721" class="text-white">0907067721</a>
-                </p>
-            </div>
-            <div class="col-md-4">
-                <h5>About Us</h5>
-                <p>At MinhPhungPC, we help you build the perfect PC tailored to your needs. Whether for gaming, design, or everyday use, our expert recommendations ensure you get the best performance.</p>
-            </div>
-            <div class="col-md-4">
-                <h5>See on GitHub</h5>
-                <a href="https://github.com/JoshiMinh/MinhPhungPC" target="_blank" class="text-white mx-2" style="font-size: 2rem;">
-                    <i class="fab fa-github"></i>
-                </a>
-            </div>
-        </div>
-        <div class="mt-3">
-            <p>&copy; 2024 MinhPhungPC. All Rights Reserved.</p>
-        </div>
-    </div>
-</footer>
+    <?php include 'web_sections/footer.php'; ?>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="darkmode.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="darkmode.js"></script>
+    <script>
+    $(function() {
+        $('.select-btn').on('click', function() {
+            const componentName = $(this).data('component-name');
+            const componentIcon = $(this).data('component-icon');
+            $('#modalComponentName').text(componentName);
+            $('#modalComponentIcon').attr('src', 'Component Icons/' + componentIcon);
+            
+            const isMotherboard = componentName === "Motherboard";
+            $('#motherboardTableContainer').toggle(isMotherboard);
+            if (isMotherboard) fetchMotherboardData();
+        });
+
+        $('#confirmSelect').on('click', function() {
+            alert('You have selected: ' + $('#modalComponentName').text());
+            $('#componentModal').modal('hide');
+        });
+    });
+
+    function fetchMotherboardData() {
+        $.ajax({
+            url: 'fetch_motherboard_data.php',
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                const tableBody = $('#motherboardTable tbody');
+                tableBody.empty();
+                if (data.length) {
+                    data.forEach(motherboard => {
+                        const row = `<tr>
+                            <td>${motherboard.brand}</td>
+                            <td>${motherboard.model}</td>
+                            <td>${motherboard.socket_type}</td>
+                            <td>${motherboard.chipset}</td>
+                            <td>${motherboard.cpu}</td>
+                            <td>${motherboard.memory_slots}</td>
+                            <td>${motherboard.max_memory_capacity}</td>
+                            <td>${motherboard.ddr}</td>
+                            <td>${motherboard.expansion_slots}</td>
+                            <td>${motherboard.price}</td>
+                            <td><img src="${motherboard.image}" alt="${motherboard.model}" width="50"></td>
+                        </tr>`;
+                        tableBody.append(row);
+                    });
+                } else {
+                    tableBody.append('<tr><td colspan="11">No motherboards available.</td></tr>');
+                }
+            },
+            error: function() {
+                alert("Error fetching data.");
+            }
+        });
+    }
+    </script>
 </body>
 </html>
