@@ -1,0 +1,4 @@
+# Ignore all .tmp.driveupload files
+*.tmp.driveupload
+/.tmp.driveupload
+.tmp.driveupload/141659
