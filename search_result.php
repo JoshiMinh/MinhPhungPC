@@ -3,7 +3,17 @@ include 'db.php';
 include 'web_sections/categoryMap.php';
 
 $query = $_GET['query'] ?? '';
-$tables = ['motherboard', 'processor', 'memory', 'graphicscard', 'storage', 'powersupply', 'cpucooler', 'pccase', 'operatingsystem'];
+$tables = [
+    'motherboard',
+    'processor',
+    'memory',
+    'graphicscard',
+    'storage',
+    'powersupply',
+    'cpucooler',
+    'pccase',
+    'operatingsystem'
+];
 $items = [];
 
 if ($query) {

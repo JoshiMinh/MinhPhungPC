@@ -18,8 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function toggleDarkMode(enable) {
-        [elements.body, elements.mainNavbar, elements.secondaryNavbar].forEach(el => 
-            el.classList.toggle('dark-mode', enable)
+        [elements.body, elements.mainNavbar, elements.secondaryNavbar].forEach(el =>
+            el.classList.toggle('bg-dark', enable)
         );
 
         elements.componentCards.forEach(card => {
@@ -29,9 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
             card.classList.toggle('text-dark', !enable);
         });
 
-        elements.searchInput?.classList.toggle('dark-mode', enable);
-        elements.searchButton?.classList.toggle('dark-mode', enable);
+        elements.searchInput?.classList.toggle('bg-dark', enable);
+        elements.searchInput?.classList.toggle('text-white', enable);
+        elements.searchInput?.classList.toggle('bg-light', !enable);
+        elements.searchInput?.classList.toggle('text-dark', !enable);
         
+        elements.searchButton?.classList.toggle('btn-dark', enable);
+        elements.searchButton?.classList.toggle('btn-light', !enable);
+
         if (elements.icon) {
             elements.icon.classList.toggle('bi-moon', !enable);
             elements.icon.classList.toggle('bi-brightness-high', enable);

@@ -15,7 +15,7 @@
             </div>
             <div class="col-md-4">
                 <h5>About Us</h5>
-                <p>MinhPhungPC helps you build the ideal PC with expert recommendations for gaming, design, or daily use. Our dedicated team is committed to providing personalized solutions and outstanding customer service to ensure you find the perfect setup for your needs.</p>
+                <p>MinhPhungPC helps you build the ideal PC with expert recommendations for gaming, design, or daily use. Our dedicated team provides personalized solutions and outstanding customer service to ensure you find the perfect setup for your needs.</p>
             </div>
             <div class="col-md-4">
                 <h5>See on GitHub</h5>
