@@ -23,7 +23,7 @@
                 </a>
             <?php else: ?>
                 <a href="account.php" class="btn btn-primary">
-                    <i class="fas fa-user"></i> Account
+                    <i class="fas fa-user"></i>
                 </a>
             <?php endif; ?>
         </div>

@@ -1,47 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const elements = {
-        body: document.body,
-        mainNavbar: document.querySelector('.navbar-main'),
-        secondaryNavbar: document.querySelector('.navbar-secondary'),
-        componentCards: document.querySelectorAll('.component-card'),
-        searchInput: document.querySelector('.search-input'),
-        searchButton: document.querySelector('.search-button'),
-        icon: document.querySelector('.icon'),
-        switchBtn: document.getElementById('switchBtn')
-    };
+    const body = document.body;
+    const mainNavbar = document.querySelector('.navbar-main');
+    const secondaryNavbar = document.querySelector('.navbar-secondary');
+    const componentCards = document.querySelectorAll('.component-card');
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-button');
+    const icon = document.querySelector('.icon');
+    const switchBtn = document.getElementById('switchBtn');
+    
+    // Check system preference initially
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const isDarkModeEnabled = localStorage.getItem('dark-mode') === 'enabled' || 
+                             (localStorage.getItem('dark-mode') === null && prefersDark.matches);
 
-    const isDarkModeEnabled = localStorage.getItem('dark-mode') === 'enabled';
     if (isDarkModeEnabled) toggleDarkMode(true);
 
-    elements.switchBtn?.addEventListener('click', () => {
-        toggleDarkMode(elements.body.classList.toggle('dark-mode'));
+    // Listen for system dark mode changes
+    prefersDark.addEventListener('change', (e) => {
+        if (localStorage.getItem('dark-mode') === null) {
+            toggleDarkMode(e.matches);
+        }
     });
 
+    switchBtn.onclick = () => toggleDarkMode(body.classList.toggle('dark-mode'));
+
     function toggleDarkMode(enable) {
-        [elements.body, elements.mainNavbar, elements.secondaryNavbar].forEach(el =>
-            el.classList.toggle('bg-dark', enable)
+        document.documentElement.classList.toggle('dark-theme', enable);
+        
+        [body, mainNavbar, secondaryNavbar].forEach(el => 
+            el.classList.toggle('dark-mode', enable)
         );
 
-        elements.componentCards.forEach(card => {
-            card.classList.toggle('bg-dark', enable);
-            card.classList.toggle('text-white', enable);
-            card.classList.toggle('bg-white', !enable);
-            card.classList.toggle('text-dark', !enable);
-        });
+        componentCards.forEach(card => card.classList.toggle('dark-mode', enable));
+        searchInput.classList.toggle('dark-mode', enable);
+        searchButton.classList.toggle('dark-mode', enable);
 
-        elements.searchInput?.classList.toggle('bg-dark', enable);
-        elements.searchInput?.classList.toggle('text-white', enable);
-        elements.searchInput?.classList.toggle('bg-light', !enable);
-        elements.searchInput?.classList.toggle('text-dark', !enable);
-        
-        elements.searchButton?.classList.toggle('btn-dark', enable);
-        elements.searchButton?.classList.toggle('btn-light', !enable);
-
-        if (elements.icon) {
-            elements.icon.classList.toggle('bi-moon', !enable);
-            elements.icon.classList.toggle('bi-brightness-high', enable);
-            elements.icon.style.color = enable ? 'white' : 'black';
-        }
+        // Update icon
+        icon.classList.toggle('bi-moon', !enable);
+        icon.classList.toggle('bi-brightness-high', enable);
+        icon.style.color = enable ? 'var(--text-primary)' : 'var(--text-primary)';
 
         localStorage.setItem('dark-mode', enable ? 'enabled' : 'disabled');
     }

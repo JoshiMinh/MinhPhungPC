@@ -1,22 +1,34 @@
 <?php
 require 'db.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['signup'])) {
         $username = trim($_POST['username']);
         $email = trim($_POST['email']);
-        $passwordHash = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $password = $_POST['password'];
+        $retypePassword = $_POST['retype-password'];
         $dob = $_POST['dob'];
 
-        $stmt = $pdo->prepare("SELECT user_id FROM users WHERE name = :username OR email = :email");
-        $stmt->execute(['username' => $username, 'email' => $email]);
-
-        if ($stmt->rowCount() > 0) {
-            echo "<script>alert('Username or email already exists.');</script>";
+        if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+            echo '<div class="alert alert-warning" style="margin: 4rem 0;">Password must be at least 8 characters long and include both letters and numbers.</div>';
+        } elseif ($password !== $retypePassword) {
+            echo '<div class="alert alert-warning" style="margin: 4rem 0;">Passwords do not match.</div>';
         } else {
-            $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
-            $success = $stmt->execute(['name' => $username, 'email' => $email, 'password_hash' => $passwordHash, 'dob' => $dob]);
-            echo "<script>alert('" . ($success ? "Registration successful!" : "Error. Please try again.") . "');</script>";
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("SELECT user_id FROM users WHERE name = :username OR email = :email");
+            $stmt->execute(['username' => $username, 'email' => $email]);
+
+            if ($stmt->rowCount() > 0) {
+                echo '<div class="alert alert-warning" style="margin: 4rem 0;">User already exists.</div>';
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
+                $success = $stmt->execute(['name' => $username, 'email' => $email, 'password_hash' => $passwordHash, 'dob' => $dob]);
+                if ($success) {
+                    echo '<div class="alert alert-success" style="margin: 4rem 0;">Registration successful!</div>';
+                } else {
+                    echo '<div class="alert alert-danger" style="margin: 4rem 0;">Registration failed. Please try again.</div>';
+                }
+            }
         }
     }
 
@@ -28,11 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($user && password_verify($_POST['login-password'], $user['password_hash'])) {
             session_start();
-            $_SESSION = array_merge($user, ['username' => $user['name']]);
-            echo "<script>alert('Login successful!'); window.location.href='index.php';</script>";
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['profile_image'] = $user['profile_image'];
+            header("Location: index.php?success=login_successful");
             exit();
         } else {
-            echo "<script>alert('Invalid username or password.');</script>";
+            echo '<div class="alert alert-danger" style="margin: 4rem 0;">Invalid username or password.</div>';
         }
     }
 }
@@ -53,6 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="form-group">
                 <label for="signup-password">Password</label>
                 <input type="password" class="form-control" id="signup-password" name="password" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-retype-password">Retype Password</label>
+                <input type="password" class="form-control" id="signup-retype-password" name="retype-password" placeholder="Retype password" required>
             </div>
             <div class="form-group">
                 <label for="signup-dob">Date of Birth</label>

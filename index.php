@@ -29,7 +29,8 @@
                             <span class="text-center" style="width: 120px;"><?= htmlspecialchars($componentName); ?></span>
                             <div class="p-2">
                                 <img src="Component Icons/<?= htmlspecialchars($tableName . '.png'); ?>"
-                                     alt="<?= htmlspecialchars($componentName); ?>" width="32">
+                                     alt="<?= htmlspecialchars($componentName); ?>"
+                                     style="background-color: #ffffff; opacity: 0.7; transition: opacity 0.3s ease; width: 50px; padding: 10px; border-radius: 5px;">
                             </div>
                             <span class="text-muted">Please select a component</span>
                         </div>
