@@ -1,6 +1,4 @@
 <?php
-require 'db.php';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['signup'])) {
         $username = trim($_POST['username']);
@@ -23,26 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
                 $success = $stmt->execute(['name' => $username, 'email' => $email, 'password_hash' => $passwordHash, 'dob' => $dob]);
-                if ($success) {
-                    echo '<div class="alert alert-success" style="margin: 4rem 0;">Registration successful!</div>';
-                } else {
-                    echo '<div class="alert alert-danger" style="margin: 4rem 0;">Registration failed. Please try again.</div>';
-                }
+                echo $success 
+                    ? '<div class="alert alert-success" style="margin: 4rem 0;">Registration successful!</div>' 
+                    : '<div class="alert alert-danger" style="margin: 4rem 0;">Registration failed. Please try again.</div>';
             }
         }
     }
 
     if (isset($_POST['login'])) {
         $loginInput = trim($_POST['login-username-email']);
-        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, profile_image, date_of_birth, address, email FROM users WHERE name = :username OR email = :email");
+        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, profile_image, email FROM users WHERE name = :username OR email = :email");
         $stmt->execute(['username' => $loginInput, 'email' => $loginInput]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($_POST['login-password'], $user['password_hash'])) {
             session_start();
-            $_SESSION['user_id'] = $user['user_id'];
-            $_SESSION['email'] = $user['email'];
-            $_SESSION['profile_image'] = $user['profile_image'];
+            $_SESSION = array_merge($_SESSION, [
+                'user_id' => $user['user_id'],
+                'email' => $user['email'],
+                'profile_image' => $user['profile_image']
+            ]);
             header("Location: index.php?success=login_successful");
             exit();
         } else {

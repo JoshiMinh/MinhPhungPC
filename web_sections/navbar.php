@@ -14,23 +14,31 @@
         <button id="switchBtn" class="btn btn-link p-0" aria-label="Toggle dark mode">
             <i class="bi bi-moon icon"></i>
         </button>
-        
-        <?php session_start(); ?>
-        <div class="mx-2">
-            <?php if (isset($_SESSION['profile_image'])): ?>
+        <?php if (isset($_SESSION['user_id'])):
+            $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = :user_id");
+            $stmt->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
+            $stmt->execute();
+            $cart_data = $stmt->fetchColumn();
+            $cart_amount = $cart_data ? count(explode(' ', trim($cart_data))) : 0;
+        ?>
+            <div class="mx-2">
                 <a href="account.php">
-                    <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" style="width: 35px; height: 35px; border-radius: 50%;">
+                    <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" class="rounded-circle" style="width: 35px; height: 35px;">
                 </a>
-            <?php else: ?>
+            </div>
+            <a href="cart.php" class="btn btn-secondary">
+                <i class="fas fa-shopping-cart"></i> <?= $cart_amount; ?>
+            </a>
+        <?php else: ?>
+            <div class="mx-2">
                 <a href="account.php" class="btn btn-primary">
                     <i class="fas fa-user"></i>
                 </a>
-            <?php endif; ?>
-        </div>
-        
-        <a href="<?= isset($_SESSION['user_id']) ? 'cart.php' : 'account.php'; ?>" class="btn btn-secondary">
-            <i class="fas fa-shopping-cart"></i>
-        </a>
+            </div>
+            <a href="account.php" class="btn btn-secondary">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
+        <?php endif; ?>
     </div>
 </nav>
 
@@ -46,12 +54,10 @@
 </nav>
 
 <script>
-function performSearch() {
+const performSearch = () => {
     const query = document.getElementById('searchQuery').value;
     if (query) window.location.href = 'search_result.php?query=' + encodeURIComponent(query);
-}
+};
 
-function checkEnter(event) {
-    if (event.key === 'Enter') performSearch();
-}
+const checkEnter = (event) => event.key === 'Enter' && performSearch();
 </script>

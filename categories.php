@@ -9,10 +9,10 @@ $tableDisplayName = htmlspecialchars(ucwords(str_replace('_', ' ', $tableName)))
 $items = [];
 if ($tableName !== 'Unknown Category') {
     try {
-        $stmt = $pdo->query("SELECT * FROM $table");
-        $items = $stmt->fetchAll();
+        $stmt = $pdo->query("SELECT *, '$table' AS item_table FROM $table");
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        echo "Error fetching data: " . $e->getMessage();
+        echo "Error fetching data: " . htmlspecialchars($e->getMessage());
     }
 }
 ?>
@@ -33,7 +33,8 @@ if ($tableName !== 'Unknown Category') {
     <?php include 'web_sections/navbar.php'; ?>
 
     <main class="container my-4">
-        <h2 class="text-center"><?= $tableDisplayName ?></h2>
+        <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
+        <?php include 'web_sections/add_to_cart.php'; ?>
         <?php include 'web_sections/item_display.php'; ?>
     </main>
 

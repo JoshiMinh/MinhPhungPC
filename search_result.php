@@ -1,30 +1,20 @@
 <?php
 include 'db.php';
 include 'web_sections/categoryMap.php';
+include 'web_sections/tableColumns.php';
 
 $query = $_GET['query'] ?? '';
-$tables = [
-    'motherboard',
-    'processor',
-    'memory',
-    'graphicscard',
-    'storage',
-    'powersupply',
-    'cpucooler',
-    'pccase',
-    'operatingsystem'
-];
+$tables = array_keys($components);
 $items = [];
 
 if ($query) {
     foreach ($tables as $table) {
         try {
-            $stmt = $pdo->prepare("SELECT * FROM $table WHERE name LIKE :query OR brand LIKE :query");
-            $stmt->execute(['query' => '%' . $query . '%']);
-            $results = $stmt->fetchAll();
-            $items = array_merge($items, $results);
+            $stmt = $pdo->prepare("SELECT *, :table AS item_table FROM $table WHERE name LIKE :query OR brand LIKE :query");
+            $stmt->execute(['query' => '%' . $query . '%', 'table' => $table]);
+            $items = array_merge($items, $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (PDOException $e) {
-            echo "Error fetching data: " . $e->getMessage();
+            echo "Error fetching data: " . htmlspecialchars($e->getMessage());
         }
     }
 }
@@ -46,7 +36,8 @@ if ($query) {
     <?php include 'web_sections/navbar.php'; ?>
 
     <main class="container my-4">
-        <h2 class="text-center">Search Results for: <?= htmlspecialchars($query) ?></h2>
+        <h2 class="text-center my-3">Search Results for: <?= htmlspecialchars($query) ?></h2>
+        <?php include 'web_sections/add_to_cart.php'; ?>
         <?php include 'web_sections/item_display.php'; ?>
     </main>
 

@@ -1,6 +1,4 @@
 <?php
-include 'db.php';
-
 $userId = $_SESSION['user_id'] ?? 0;
 
 $stmt = $pdo->prepare("SELECT name, email, date_of_birth, profile_image, address, password_hash FROM users WHERE user_id = :user_id");
@@ -29,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $oldProfileImage = $user['profile_image'];
 
             if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-                if ($oldProfileImage !== 'profile_images/default.jpg' && file_exists($oldProfileImage)) {
+                if ($oldProfileImage != 'default.jpg' && file_exists($oldProfileImage)) {
                     unlink($oldProfileImage);
                 }
 

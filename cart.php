@@ -1,0 +1,167 @@
+<?php include 'db.php'; 
+
+$user_id = $_SESSION['user_id'] ?? 0;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['remove_all'])) {
+        $stmt = $pdo->prepare("UPDATE users SET cart = '' WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        header("Location: cart.php");
+        exit();
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cart-item {
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .cart-item img {
+            max-width: 100px;
+            margin-right: 20px;
+        }
+        .cart-item-details {
+            flex: 1;
+        }
+        .cart-item .price {
+            font-size: 110%;
+            color: lightgreen;
+            margin-bottom: 10px;
+        }
+        .cart-item .brand {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        .cart-item .quantity {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            font-size: 1.5rem;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        .remove-item-btn {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            background: none;
+            border: none;
+            font-size: 1.7rem;
+            color: lightcoral;
+            cursor: pointer;
+        }
+        .cart-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .cart-actions button {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <?php include 'web_sections/navbar.php'; ?>
+
+    <main class="container my-4">
+        <?php
+        $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        $cart_data = $stmt->fetchColumn();
+
+        $cart_items = [];
+        if (!empty($cart_data)) {
+            $cart_items_raw = explode(' ', $cart_data);
+            foreach ($cart_items_raw as $item) {
+                $item_parts = explode('-', $item);
+                if (count($item_parts) === 3) {
+                    $cart_items[] = [
+                        'table' => $item_parts[0],
+                        'id' => $item_parts[1],
+                        'amount' => (int)$item_parts[2]
+                    ];
+                }
+            }
+
+            foreach ($cart_items as $item) {
+                $stmt = $pdo->prepare("SELECT name, price, brand, image FROM {$item['table']} WHERE id = ?");
+                $stmt->execute([$item['id']]);
+                $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($product) {
+                    echo '<div class="cart-item h-100 bg-white text-dark">';
+                    echo '<button class="remove-item-btn" onclick="removeItem(' . $item['id'] . ')">&times;</button>';
+                    echo '<img src="' . htmlspecialchars($product['image']) . '" alt="' . htmlspecialchars($product['name']) . '">';
+                    echo '<div class="cart-item-details">';
+                    echo '<h5>' . htmlspecialchars($product['name']) . '</h5>';
+                    echo '<p class="price">' . number_format($product['price'], 0, ',', '.') . '₫</p>';
+                    echo '<p class="brand">Brand: ' . htmlspecialchars($product['brand']) . '</p>';
+                    echo '</div>';
+                    echo '<div class="quantity">';
+                    echo '<button class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', -1)">-</button>';
+                    echo '<span>' . (int)$item['amount'] . '</span>';
+                    echo '<button class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', 1)">+</button>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+            }
+
+            echo '<div class="cart-actions">';
+            echo '<form method="post"><button type="submit" name="remove_all" class="btn btn-danger">Remove All</button></form>';
+            echo '<form method="post"><button type="submit" name="update_cart" class="btn btn-primary">Update Cart</button></form>';
+            echo '<button class="btn btn-success"><b>Order</b></button>';
+            echo '</div>';
+        } else {
+            echo '<div class="alert alert-danger" style="margin: 6rem 0;">No items found in the cart.</div>';
+        }
+        ?>
+    </main>
+
+    <?php include 'web_sections/footer.php'; ?>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="darkmode.js"></script>
+    <script>
+        function removeItem(itemId) {
+            if (confirm('Are you sure you want to remove this item?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'remove_item';
+                input.value = itemId;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function updateQuantity(productId, delta) {
+            const quantityElement = event.target.parentElement.querySelector('span');
+            let currentQuantity = parseInt(quantityElement.innerText);
+            currentQuantity += delta;
+            if (currentQuantity < 1) currentQuantity = 1;
+            quantityElement.innerText = currentQuantity;
+        }
+    </script>
+</body>
+</html>
