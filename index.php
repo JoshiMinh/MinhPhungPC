@@ -1,4 +1,14 @@
-<?php include 'db.php'; ?>
+<?php
+include 'db.php';
+
+function fetchItems($tableName) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT id, name, price, brand, image FROM $tableName");
+    $stmt->execute();
+    return $stmt->fetchAll() ?: [];
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,11 +29,10 @@
         <div class="text-center my-5">
             <h2>Build Your First PC!</h2>
         </div>
+
         <div class="container">
             <?php foreach ($categoryMap as $componentName => $tableName): ?>
-                <div class="component-card my-4 shadow-sm bg-white text-dark rounded"
-                     data-component-name="<?= htmlspecialchars($componentName); ?>"
-                     data-component-icon="<?= htmlspecialchars($tableName . '.png'); ?>">
+                <div class="component-card my-4 shadow-sm bg-white text-dark rounded">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
                             <span class="text-center" style="width: 120px;"><?= htmlspecialchars($componentName); ?></span>
@@ -38,7 +47,8 @@
                                 data-toggle="modal"
                                 data-target="#componentModal"
                                 data-component-name="<?= htmlspecialchars($componentName); ?>"
-                                data-component-icon="<?= htmlspecialchars($tableName . '.png'); ?>">Select</button>
+                                data-component-icon="<?= htmlspecialchars($tableName . '.png'); ?>"
+                                data-table="<?= htmlspecialchars($tableName); ?>">Select</button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -55,27 +65,8 @@
                 <div class="modal-body text-center">
                     <img id="modalComponentIcon" src="" alt="" width="80" class="mb-3">
                     <h6 id="modalComponentName">Component Name</h6>
-                    <p>Please confirm your selection.</p>
-                    <div id="motherboardTableContainer" style="display: none;">
-                        <h6>Available Motherboards</h6>
-                        <table class="table table-bordered" id="motherboardTable">
-                            <thead>
-                                <tr>
-                                    <th>Brand</th>
-                                    <th>Model</th>
-                                    <th>Socket Type</th>
-                                    <th>Chipset</th>
-                                    <th>CPU Support</th>
-                                    <th>Memory Slots</th>
-                                    <th>Max Memory Capacity</th>
-                                    <th>DDR Type</th>
-                                    <th>Expansion Slots</th>
-                                    <th>Price</th>
-                                    <th>Image</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <div id="modalItemContainer" class="d-flex flex-wrap justify-content-start">
+                        <!-- Items will be dynamically loaded here -->
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -97,52 +88,35 @@
             $('.select-btn').on('click', function() {
                 const componentName = $(this).data('component-name');
                 const componentIcon = $(this).data('component-icon');
+                const tableName = $(this).data('table');
+
                 $('#modalComponentName').text(componentName);
                 $('#modalComponentIcon').attr('src', 'Component Icons/' + componentIcon);
-                
-                $('#motherboardTableContainer').toggle(componentName === "Motherboard");
-                if (componentName === "Motherboard") fetchMotherboardData();
-            });
 
-            $('#confirmSelect').on('click', function() {
-                alert('You have selected: ' + $('#modalComponentName').text());
-                $('#componentModal').modal('hide');
+                const modalContainer = $('#modalItemContainer').empty();
+
+                <?php
+                    if (isset($_GET['table'])) {
+                        $table = $_GET['table'];
+                        $items = fetchItems($table);
+                        foreach ($items as $item):
+                            ?>
+                                const itemBox = `
+                                    <div class="col-md-3 mb-3">
+                                        <div class="h-100 bg-white text-dark p-3 shadow-sm rounded">
+                                            <img src="<?= $item['image'] ?>" alt="<?= $item['name'] ?>" class="img-fluid mb-2">
+                                            <h6><?= $item['name'] ?></h6>
+                                            <p>Brand: <?= $item['brand'] ?></p>
+                                            <p>Price: $<?= $item['price'] ?></p>
+                                        </div>
+                                    </div>
+                                `;
+                                modalContainer.append(itemBox);
+                            <?php endforeach;
+                    }
+                ?>
             });
         });
-
-        function fetchMotherboardData() {
-            $.ajax({
-                url: 'fetch_motherboard_data.php',
-                method: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    const tableBody = $('#motherboardTable tbody').empty();
-                    if (data.length) {
-                        data.forEach(motherboard => {
-                            const row = `<tr>
-                                <td>${motherboard.brand}</td>
-                                <td>${motherboard.model}</td>
-                                <td>${motherboard.socket_type}</td>
-                                <td>${motherboard.chipset}</td>
-                                <td>${motherboard.cpu}</td>
-                                <td>${motherboard.memory_slots}</td>
-                                <td>${motherboard.max_memory_capacity}</td>
-                                <td>${motherboard.ddr}</td>
-                                <td>${motherboard.expansion_slots}</td>
-                                <td>${motherboard.price}</td>
-                                <td><img src="${motherboard.image}" alt="${motherboard.model}" width="50"></td>
-                            </tr>`;
-                            tableBody.append(row);
-                        });
-                    } else {
-                        tableBody.append('<tr><td colspan="11">No motherboards available.</td></tr>');
-                    }
-                },
-                error: function() {
-                    alert("Error fetching data.");
-                }
-            });
-        }
     </script>
 </body>
 </html>

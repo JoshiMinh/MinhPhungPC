@@ -9,9 +9,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: cart.php");
         exit();
     }
+
+    if (isset($_POST['remove_item'])) {
+        $item_to_remove = $_POST['remove_item'];
+        $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        $cart_data = $stmt->fetchColumn();
+
+        $updated_cart = '';
+        $cart_items_raw = explode(' ', $cart_data);
+        foreach ($cart_items_raw as $item) {
+            if (strpos($item, $item_to_remove) === false) {
+                $updated_cart .= $item . ' ';
+            }
+        }
+
+        $updated_cart = rtrim($updated_cart);
+        $stmt = $pdo->prepare("UPDATE users SET cart = ? WHERE user_id = ?");
+        $stmt->execute([$updated_cart, $user_id]);
+        header("Location: cart.php");
+        exit();
+    }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,7 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($product) {
                     echo '<div class="cart-item h-100 bg-white text-dark">';
-                    echo '<button class="remove-item-btn" onclick="removeItem(' . $item['id'] . ')">&times;</button>';
+                    echo '<form method="post" style="position: absolute; top: -5px; right: 5px;">';
+                    echo '<input type="hidden" name="remove_item" value="' . htmlspecialchars($item['table']) . '-' . htmlspecialchars($item['id']) . '">';
+                    echo '<button class="remove-item-btn" type="submit">&times;</button>';
+                    echo '</form>';
                     echo '<img src="' . htmlspecialchars($product['image']) . '" alt="' . htmlspecialchars($product['name']) . '">';
                     echo '<div class="cart-item-details">';
                     echo '<h5>' . htmlspecialchars($product['name']) . '</h5>';
@@ -126,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo '<div class="cart-actions">';
             echo '<form method="post"><button type="submit" name="remove_all" class="btn btn-danger">Remove All</button></form>';
             echo '<form method="post"><button type="submit" name="update_cart" class="btn btn-primary">Update Cart</button></form>';
-            echo '<button class="btn btn-success"><b>Order</b></button>';
+            echo '<button class="btn btn-success" onclick="showOrderModal()"><b>Order</b></button>';
             echo '</div>';
         } else {
             echo '<div class="alert alert-danger" style="margin: 6rem 0;">No items found in the cart.</div>';
@@ -134,33 +157,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ?>
     </main>
 
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderModalLabel">Place Your Order</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="orderForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="text" class="form-control" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Shipping Address</label>
+                            <textarea class="form-control" id="address" name="address" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" form="orderForm">Place Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include 'web_sections/footer.php'; ?>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="darkmode.js"></script>
     <script>
-        function removeItem(itemId) {
-            if (confirm('Are you sure you want to remove this item?')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'remove_item';
-                input.value = itemId;
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-
         function updateQuantity(productId, delta) {
             const quantityElement = event.target.parentElement.querySelector('span');
             let currentQuantity = parseInt(quantityElement.innerText);
             currentQuantity += delta;
             if (currentQuantity < 1) currentQuantity = 1;
             quantityElement.innerText = currentQuantity;
+        }
+
+        function showOrderModal() {
+            $('#orderModal').modal('show');
         }
     </script>
 </body>
