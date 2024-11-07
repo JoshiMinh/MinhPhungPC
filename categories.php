@@ -30,19 +30,24 @@ if ($tableName !== 'Unknown Category') {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <?php include 'web_sections/navbar.php'; ?>
 
-    <main class="container my-4">
-        <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
-        <?php include 'web_sections/add_to_cart.php'; ?>
-        <?php include 'web_sections/item_display.php'; ?>
-    </main>
+<div class="wrapper">
+    <div class="content">
+        <?php include 'web_sections/navbar.php'; ?>
+
+        <main class="container my-4">
+            <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
+            <?php include 'web_sections/add_to_cart.php'; ?>
+            <?php include 'web_sections/item_display.php'; ?>
+        </main>
+    </div>
 
     <?php include 'web_sections/footer.php'; ?>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="darkmode.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="darkmode.js"></script>
 </body>
 </html>

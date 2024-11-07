@@ -3,7 +3,7 @@
         <div class="row">
             <?php foreach ($items as $item): ?>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                    <div class="card h-100 bg-white text-dark" style="border: none; border-radius: 10px;">
+                    <div class="card h-100 bg-white text-dark p-0" style="border: none; border-radius: 10px;">
                         <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>" class="nav-link">
                             <img src="<?= htmlspecialchars($item['image']) ?>" 
                                  alt="<?= htmlspecialchars($item['name']) ?>" 

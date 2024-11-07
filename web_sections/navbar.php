@@ -4,17 +4,18 @@
     </a>
     <div class="mx-auto" style="width: 50%;">
         <div class="search-input-container d-flex">
-            <input type="text" class="search-input flex-grow-1" id="searchQuery" placeholder="Find component" onkeypress="checkEnter(event)">
+            <input type="text" class="search-input flex-grow-1" id="searchQuery" placeholder="Find component" onkeypress="checkEnter(event)" onkeyup="searchComponents()">
             <button class="search-button" id="searchBtn" onclick="performSearch()">
                 <i class="fas fa-search"></i>
             </button>
+            <div id="searchDropdown" class="dropdown-menu w-100 bg-dark text-light p-0" aria-labelledby="searchQuery" style="max-height: 300px; overflow-y: auto; position: absolute; z-index: 1000;"></div>
         </div>
     </div>
     <div class="d-flex align-items-center ml-auto">
         <button id="switchBtn" class="btn btn-link p-0" aria-label="Toggle dark mode">
             <i class="bi bi-moon icon"></i>
         </button>
-        <?php if (isset($_SESSION['user_id'])):
+        <?php if (isset($_SESSION['user_id'])): 
             $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = :user_id");
             $stmt->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
             $stmt->execute();
@@ -60,4 +61,53 @@ const performSearch = () => {
 };
 
 const checkEnter = (event) => event.key === 'Enter' && performSearch();
+
+function searchComponents() {
+    const searchQuery = document.getElementById("searchQuery").value;
+    const searchDropdown = document.getElementById("searchDropdown");
+
+    if (searchQuery.length > 0) {
+        searchDropdown.style.display = 'block';
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "search.php?search=" + encodeURIComponent(searchQuery), true);
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const components = JSON.parse(xhr.responseText);
+                let output = '';
+
+                if (components.length === 0) {
+                    output += "<button class='dropdown-item' disabled>No results found</button>";
+                } else {
+                    components.forEach(function(component) {
+                        const formattedPrice = new Intl.NumberFormat('vi-VN').format(component.price);
+                        output += `
+                            <div class='dropdown-item' onclick='window.location.href="item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.id)}"' style='display: flex; align-items: center;'>
+                                <img src='${component.image}' alt='${component.name}' style='width: 60px; height: 60px; margin-right: 10px;'>
+                                <div style='display: flex; flex-direction: column;'>
+                                    <strong>${component.name}</strong>
+                                    <span>${formattedPrice}₫</span>
+                                    <span>${component.brand}</span>
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                searchDropdown.innerHTML = output;
+            }
+        };
+
+        xhr.send();
+    } else {
+        searchDropdown.style.display = 'none';
+    }
+}
+
+document.addEventListener('click', function(event) {
+    const searchQuery = document.getElementById('searchQuery');
+    const searchDropdown = document.getElementById('searchDropdown');
+    if (!searchQuery.contains(event.target) && !searchDropdown.contains(event.target)) {
+        searchDropdown.style.display = 'none';
+    }
+});
 </script>
