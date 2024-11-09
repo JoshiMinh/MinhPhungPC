@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
                 $success = $stmt->execute(['name' => $username, 'email' => $email, 'password_hash' => $passwordHash, 'dob' => $dob]);
-                echo $success 
-                    ? '<div class="alert alert-success" style="margin: 4rem 0;">Registration successful!</div>' 
+                echo $success
+                    ? '<div class="alert alert-success" style="margin: 4rem 0;">Registration successful!</div>'
                     : '<div class="alert alert-danger" style="margin: 4rem 0;">Registration failed. Please try again.</div>';
             }
         }
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email' => $user['email'],
                 'profile_image' => $user['profile_image']
             ]);
-            header("Location: index.php?success=login_successful");
+            echo "<script>window.location.href = window.location.href;</script>";
             exit();
         } else {
             echo '<div class="alert alert-danger" style="margin: 4rem 0;">Invalid username or password.</div>';
@@ -50,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div class="row">
-    <div class="col-md-6">
+<div class="row justify-content-center">
+    <div class="col-md-5 col-sm-10">
         <h2>Sign Up</h2>
         <form method="POST">
             <div class="form-group">
@@ -74,14 +74,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="signup-dob">Date of Birth</label>
                 <input type="date" class="form-control" id="signup-dob" name="dob" required>
             </div>
-            <button type="submit" name="signup" class="btn btn-primary">Sign Up</button>
+            <button type="submit" name="signup" class="btn btn-primary w-100">Sign Up</button>
         </form>
     </div>
-    <div class="col-md-1 d-none d-md-block text-center">
-        <div class="vertical-line"></div>
+
+    <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
+        <div class="border-end" style="height: 100%;"></div>
     </div>
-    <div class="col-md-5">
-        <h2>Login</h2>
+
+    <div class="col-md-5 col-sm-10 mt-4 mt-md-0">
+        <h2 class="mt-2 mt-md-0">Login</h2>
         <form method="POST">
             <div class="form-group">
                 <label for="login-username-email">Username/Email</label>
@@ -91,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="login-password">Password</label>
                 <input type="password" class="form-control" id="login-password" name="login-password" placeholder="Password" required>
             </div>
-            <button type="submit" name="login" class="btn btn-primary">Login</button>
+            <button type="submit" name="login" class="btn btn-primary w-100">Login</button>
         </form>
     </div>
 </div>

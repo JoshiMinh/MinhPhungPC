@@ -23,7 +23,7 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body style="transition: 0.5s;">
 
 <div class="wrapper">
     <div class="content">

@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
             
-            header("Location: " . $_SERVER['PHP_SELF']);
+            echo "<script>window.location.href = window.location.href;</script>";
             exit();
         }
     }
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['logout'])) {
         session_unset();
         session_destroy();
-        header("Location: index.php");
+        echo "<script>window.location.href = window.location.href;</script>";
         exit();
     }
 }

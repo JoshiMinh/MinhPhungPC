@@ -1,3 +1,59 @@
+<style>
+.navbar-main {
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.navbar-secondary {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.navbar-secondary a {
+    color: white;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.navbar-secondary a:hover {
+    background-color: var(--navbar-hover);
+}
+
+.search-input-container {
+    display: flex;
+    width: 100%;
+    position: relative;
+}
+
+.search-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 4px 0 0 4px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.search-button {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 0 4px 4px 0;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.search-button:hover {
+    background-color: var(--primary-hover);
+}
+</style>
+
 <nav class="navbar navbar-expand-lg navbar-main">
     <a href="index.php" class="navbar-brand" style="width: 10%;">
         <img src="logo.png" alt="MinhPhungPC Logo" style="width: 100%;">
@@ -44,15 +100,40 @@
 </nav>
 
 <nav class="navbar navbar-expand-lg navbar-secondary navbar-gradient">
-    <ul class="navbar-nav flex-row w-100">
-        <?php include 'categoryMap.php'; ?>
-        <?php foreach ($categoryMap as $category => $tableName): ?>
-            <li class="nav-item flex-fill">
-                <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link"><?= htmlspecialchars($category); ?></a>
-            </li>
-        <?php endforeach; ?>
-    </ul>
+    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarNav" aria-controls="sidebarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse d-none d-lg-block">
+        <ul class="navbar-nav flex-row w-100">
+            <?php include 'categoryMap.php'; ?>
+            <?php foreach ($categoryMap as $category => $tableName): ?>
+                <li class="nav-item flex-fill">
+                    <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link"><?= htmlspecialchars($category); ?></a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+
+    <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarNav" aria-labelledby="sidebarNavLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="sidebarNavLabel">Categories</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="navbar-nav">
+                <?php include 'categoryMap.php'; ?>
+                <?php foreach ($categoryMap as $category => $tableName): ?>
+                    <li class="nav-item">
+                        <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link"><?= htmlspecialchars($category); ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
 </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 const performSearch = () => {

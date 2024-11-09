@@ -36,18 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['update_quantity'])) {
         $table = $_POST['table'];
         $id = $_POST['id'];
-        $quantity = $_POST['quantity'];
+        $quantity = (int)$_POST['quantity'];
 
+        // Fetch the current cart data
         $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
         $stmt->execute([$user_id]);
         $cart_data = $stmt->fetchColumn();
 
+        // Update the cart data with new quantity
         $updated_cart = '';
         $cart_items_raw = explode(' ', $cart_data);
         foreach ($cart_items_raw as $item) {
             $item_parts = explode('-', $item);
             if (count($item_parts) === 3 && $item_parts[0] === $table && $item_parts[1] == $id) {
-                $item_parts[2] = $quantity;
+                $item_parts[2] = $quantity; // Update quantity
             }
             $updated_cart .= implode('-', $item_parts) . ' ';
         }
@@ -55,9 +57,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updated_cart = rtrim($updated_cart);
         $stmt = $pdo->prepare("UPDATE users SET cart = ? WHERE user_id = ?");
         $stmt->execute([$updated_cart, $user_id]);
-        echo 'Cart updated';
+
+        // Recalculate the total amount
+        $totalAmount = 0;
+        $cart_items = [];
+        $cart_items_raw = explode(' ', $updated_cart);
+        foreach ($cart_items_raw as $item) {
+            $item_parts = explode('-', $item);
+            if (count($item_parts) === 3) {
+                $cart_items[] = [
+                    'table' => $item_parts[0],
+                    'id' => $item_parts[1],
+                    'amount' => (int)$item_parts[2]
+                ];
+            }
+        }
+
+        foreach ($cart_items as $item) {
+            $stmt = $pdo->prepare("SELECT price FROM {$item['table']} WHERE id = ?");
+            $stmt->execute([$item['id']]);
+            $product = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($product) {
+                $totalAmount += $product['price'] * $item['amount'];
+            }
+        }
+
+        // Return JSON response with the updated total amount
+        header('Content-Type: application/json');
+        echo json_encode(['newTotal' => number_format($totalAmount, 0, ',', '.') . '₫']);
         exit();
     }
+
+
 }
 ?>
 <!DOCTYPE html>
@@ -87,6 +118,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .cart-item-details { 
             flex: 1; 
         }
+        .modal-content{
+            background-color: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
         .price { 
             font-size: 110%; 
             color: lightgreen; 
@@ -104,6 +140,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 1.5rem; 
             margin: 0 10px; 
             cursor: pointer; 
+            background-color: none;
+            border: none;
+        }
+        .quantity-btn:hover{
+            text-decoration: none;
+
         }
         .remove-item-btn { 
             position: absolute; 
@@ -117,15 +159,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .cart-actions { 
             display: flex; 
-            justify-content: flex-end; 
             gap: 10px; 
+            justify-content: flex-end; 
         }
         .cart-actions button { 
             font-size: 1rem; 
         }
+
+        .totalAmount {
+            font-size: 110%;
+            color: lightgreen;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body>
+<body style="transition: 0.5s;">
 
 <div class="wrapper">
     <div class="content">
@@ -137,6 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $cart_data = $stmt->fetchColumn();
 
             $cart_items = [];
+            $totalAmount = 0;
+
             if (!empty($cart_data)) {
                 $cart_items_raw = explode(' ', $cart_data);
                 foreach ($cart_items_raw as $item) {
@@ -155,7 +205,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$item['id']]);
                     $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
+                    
+
                     if ($product) {
+                        $totalAmount += $product['price'] * $item['amount'];
                         echo '<div class="cart-item h-100 bg-white text-dark">';
                         echo '<form method="post" style="position: absolute; top: -5px; right: 5px;">';
                         echo '<input type="hidden" name="remove_item" value="' . htmlspecialchars($item['table']) . '-' . htmlspecialchars($item['id']) . '">';
@@ -165,18 +218,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         echo '<div class="cart-item-details">';
                         echo '<h5>' . htmlspecialchars($product['name']) . '</h5>';
                         echo '<p class="price">' . number_format($product['price'], 0, ',', '.') . '₫</p>';
-                        echo '<p class="brand">Brand: ' . htmlspecialchars($product['brand']) . '</p>';
+                        echo '<p class="brand">' . htmlspecialchars($product['brand']) . '</p>';
                         echo '</div>';
                         echo '<div class="quantity">';
-                        echo '<button class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', -1, \'' . $item['table'] . '\')">-</button>';
+                        echo '<a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', -1, \'' . $item['table'] . '\')"><</a>';
                         echo '<span>' . (int)$item['amount'] . '</span>';
-                        echo '<button class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', 1, \'' . $item['table'] . '\')">+</button>';
+                        echo '<a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', 1, \'' . $item['table'] . '\')">></a>';
                         echo '</div>';
                         echo '</div>';
                     }
                 }
 
                 echo '<div class="cart-actions">';
+                echo '<div class="totalAmount">Total: <span id="totalAmount">' . number_format($totalAmount, 0, ',', '.') . '₫</span></div>';
                 echo '<form method="post"><button type="submit" name="remove_all" class="btn btn-danger">Remove All</button></form>';
                 echo '<button class="btn btn-success" onclick="showOrderModal()"><b>Order</b></button>';
                 echo '</div>';
@@ -246,8 +300,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             id: productId,
             quantity: currentQuantity
         }, function(response) {
-            console.log(response);
-        });
+            if (response && response.newTotal) {
+                $('#totalAmount').text(response.newTotal);
+            }
+        }, 'json');
     }
 
     function showOrderModal() {

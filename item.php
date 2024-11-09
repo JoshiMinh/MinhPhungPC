@@ -42,7 +42,7 @@ if ($table && $id) {
         }
     </style>
 </head>
-<body>
+<body style="transition: 0.5s;">
     <?php include 'web_sections/navbar.php'; ?>
     <main class="container my-4">
         <?php include 'web_sections/add_to_cart.php'; ?>

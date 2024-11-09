@@ -1,6 +1,20 @@
 <?php
 include 'db.php';
 
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $stmt = $pdo->prepare("SELECT buildset FROM users WHERE user_id = ?");
+    $stmt->execute([$user_id]);
+    $result = $stmt->fetch();
+    if ($result) {
+        $buildset = $result['buildset'];
+    }
+} else {
+    if (isset($_COOKIE['buildset'])) {
+        $buildset = $_COOKIE['buildset'];
+    }
+}
+
 function fetchItems($tableName) {
     global $pdo;
     $stmt = $pdo->prepare("SELECT id, name, price, brand, image FROM $tableName");
@@ -20,8 +34,11 @@ function fetchItems($tableName) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        
+    </style>
 </head>
-<body>
+<body style="transition: 0.5s;">
 <div class="wrapper">
     <div class="content">
         <?php include 'web_sections/navbar.php'; ?>

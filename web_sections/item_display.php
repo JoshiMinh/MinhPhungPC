@@ -8,7 +8,7 @@
                             <img src="<?= htmlspecialchars($item['image']) ?>" 
                                  alt="<?= htmlspecialchars($item['name']) ?>" 
                                  class="card-img-top" 
-                                 style="max-height: 200px; object-fit: cover;">
+                                 style="max-height: 200px; object-fit: cover; background-color: white;">
                         </a>
                         <div class="card-body">
                             <p class="card-text mb-2 fw-bold">

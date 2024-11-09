@@ -1,7 +1,7 @@
 <footer class="footer-gradient py-4 text-white">
     <div class="container text-center">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4 mb-4 mb-md-0">
                 <h5>Contact Us</h5>
                 <p>
                     <strong>Email:</strong> 
@@ -13,11 +13,11 @@
                     <img src="logo_light.png" alt="MinhPhungPC Logo" style="width: 100%;">
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4 mb-4 mb-md-0">
                 <h5>About Us</h5>
                 <p>MinhPhungPC helps you build the ideal PC with expert recommendations for gaming, design, or daily use. Our dedicated team provides personalized solutions and outstanding customer service to ensure you find the perfect setup for your needs.</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4 mb-4 mb-md-0">
                 <h5>See on GitHub</h5>
                 <a href="https://github.com/JoshiMinh/MinhPhungPC" target="_blank" class="text-white mx-2" style="font-size: 2rem;">
                     <i class="fab fa-github"></i>

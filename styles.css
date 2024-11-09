@@ -1,7 +1,7 @@
 :root {
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
-    --bg-elevated: #ffffff;
+    --bg-elevated: #cbcbcb;
     --text-primary: #212529;
     --text-secondary: #6c757d;
     --border-color: #dee2e6;
@@ -13,7 +13,7 @@
 }
 
 .dark-theme {
-    --bg-primary: #121212;
+    --bg-primary: #1c1c1c;
     --bg-secondary: #1e1e1e;
     --bg-elevated: #2d2d2d;
     --text-primary: #e0e0e0;
@@ -47,59 +47,10 @@ html, body {
     flex: 1;
 }
 
-.navbar-main {
-    background-color: var(--bg-primary);
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-.navbar-secondary {
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-}
-
-.navbar-secondary a {
-    color: white;
-    text-align: center;
-    transition: background-color 0.3s;
-}
-
-.navbar-secondary a:hover {
-    background-color: var(--navbar-hover);
-}
-
-.search-input-container {
-    display: flex;
-    width: 100%;
-    position: relative;
-}
-
-.search-input {
-    flex: 1;
-    padding: 8px;
+.form-control {
     border: 1px solid var(--border-color);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
-    border-radius: 4px 0 0 4px;
-    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
-.search-button {
-    background-color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    border-radius: 0 4px 4px 0;
-    padding: 8px 12px;
-    cursor: pointer;
-    color: white;
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-.search-button:hover {
-    background-color: var(--primary-hover);
 }
 
 .component-card,
