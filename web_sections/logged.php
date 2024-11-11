@@ -144,15 +144,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit" class="btn btn-warning btn-block" name="change-password" onclick="setPasswordRequired()">Change Password</button>
     </form>
 
-    <form action="" method="POST" class="mt-3">
-        <button type="submit" class="btn btn-danger btn-block" name="logout">Sign Out</button>
-    </form>
+    <div class="d-flex justify-content-between mt-3">
+        <form action="" method="POST" style="flex: 1; margin-right: 5px;">
+            <button type="submit" class="btn btn-danger btn-block" name="logout">Sign Out</button>
+        </form>
+        <a href="order_history.php" class="btn btn-secondary btn-block" style="flex: 1; margin-left: 5px;">Order History</a>
+    </div>
 </div>
 
 <script>
 function setPasswordRequired() {
     document.getElementById('current-password').setAttribute('required', 'required');
     document.getElementById('new-password').setAttribute('required', 'required');
-    document.getElementById('retype-password').setAttribute('required', 'required');
-}
+    document.getElementById('retype-password').setAttribute('required', 'required');}
 </script>

@@ -1,7 +1,7 @@
 :root {
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
-    --bg-elevated: #cbcbcb;
+    --bg-elevated: #e7e7e7;
     --text-primary: #212529;
     --text-secondary: #6c757d;
     --border-color: #dee2e6;
@@ -47,7 +47,7 @@ html, body {
     flex: 1;
 }
 
-.form-control {
+form .form-control{
     border: 1px solid var(--border-color);
     background-color: var(--bg-secondary);
     color: var(--text-primary);

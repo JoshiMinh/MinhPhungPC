@@ -14,6 +14,33 @@ if ($table && $id) {
         header("HTTP/1.0 404 Not Found");
         exit("<h1>Item Not Found</h1>");
     }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
+        $userId = $_SESSION['user_id'] ?? '';
+        $content = trim($_POST['comment']);
+
+        if ($userId && $content) {
+            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, product_table, content, time) VALUES (:user_id, :product_id, :product_table, :content, NOW())");
+            $insertStmt->execute([
+                'user_id' => $userId,
+                'product_id' => $id,
+                'product_table' => $table,
+                'content' => $content
+            ]);
+            header("Location: " . $_SERVER['PHP_SELF'] . "?table=$table&id=$id");
+            exit;
+        }
+    }
+
+    $commentStmt = $pdo->prepare("
+        SELECT comments.content, comments.time, users.name, users.profile_image
+        FROM comments
+        JOIN users ON comments.user_id = users.user_id
+        WHERE comments.product_id = :product_id AND comments.product_table = :product_table
+        ORDER BY comments.comment_id DESC
+    ");
+    $commentStmt->execute(['product_id' => $id, 'product_table' => $table]);
+    $comments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
     exit("<h1>Invalid request</h1>");
 }
@@ -72,6 +99,37 @@ if ($table && $id) {
                     </ul>
                 </div>
             </div>
+        </div>
+
+        <div id="comment" class="mt-5">
+            <h4>Comments</h4>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <form method="post" class="mb-4">
+                    <div class="form-group">
+                        <label for="comment">Add a comment:</label>
+                        <textarea name="comment" id="comment" rows="3" class="form-control" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+            <?php else: ?>
+                <p><a href="account.php">Log in</a> to post a comment.</p>
+            <?php endif; ?>
+
+            <?php if ($comments): ?>
+                <ul class="list-unstyled">
+                    <?php foreach ($comments as $comment): ?>
+                        <li class="media my-3 p-3 rounded" style="background-color: var(--bg-elevated); box-shadow: var(--card-shadow);">
+                            <img src="<?= htmlspecialchars($comment['profile_image']) ?>" alt="<?= htmlspecialchars($comment['name']) ?>" class="mr-3 rounded-circle" style="width: 50px; height: 50px;">
+                            <div class="media-body">
+                                <h5 class="mt-0 mb-1" style="color: var(--text-primary);"><?= htmlspecialchars($comment['name']) ?> <small style="color: var(--text-secondary);"><?= date("F j, Y, g:i a", strtotime($comment['time'])) ?></small></h5>
+                                <p style="color: var(--text-primary);"><?= $comment['content'] ?></p>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <p>No comments yet. Be the first to comment!</p>
+            <?php endif; ?>
         </div>
     </main>
     <?php include 'web_sections/footer.php'; ?>

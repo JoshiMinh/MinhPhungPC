@@ -1,5 +1,4 @@
 <?php
-
 include 'db.php';
 
 $user_id = $_SESSION['user_id'] ?? 0;
@@ -38,18 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = $_POST['id'];
         $quantity = (int)$_POST['quantity'];
 
-        // Fetch the current cart data
         $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
         $stmt->execute([$user_id]);
         $cart_data = $stmt->fetchColumn();
 
-        // Update the cart data with new quantity
         $updated_cart = '';
         $cart_items_raw = explode(' ', $cart_data);
         foreach ($cart_items_raw as $item) {
             $item_parts = explode('-', $item);
             if (count($item_parts) === 3 && $item_parts[0] === $table && $item_parts[1] == $id) {
-                $item_parts[2] = $quantity; // Update quantity
+                $item_parts[2] = $quantity;
             }
             $updated_cart .= implode('-', $item_parts) . ' ';
         }
@@ -58,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE users SET cart = ? WHERE user_id = ?");
         $stmt->execute([$updated_cart, $user_id]);
 
-        // Recalculate the total amount
         $totalAmount = 0;
         $cart_items = [];
         $cart_items_raw = explode(' ', $updated_cart);
@@ -82,15 +78,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Return JSON response with the updated total amount
         header('Content-Type: application/json');
         echo json_encode(['newTotal' => number_format($totalAmount, 0, ',', '.') . '₫']);
         exit();
     }
 
+    if (isset($_POST['place_order'])) {
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $phone = $_POST['phone'];
+        $address = $_POST['address'];
+        $payment_method = $_POST['payment_method'];
+    
+        $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        $cart_data = $stmt->fetchColumn();
+    
+        if (!empty($cart_data)) {
+            $totalAmount = 0;
+            $cart_items_raw = explode(' ', $cart_data);
+            foreach ($cart_items_raw as $item) {
+                $item_parts = explode('-', $item);
+                if (count($item_parts) === 3) {
+                    $stmt = $pdo->prepare("SELECT price FROM {$item_parts[0]} WHERE id = ?");
+                    $stmt->execute([$item_parts[1]]);
+                    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($product) {
+                        $totalAmount += $product['price'] * $item_parts[2];
+                    }
+                }
+            }
+    
+            $stmt = $pdo->prepare("INSERT INTO orders (customer_id, items, order_date, status, total_amount, address, payment_method, payment_status)
+                                   VALUES (?, ?, NOW(), 'pending', ?, ?, ?, 'pending')");
+            $stmt->execute([
+                $user_id,
+                $cart_data,
+                $totalAmount,
+                $address,
+                $payment_method
+            ]);
+    
+            $stmt = $pdo->prepare("UPDATE users SET cart = '' WHERE user_id = ?");
+            $stmt->execute([$user_id]);
 
+            $_SESSION['order_success'] = true;
+
+            header("Location: cart.php");
+            exit();
+        }
+    }
+}
+
+if (isset($_SESSION['order_success'])) {
+    echo "<script>window.addEventListener('load', function() { alert('Your order has been successfully placed.'); });</script>";
+    unset($_SESSION['order_success']); // Clear the session variable after displaying the alert
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -121,7 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .modal-content{
             background-color: var(--bg-elevated);
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
         }
         .price { 
             font-size: 110%; 
@@ -165,7 +209,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .cart-actions button { 
             font-size: 1rem; 
         }
-
         .totalAmount {
             font-size: 110%;
             color: lightgreen;
@@ -205,8 +248,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$item['id']]);
                     $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    
-
                     if ($product) {
                         $totalAmount += $product['price'] * $item['amount'];
                         echo '<div class="cart-item h-100 bg-white text-dark">';
@@ -243,6 +284,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'web_sections/footer.php'; ?>
 </div>
 
+<?php
+$stmt = $pdo->prepare("SELECT name, email, address FROM users WHERE user_id = :user_id");
+$stmt->execute(['user_id' => $user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
+    'name' => '',
+    'email' => '',
+    'address' => '',
+];
+?>
+
 <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -253,14 +304,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </div>
             <div class="modal-body">
-                <form id="orderForm">
+                <form id="orderForm" method="POST">
                     <div class="form-group">
                         <label for="name">Full Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($user['name']) ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
@@ -268,13 +319,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="form-group">
                         <label for="address">Shipping Address</label>
-                        <textarea class="form-control" id="address" name="address" required></textarea>
+                        <textarea class="form-control" id="address" name="address" required><?= htmlspecialchars($user['address']) ?></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="radio-inline">
+                            <input type="radio" name="payment_method" value="COD" checked onclick="updatePaymentMessage()"> Cash on Delivery (COD)
+                        </label>
+                        <label class="radio-inline ml-3">
+                            <input type="radio" name="payment_method" value="Bank" onclick="updatePaymentMessage()"> Bank Payment
+                        </label>
+                    </div>
+
+                    <div id="paymentMessage" class="text-success mt-2">
+                        Pay Upon Delivery
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary" form="orderForm">Place Order</button>
+            <div class="modal-footer d-flex justify-content-between">
+                <div class="totalAmount">
+                    Total: <span id="totalAmount"><?= number_format($totalAmount, 0, ',', '.') . '₫' ?></span>
+                </div>
+                <button type="submit" class="btn btn-primary" form="orderForm" name="place_order">Place Order</button>
             </div>
         </div>
     </div>
@@ -301,9 +367,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             quantity: currentQuantity
         }, function(response) {
             if (response && response.newTotal) {
+                // Update total in the cart
                 $('#totalAmount').text(response.newTotal);
+                $('#orderModal .totalAmount span').text(response.newTotal);
             }
         }, 'json');
+    }
+
+    function updatePaymentMessage() {
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const paymentMessage = document.getElementById('paymentMessage');
+
+        if (paymentMethod === 'Bank') {
+            paymentMessage.textContent = 'Transfer to VCB - 1017110028 - NGUYEN BINH MINH';
+            paymentMessage.classList.remove('text-secondary');
+            paymentMessage.classList.add('text-success');
+        } else {
+            paymentMessage.textContent = 'Pay Upon Delivery';
+            paymentMessage.classList.remove('text-success');
+            paymentMessage.classList.add('text-secondary');
+        }
     }
 
     function showOrderModal() {
