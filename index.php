@@ -2,17 +2,11 @@
 include 'db.php';
 
 if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
     $stmt = $pdo->prepare("SELECT buildset FROM users WHERE user_id = ?");
-    $stmt->execute([$user_id]);
-    $result = $stmt->fetch();
-    if ($result) {
-        $buildset = $result['buildset'];
-    }
-} else {
-    if (isset($_COOKIE['buildset'])) {
-        $buildset = $_COOKIE['buildset'];
-    }
+    $stmt->execute([$_SESSION['user_id']]);
+    $buildset = $stmt->fetchColumn();
+} elseif (isset($_COOKIE['buildset'])) {
+    $buildset = $_COOKIE['buildset'];
 }
 
 function fetchItems($tableName) {
@@ -35,14 +29,17 @@ function fetchItems($tableName) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
     <style>
-        
+        .modal-content{
+            background-color: var(--bg-elevated);
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body style="transition: 0.5s;">
 <div class="wrapper">
     <div class="content">
         <?php include 'web_sections/navbar.php'; ?>
-        <?php include 'web_sections/categoryMap.php'; ?>
+        <?php include 'scripts/categoryMap.php'; ?>
 
         <main class="container">
             <div class="text-center my-5">
@@ -57,6 +54,7 @@ function fetchItems($tableName) {
                                 <span class="text-center" style="width: 120px;"><?= htmlspecialchars($componentName); ?></span>
                                 <div class="p-2">
                                     <img src="component_icons/<?= htmlspecialchars($tableName . '.png'); ?>"
+
                                          alt="<?= htmlspecialchars($componentName); ?>"
                                          style="background-color: #ffffff; opacity: 0.7; transition: opacity 0.3s ease; width: 50px; padding: 10px; border-radius: 5px;">
                                 </div>
@@ -84,9 +82,7 @@ function fetchItems($tableName) {
                     <div class="modal-body text-center">
                         <img id="modalComponentIcon" src="" alt="" width="80" class="mb-3">
                         <h6 id="modalComponentName">Component Name</h6>
-                        <div id="modalItemContainer" class="d-flex flex-wrap justify-content-start">
-                            <!-- Items will be dynamically loaded here -->
-                        </div>
+                        <div id="modalItemContainer" class="d-flex flex-wrap justify-content-start"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -112,14 +108,12 @@ function fetchItems($tableName) {
 
             $('#modalComponentName').text(componentName);
             $('#modalComponentIcon').attr('src', 'component_icons/' + componentIcon);
-
-            const modalContainer = $('#modalItemContainer').empty();
+            $('#modalItemContainer').empty();
 
             <?php if (isset($_GET['table'])): ?>
-                const table = '<?= $_GET['table']; ?>';
-                const items = <?php echo json_encode(fetchItems($_GET['table'])); ?>;
+                const items = <?= json_encode(fetchItems($_GET['table'])); ?>;
                 items.forEach(item => {
-                    const itemBox = `
+                    $('#modalItemContainer').append(`
                         <div class="col-md-3 mb-3">
                             <div class="h-100 bg-white text-dark p-3 shadow-sm rounded">
                                 <img src="${item.image}" alt="${item.name}" class="img-fluid mb-2">
@@ -128,8 +122,7 @@ function fetchItems($tableName) {
                                 <p>Price: $${item.price}</p>
                             </div>
                         </div>
-                    `;
-                    modalContainer.append(itemBox);
+                    `);
                 });
             <?php endif; ?>
         });

@@ -163,10 +163,6 @@ if (isset($_SESSION['order_success'])) {
         .cart-item-details { 
             flex: 1; 
         }
-        .modal-content{
-            background-color: var(--bg-elevated);
-            color: var(--text-primary);
-        }
         .price { 
             font-size: 110%; 
             color: lightgreen; 
@@ -200,6 +196,10 @@ if (isset($_SESSION['order_success'])) {
             font-size: 1.7rem; 
             color: lightcoral; 
             cursor: pointer; 
+        }
+        .modal-content{
+            background-color: var(--bg-elevated);
+            color: var(--text-primary);
         }
         .cart-actions { 
             display: flex; 

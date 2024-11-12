@@ -1,6 +1,6 @@
 <?php
 include 'db.php';
-include 'web_sections/categoryMap.php';
+include 'scripts/categoryMap.php';
 
 $table = $_GET['table'] ?? '';
 $tableName = array_search($table, $categoryMap) ?: 'Unknown Category';
@@ -37,7 +37,7 @@ if ($tableName !== 'Unknown Category') {
 
         <main class="container my-4">
             <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
-            <?php include 'web_sections/add_to_cart.php'; ?>
+            <?php include 'scripts/add_to_cart.php'; ?>
             <?php include 'web_sections/item_display.php'; ?>
         </main>
     </div>

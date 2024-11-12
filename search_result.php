@@ -1,7 +1,7 @@
 <?php
 include 'db.php';
-include 'web_sections/categoryMap.php';
-include 'web_sections/tableColumns.php';
+include 'scripts/categoryMap.php';
+include 'scripts/tableColumns.php';
 
 $query = $_GET['query'] ?? '';
 $items = [];
@@ -39,7 +39,7 @@ if ($query) {
 
         <main class="container my-4">
             <h2 class="text-center my-3">Search Results for: <?= htmlspecialchars($query) ?></h2>
-            <?php include 'web_sections/add_to_cart.php'; ?>
+            <?php include 'scripts/add_to_cart.php'; ?>
             <?php include 'web_sections/item_display.php'; ?>
         </main>
     </div>

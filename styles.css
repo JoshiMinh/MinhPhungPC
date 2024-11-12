@@ -156,3 +156,8 @@ form .form-control{
 .dark-mode #searchDropdown .dropdown-item {
     color: var(--text-primary);
 }
+
+.modal-content{
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+}

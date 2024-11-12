@@ -106,7 +106,7 @@
 
     <div class="collapse navbar-collapse d-none d-lg-block">
         <ul class="navbar-nav flex-row w-100">
-            <?php include 'categoryMap.php'; ?>
+            <?php include 'scripts/categoryMap.php'; ?>
             <?php foreach ($categoryMap as $category => $tableName): ?>
                 <li class="nav-item flex-fill">
                     <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link"><?= htmlspecialchars($category); ?></a>
@@ -122,7 +122,7 @@
         </div>
         <div class="offcanvas-body">
             <ul class="navbar-nav">
-                <?php include 'categoryMap.php'; ?>
+                <?php include 'scripts/categoryMap.php'; ?>
                 <?php foreach ($categoryMap as $category => $tableName): ?>
                     <li class="nav-item">
                         <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link"><?= htmlspecialchars($category); ?></a>

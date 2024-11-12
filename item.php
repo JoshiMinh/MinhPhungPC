@@ -1,6 +1,6 @@
 <?php
 include 'db.php';
-include 'web_sections/categoryMap.php';
+include 'scripts/categoryMap.php';
 
 $table = $_GET['table'] ?? '';
 $id = $_GET['id'] ?? '';
@@ -72,7 +72,7 @@ if ($table && $id) {
 <body style="transition: 0.5s;">
     <?php include 'web_sections/navbar.php'; ?>
     <main class="container my-4">
-        <?php include 'web_sections/add_to_cart.php'; ?>
+        <?php include 'scripts/add_to_cart.php'; ?>
         <div class="row">
             <div class="col-md-6">
                 <img src="<?= htmlspecialchars($item['image']) ?>" class="img-fluid" alt="<?= htmlspecialchars($item['name']) ?>">

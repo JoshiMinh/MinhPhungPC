@@ -1,50 +1,139 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['signup'])) {
-        $username = trim($_POST['username']);
-        $email = trim($_POST['email']);
-        $password = $_POST['password'];
-        $retypePassword = $_POST['retype-password'];
-        $dob = $_POST['dob'];
+require "scripts/send_email.php";
 
-        if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
-            echo '<div class="alert alert-warning" style="margin: 4rem 0;">Password must be at least 8 characters long and include both letters and numbers.</div>';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $verificationCode = rand(100000, 999999);
+
+    if (isset($_POST["signup"])) {
+        $username = trim($_POST["username"]);
+        $email = trim($_POST["email"]);
+        $password = $_POST["password"];
+        $retypePassword = $_POST["retype-password"];
+        $dob = $_POST["dob"];
+
+        if (
+            strlen($password) < 8 ||
+            !preg_match("/[A-Za-z]/", $password) ||
+            !preg_match("/\d/", $password)
+        ) {
+            echo '<div class="alert alert-warning">Password must be at least 8 characters long and include both letters and numbers.</div>';
         } elseif ($password !== $retypePassword) {
-            echo '<div class="alert alert-warning" style="margin: 4rem 0;">Passwords do not match.</div>';
+            echo '<div class="alert alert-warning">Passwords do not match.</div>';
         } else {
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("SELECT user_id FROM users WHERE name = :username OR email = :email");
-            $stmt->execute(['username' => $username, 'email' => $email]);
+            $stmt = $pdo->prepare(
+                "SELECT user_id FROM users WHERE name = :username OR email = :email",
+            );
+            $stmt->execute([
+                ":username" => $username,
+                ":email" => $email,
+            ]);
 
             if ($stmt->rowCount() > 0) {
-                echo '<div class="alert alert-warning" style="margin: 4rem 0;">User already exists.</div>';
+                echo '<div class="alert alert-warning">User already exists.</div>';
             } else {
-                $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
-                $success = $stmt->execute(['name' => $username, 'email' => $email, 'password_hash' => $passwordHash, 'dob' => $dob]);
-                echo $success
-                    ? '<div class="alert alert-success" style="margin: 4rem 0;">Registration successful!</div>'
-                    : '<div class="alert alert-danger" style="margin: 4rem 0;">Registration failed. Please try again.</div>';
+                $_SESSION["verification_code"] = $verificationCode;
+                $_SESSION["pending_signup"] = [
+                    "username" => $username,
+                    "email" => $email,
+                    "password_hash" => $passwordHash,
+                    "dob" => $dob,
+                ];
+
+                if (
+                    sendEmail(
+                        $email,
+                        $username,
+                        "Your Verification Code",
+                        "Your verification code is: $verificationCode",
+                    )
+                ) {
+                    echo '<script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                document.getElementById("verificationModal").style.display = "block";
+                            });
+                          </script>';
+                } else {
+                    echo '<div class="alert alert-danger">Failed to send verification email.</div>';
+                }
             }
         }
     }
 
-    if (isset($_POST['login'])) {
-        $loginInput = trim($_POST['login-username-email']);
-        $stmt = $pdo->prepare("SELECT user_id, name, password_hash, profile_image, email FROM users WHERE name = :username OR email = :email");
-        $stmt->execute(['username' => $loginInput, 'email' => $loginInput]);
+    if (isset($_POST["login"])) {
+        $loginInput = trim($_POST["login-username-email"]);
+        $stmt = $pdo->prepare(
+            "SELECT user_id, name, password_hash, profile_image, email FROM users WHERE name = :username OR email = :email",
+        );
+        $stmt->execute(["username" => $loginInput, "email" => $loginInput]);
         $user = $stmt->fetch();
 
-        if ($user && password_verify($_POST['login-password'], $user['password_hash'])) {
-            session_start();
-            $_SESSION = array_merge($_SESSION, [
-                'user_id' => $user['user_id'],
-                'email' => $user['email'],
-                'profile_image' => $user['profile_image']
-            ]);
-            echo "<script>window.location.href = window.location.href;</script>";
-            exit();
+        if (
+            $user &&
+            password_verify($_POST["login-password"], $user["password_hash"])
+        ) {
+            $_SESSION["verification_code"] = $verificationCode;
+            $_SESSION["pending_login"] = [
+                "user_id" => $user["user_id"],
+                "email" => $user["email"],
+                "profile_image" => $user["profile_image"],
+            ];
+
+            if (
+                sendEmail(
+                    $user["email"],
+                    $user["name"],
+                    "Your Verification Code",
+                    "Your verification code is: $verificationCode",
+                )
+            ) {
+                echo '<script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            document.getElementById("verificationModal").style.display = "block";
+                        });
+                      </script>';
+            } else {
+                echo '<div class="alert alert-danger">Failed to send verification email.</div>';
+            }
         } else {
-            echo '<div class="alert alert-danger" style="margin: 4rem 0;">Invalid username or password.</div>';
+            echo '<div class="alert alert-danger">Invalid username or password.</div>';
+        }
+    }
+
+    if (isset($_POST["verify-code"])) {
+        if ($_POST["verification-code"] == $_SESSION["verification_code"]) {
+            unset($_SESSION["verification_code"]);
+
+            if (isset($_SESSION["pending_signup"])) {
+                $pendingSignup = $_SESSION["pending_signup"];
+
+                $stmt = $pdo->prepare(
+                    "INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)",
+                );
+
+                if (
+                    $stmt->execute([
+                        ":name" => $pendingSignup["username"],
+                        ":email" => $pendingSignup["email"],
+                        ":password_hash" => $pendingSignup["password_hash"],
+                        ":dob" => $pendingSignup["dob"],
+                    ])
+                ) {
+                    echo '<div class="alert alert-success">Registration successful!</div>';
+                    unset($_SESSION["pending_signup"]);
+                } else {
+                    echo '<div class="alert alert-danger">Registration failed. Please try again.</div>';
+                }
+            }
+
+            if (isset($_SESSION["pending_login"])) {
+                $_SESSION = array_merge($_SESSION, $_SESSION["pending_login"]);
+                unset($_SESSION["pending_login"]);
+                echo "<script>window.location.href = window.location.href;</script>";
+                exit();
+            }
+        } else {
+            echo '<div class="alert alert-danger">Invalid verification code.</div>';
         }
     }
 }
@@ -79,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
-        <div class="border-end" style="height: 100%;"></div>
+        <div class="border-end h-100"></div>
     </div>
 
     <div class="col-md-5 col-sm-10 mt-4 mt-md-0">
@@ -95,5 +184,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit" name="login" class="btn btn-primary w-100">Login</button>
         </form>
+    </div>
+</div>
+
+<div class="modal" id="verificationModal" tabindex="-1" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enter Email Verification Code</h5>
+                <button type="button" onclick="document.getElementById('verificationModal').style.display = 'none'" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    <input type="hidden" name="verify-code" value="1">
+                    <div class="form-group">
+                        <label for="verification-code">Verification Code</label>
+                        <input type="text" class="form-control" id="verification-code" name="verification-code" placeholder="Enter 6-digit code" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Verify</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
