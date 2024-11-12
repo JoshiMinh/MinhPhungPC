@@ -103,29 +103,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST["verify-code"])) {
         if ($_POST["verification-code"] == $_SESSION["verification_code"]) {
             unset($_SESSION["verification_code"]);
-
+    
             if (isset($_SESSION["pending_signup"])) {
                 $pendingSignup = $_SESSION["pending_signup"];
-
-                $stmt = $pdo->prepare(
-                    "INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)",
-                );
-
-                if (
-                    $stmt->execute([
-                        ":name" => $pendingSignup["username"],
-                        ":email" => $pendingSignup["email"],
-                        ":password_hash" => $pendingSignup["password_hash"],
-                        ":dob" => $pendingSignup["dob"],
-                    ])
-                ) {
-                    echo '<div class="alert alert-success">Registration successful!</div>';
+    
+                $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
+                if ($stmt->execute([
+                    ":name" => $pendingSignup["username"],
+                    ":email" => $pendingSignup["email"],
+                    ":password_hash" => $pendingSignup["password_hash"],
+                    ":dob" => $pendingSignup["dob"],
+                ])) {
+                    // Automatically log in the user upon successful registration
+                    $_SESSION["user_id"] = $pdo->lastInsertId();
+                    $_SESSION["username"] = $pendingSignup["username"];
+                    $_SESSION["email"] = $pendingSignup["email"];
+                    $_SESSION['profile_image'] = 'default.jpg';
+    
+                    echo '<div class="alert alert-success">Registration successful! You are now logged in.</div>';
                     unset($_SESSION["pending_signup"]);
+                    echo "<script>window.location.href = window.location.href;</script>";
+                    exit();
                 } else {
                     echo '<div class="alert alert-danger">Registration failed. Please try again.</div>';
                 }
             }
-
+    
             if (isset($_SESSION["pending_login"])) {
                 $_SESSION = array_merge($_SESSION, $_SESSION["pending_login"]);
                 unset($_SESSION["pending_login"]);
@@ -135,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             echo '<div class="alert alert-danger">Invalid verification code.</div>';
         }
-    }
+    }    
 }
 ?>
 
