@@ -114,9 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     ":password_hash" => $pendingSignup["password_hash"],
                     ":dob" => $pendingSignup["dob"],
                 ])) {
-                    // Automatically log in the user upon successful registration
                     $_SESSION["user_id"] = $pdo->lastInsertId();
-                    $_SESSION["username"] = $pendingSignup["username"];
                     $_SESSION["email"] = $pendingSignup["email"];
                     $_SESSION['profile_image'] = 'default.jpg';
     

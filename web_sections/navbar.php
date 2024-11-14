@@ -150,7 +150,7 @@ function searchComponents() {
     if (searchQuery.length > 0) {
         searchDropdown.style.display = 'block';
         const xhr = new XMLHttpRequest();
-        xhr.open("GET", "search.php?search=" + encodeURIComponent(searchQuery), true);
+        xhr.open("GET", "_search.php?search=" + encodeURIComponent(searchQuery), true);
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {

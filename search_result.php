@@ -9,13 +9,14 @@ $items = [];
 if ($query) {
     foreach (array_keys($components) as $table) {
         try {
-            $stmt = $pdo->prepare("SELECT *, :table AS item_table FROM $table WHERE name LIKE :query OR brand LIKE :query");
+            $stmt = $pdo->prepare("SELECT *, :table AS item_table FROM $table WHERE name LIKE :query OR brand LIKE :query ORDER BY brand");
             $stmt->execute(['query' => '%' . $query . '%', 'table' => $table]);
             $items = array_merge($items, $stmt->fetchAll(PDO::FETCH_ASSOC));
         } catch (PDOException $e) {
             echo "Error fetching data: " . htmlspecialchars($e->getMessage());
         }
     }
+    include 'scripts/sort_by.php';
 }
 ?>
 

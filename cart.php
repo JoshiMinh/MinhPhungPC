@@ -163,12 +163,11 @@ if (isset($_SESSION['order_success'])) {
         .cart-item-details { 
             flex: 1; 
         }
-        .price { 
-            font-size: 110%; 
-            color: lightgreen; 
-            margin-bottom: 10px; 
+        .price {
+            font-size: 110%;
+            margin-bottom: 10px;
         }
-        .brand { 
+        .brand {
             font-size: 1rem; 
             margin-bottom: 10px; 
         }
@@ -211,7 +210,6 @@ if (isset($_SESSION['order_success'])) {
         }
         .totalAmount {
             font-size: 110%;
-            color: lightgreen;
             font-weight: bold;
         }
     </style>
@@ -258,7 +256,7 @@ if (isset($_SESSION['order_success'])) {
                         echo '<img src="' . htmlspecialchars($product['image']) . '" alt="' . htmlspecialchars($product['name']) . '">';
                         echo '<div class="cart-item-details">';
                         echo '<h5>' . htmlspecialchars($product['name']) . '</h5>';
-                        echo '<p class="price">' . number_format($product['price'], 0, ',', '.') . '₫</p>';
+                        echo '<p class="price text-success">' . number_format($product['price'], 0, ',', '.') . '₫</p>';
                         echo '<p class="brand">' . htmlspecialchars($product['brand']) . '</p>';
                         echo '</div>';
                         echo '<div class="quantity">';
@@ -271,7 +269,7 @@ if (isset($_SESSION['order_success'])) {
                 }
 
                 echo '<div class="cart-actions">';
-                echo '<div class="totalAmount">Total: <span id="totalAmount">' . number_format($totalAmount, 0, ',', '.') . '₫</span></div>';
+                echo '<div class="totalAmount">Total: <span id="totalAmount" class="text-success">' . number_format($totalAmount, 0, ',', '.') . '₫</span></div>';
                 echo '<form method="post"><button type="submit" name="remove_all" class="btn btn-danger">Remove All</button></form>';
                 echo '<button class="btn btn-success" onclick="showOrderModal()"><b>Order</b></button>';
                 echo '</div>';

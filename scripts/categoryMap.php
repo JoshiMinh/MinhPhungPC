@@ -1,7 +1,7 @@
 <?php 
 $categoryMap = [
-    "Motherboard" => "motherboard",
     "CPU" => "processor",
+    "Motherboard" => "motherboard",
     "RAM" => "memory",
     "Graphics Card" => "graphicscard",
     "Storage" => "storage",

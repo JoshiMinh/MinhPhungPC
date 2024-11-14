@@ -9,8 +9,10 @@ $tableDisplayName = htmlspecialchars(ucwords(str_replace('_', ' ', $tableName)))
 $items = [];
 if ($tableName !== 'Unknown Category') {
     try {
-        $stmt = $pdo->query("SELECT *, '$table' AS item_table FROM $table");
+        $stmt = $pdo->query("SELECT *, '$table' AS item_table FROM $table ORDER BY brand");
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        include 'scripts/sort_by.php';
     } catch (PDOException $e) {
         echo "Error fetching data: " . htmlspecialchars($e->getMessage());
     }

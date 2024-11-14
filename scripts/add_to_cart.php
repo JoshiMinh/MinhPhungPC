@@ -2,6 +2,7 @@
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['table'], $_POST['id'])) {
     if (!isset($_SESSION['user_id'])) {
         echo "<script>alert('You must be logged in to add items to the cart.');</script>";
+        echo "<script>window.location.href = window.location.href;</script>";
         exit;
     }
 
@@ -53,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['table'], $_POST['id']
             echo "<script>window.location.href = window.location.href;</script>";
         } else {
             echo "<script>alert('Failed to add item to cart.');</script>";
+            echo "<script>window.location.href = window.location.href;</script>";
         }
     }
 }
