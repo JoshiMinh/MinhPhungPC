@@ -329,7 +329,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
                         </label>
                     </div>
 
-                    <div id="paymentMessage" class="text-success mt-2">
+                    <div id="paymentMessage" class="text-secondary mt-2">
                         Pay Upon Delivery
                     </div>
                 </form>
@@ -377,12 +377,12 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
         const paymentMessage = document.getElementById('paymentMessage');
 
         if (paymentMethod === 'Bank') {
-            paymentMessage.textContent = 'Transfer to VCB - 1017110028 - NGUYEN BINH MINH';
             paymentMessage.classList.remove('text-secondary');
+            paymentMessage.textContent = 'Transfer to VCB - 1017110028 - NGUYEN BINH MINH';
             paymentMessage.classList.add('text-success');
         } else {
-            paymentMessage.textContent = 'Pay Upon Delivery';
             paymentMessage.classList.remove('text-success');
+            paymentMessage.textContent = 'Pay Upon Delivery';
             paymentMessage.classList.add('text-secondary');
         }
     }
