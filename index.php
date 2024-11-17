@@ -138,12 +138,24 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
                                 </span>
                             </div>
 
-                            <button class="btn btn-primary px-4 select-btn mt-2 mt-md-0"
+                            <?php if ($selectedComponent): ?>
+                                <form method="post" action="_remove_component.php" style="display: inline;">
+                                    <input type="hidden" name="table" value="<?= htmlspecialchars($tableName); ?>">
+                                    <button type="submit" class="btn btn-danger px-2 mt-2 mt-md-0 mx-1">Remove</button>
+                                </form>
+                                <button class="btn btn-primary px-3 select-btn mt-2 mt-md-0"
                                     onclick="modalFetchItems('<?= htmlspecialchars($componentName); ?>', '<?= htmlspecialchars($tableName); ?>')"
                                     data-toggle="modal"
-                                    data-target="#componentModal">
-                                <?= $selectedComponent ? "Change" : "Select"; ?>
-                            </button>
+                                    data-target="#componentModal">Change
+                                </button>
+                            <?php else: ?>
+                                <button class="btn btn-primary px-4 select-btn mt-2 mt-md-0"
+                                    onclick="modalFetchItems('<?= htmlspecialchars($componentName); ?>', '<?= htmlspecialchars($tableName); ?>')"
+                                    data-toggle="modal"
+                                    data-target="#componentModal">Select
+                                </button>
+                            <?php endif; ?>
+
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -311,62 +323,81 @@ function modalFetchItems(componentName, tableName) {
 }
 
 function confirmSelection() {
-	if (selectedComponent.id && selectedComponent.tableName) {
-		const componentCard = document.getElementById(selectedComponent.tableName);
+    if (selectedComponent.id && selectedComponent.tableName) {
+        const componentCard = document.getElementById(selectedComponent.tableName);
 
-		if (componentCard) {
-			componentCard.querySelector('.text-muted').innerHTML = `<span style='color: white;'>${selectedComponent.name}</span> <br> - <span class='text-success'>${parseInt(selectedComponent.price).toLocaleString('vi-VN')}₫</span>`;
-			const componentImage = componentCard.querySelector('img');
-			componentImage.src = selectedComponent.image;
-			componentImage.style.cssText = "padding: 5px; object-fit: cover; border-radius: 10px; width: 60px; height: 60px;opacity: 0.9;";
-			componentImage.classList.add('updated-image');
+        if (componentCard) {
+            componentCard.querySelector('.text-muted').innerHTML = `<span style='color: white;'>${selectedComponent.name}</span> <br> - <span class='text-success'>${parseInt(selectedComponent.price).toLocaleString('vi-VN')}₫</span>`;
+            const componentImage = componentCard.querySelector('img');
+            componentImage.src = selectedComponent.image;
+            componentImage.style.cssText = "padding: 5px; object-fit: cover; border-radius: 10px; width: 60px; height: 60px; opacity: 0.9;";
+            componentImage.classList.add('updated-image');
 
-			componentImage.addEventListener('click', function() {
-				const modalImage = document.getElementById('modalImage');
-				modalImage.src = componentImage.src; 
-				$('#imageModal').modal('show');
-			});
-		}
+            componentImage.addEventListener('click', function() {
+                const modalImage = document.getElementById('modalImage');
+                modalImage.src = componentImage.src;
+                $('#imageModal').modal('show');
+            });
 
-		const confirmationText = `<span style="color: green;">Updated</span>`;
-		const modalFooter = document.querySelector('.modal-footer');
-		const existingMessage = modalFooter.querySelector('.updated-message');
-		if (existingMessage) {
-			existingMessage.remove();
-		}
+            const removeButton = `
+                <form method="post" action="_remove_component.php" style="display: inline;">
+                    <input type="hidden" name="table" value="${selectedComponent.tableName}">
+                    <button type="submit" class="btn btn-danger px-2 mt-2 mt-md-0 mx-1">Remove</button>
+                </form>
+            `;
 
-		const updatedMessage = document.createElement('div');
-		updatedMessage.innerHTML = confirmationText;
-		updatedMessage.classList.add('updated-message');
-		updatedMessage.style.textAlign = 'center';
-		modalFooter.insertBefore(updatedMessage, modalFooter.querySelector('button[type="button"]'));
+            const changeButton = `
+                <button class="btn btn-primary px-3 select-btn mt-2 mt-md-0 mx-1"
+                        onclick="modalFetchItems('${selectedComponent.name}', '${selectedComponent.tableName}')"
+                        data-toggle="modal"
+                        data-target="#componentModal">Change</button>
+            `;
 
-		$.ajax({
-			url: '_buildset.php',
-			type: 'POST',
-			data: {
-				component_id: selectedComponent.id,
-				table_name: selectedComponent.tableName
-			},
-			success: function(response) {
-				const data = JSON.parse(response);
-				if (data.status === 'success') {
-					document.getElementById('totalAmount').innerText = `${parseInt(data.totalAmount).toLocaleString('vi-VN')}₫`;
-				} else {
-					alert('Failed to update buildset.');
-				}
-			},
-			error: function(xhr, status, error) {
-				alert('Error updating buildset.');
-				console.log(error);
-			}
-		});
-		
-		selectedComponent = {};
-		bootstrap.Modal.getInstance(document.getElementById('componentModal'))?.hide();
-	} else {
-		alert("Please select a component before confirming.");
-	}
+            const selectButton = componentCard.querySelector('.select-btn');
+            if (selectButton) {
+                selectButton.outerHTML = removeButton + changeButton;
+            }
+        }
+
+        const confirmationText = `<span style="color: green;">Updated</span>`;
+        const modalFooter = document.querySelector('.modal-footer');
+        const existingMessage = modalFooter.querySelector('.updated-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+
+        const updatedMessage = document.createElement('div');
+        updatedMessage.innerHTML = confirmationText;
+        updatedMessage.classList.add('updated-message');
+        updatedMessage.style.textAlign = 'center';
+        modalFooter.insertBefore(updatedMessage, modalFooter.querySelector('button[type="button"]'));
+
+        $.ajax({
+            url: '_buildset.php',
+            type: 'POST',
+            data: {
+                component_id: selectedComponent.id,
+                table_name: selectedComponent.tableName
+            },
+            success: function(response) {
+                const data = JSON.parse(response);
+                if (data.status === 'success') {
+                    document.getElementById('totalAmount').innerText = `${parseInt(data.totalAmount).toLocaleString('vi-VN')}₫`;
+                } else {
+                    alert('Failed to update buildset.');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error updating buildset.');
+                console.log(error);
+            }
+        });
+
+        selectedComponent = {};
+        bootstrap.Modal.getInstance(document.getElementById('componentModal'))?.hide();
+    } else {
+        alert("Please select a component before confirming.");
+    }
 }
 
 document.getElementById('confirmSelect').addEventListener('click', confirmSelection);

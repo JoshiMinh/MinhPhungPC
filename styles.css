@@ -47,6 +47,10 @@ html, body {
     flex: 1;
 }
 
+a:hover {
+    text-decoration: none;
+}
+
 form .form-control{
     border: 1px solid var(--border-color);
     background-color: var(--bg-secondary);
