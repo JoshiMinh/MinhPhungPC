@@ -16,6 +16,30 @@ if (isset($_SESSION['user_id'])) {
     } else {
         $buildset = null;
     }
+
+    if (isset($_COOKIE['buildset']) && $_COOKIE['buildset'] !== '') {
+        echo '<script type="text/javascript">
+                if (confirm("You have a local build set that exists. You can only keep one. Do you want to replace the build set in the database with the cookie one or discard the local?")) {
+                    window.location.href = "index.php?action=replaceBuildSet";
+                } else {
+                    window.location.href = "index.php?action=discardBuildSet";
+                }
+              </script>';
+    }
+
+    if (isset($_GET['action'])) {
+        if ($_GET['action'] === 'replaceBuildSet') {
+            $stmt = $pdo->prepare("UPDATE users SET buildset = ? WHERE user_id = ?");
+            $stmt->execute([$_COOKIE['buildset'], $userId]);
+
+            setcookie('buildset', '', time() - 3600, '/');
+        } elseif ($_GET['action'] === 'discardBuildSet') {
+            setcookie('buildset', '', time() - 3600, '/');
+        }
+
+        header('Location: index.php');
+        exit;
+    }
 } else {
     $buildset = $_COOKIE['buildset'] ?? null;
 }
@@ -143,7 +167,7 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
                                     <input type="hidden" name="table" value="<?= htmlspecialchars($tableName); ?>">
                                     <button type="submit" class="btn btn-danger px-2 mt-2 mt-md-0 mx-1">Remove</button>
                                 </form>
-                                <button class="btn btn-primary px-3 select-btn mt-2 mt-md-0"
+                                <button class="btn btn-primary px-3 select-btn mt-2 mt-md-0 mx-1"
                                     onclick="modalFetchItems('<?= htmlspecialchars($componentName); ?>', '<?= htmlspecialchars($tableName); ?>')"
                                     data-toggle="modal"
                                     data-target="#componentModal">Change
@@ -189,7 +213,7 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
                     <div>
                         <form action="index.php" method="post" style="display: inline;">
                             <input type="hidden" name="action" value="clearBuildSet">
-                            <button type="submit" class="btn btn-danger mr-2">Clear</button>
+                            <button type="submit" class="btn btn-danger mr-1">Clear</button>
                         </form>
                         <button id="addToCartButton" class="btn btn-success">Add to Cart</button>
                     </div>
@@ -328,16 +352,16 @@ function confirmSelection() {
 
         if (componentCard) {
             componentCard.querySelector('.text-muted').innerHTML = `<span style='color: white;'>${selectedComponent.name}</span> <br> - <span class='text-success'>${parseInt(selectedComponent.price).toLocaleString('vi-VN')}₫</span>`;
+            
             const componentImage = componentCard.querySelector('img');
             componentImage.src = selectedComponent.image;
             componentImage.style.cssText = "padding: 5px; object-fit: cover; border-radius: 10px; width: 60px; height: 60px; opacity: 0.9;";
             componentImage.classList.add('updated-image');
 
-            componentImage.addEventListener('click', function() {
-                const modalImage = document.getElementById('modalImage');
-                modalImage.src = componentImage.src;
-                $('#imageModal').modal('show');
-            });
+            const existingRemoveButton = componentCard.querySelector('.btn-danger');
+            if (existingRemoveButton) {
+                existingRemoveButton.remove();
+            }
 
             const removeButton = `
                 <form method="post" action="_remove_component.php" style="display: inline;">
@@ -345,7 +369,6 @@ function confirmSelection() {
                     <button type="submit" class="btn btn-danger px-2 mt-2 mt-md-0 mx-1">Remove</button>
                 </form>
             `;
-
             const changeButton = `
                 <button class="btn btn-primary px-3 select-btn mt-2 mt-md-0 mx-1"
                         onclick="modalFetchItems('${selectedComponent.name}', '${selectedComponent.tableName}')"
