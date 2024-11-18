@@ -35,15 +35,15 @@
                             <img src="<?= htmlspecialchars($item['image']) ?>" 
                                  alt="<?= htmlspecialchars($item['name']) ?>" 
                                  class="card-img-top" 
-                                 style="max-height: 200px; object-fit: cover; background-color: white;">
+                                 style="height: 200px; object-fit: cover; background-color: white;">
                         </a>
                         <div class="card-body">
-                            <p class="card-text mb-2 fw-bold">
-                                <?= number_format($item['price'], 0, ',', '.') . '₫' ?>
+                            <p class="card-text mb-2" style="font-family: 'Roboto', sans-serif; font-weight: 100; font-size: 1.1rem;">
+                                <strong><?= number_format($item['price'], 0, ',', '.') . '₫' ?></strong>
                             </p>
-                            <h5 class="card-title h6 mb-0">
+                            <h6 class="card-title h6 mb-0">
                                 <?= htmlspecialchars($item['name']) ?>
-                            </h5>
+                            </h6>
                         </div>
                         <div class="card-footer d-flex" style="padding: 0; height: 50px; border: none;">
                             <form method="post" style="flex: 7; height: 100%; margin: 0;">
