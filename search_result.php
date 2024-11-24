@@ -40,8 +40,15 @@ if ($query) {
 
         <main class="container my-4">
             <h2 class="text-center my-3">Search Results for: <?= htmlspecialchars($query) ?></h2>
-            <?php include 'scripts/add_to_cart.php'; ?>
-            <?php include 'web_sections/item_display.php'; ?>
+            
+            <?php if ($items): ?>
+                <?php include 'scripts/add_to_cart.php'; ?>
+                <?php include 'web_sections/item_display.php'; ?>
+            <?php else: ?>
+                <div class="alert alert-warning" style="margin: 4rem 0;">
+                    No items found for this search.
+                </div>
+            <?php endif; ?>
         </main>
     </div>
 
@@ -52,5 +59,6 @@ if ($query) {
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="darkmode.js"></script>
+<script src="scrolledPosition.js"></script>
 </body>
 </html>

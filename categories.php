@@ -6,11 +6,39 @@ $table = $_GET['table'] ?? '';
 $tableName = array_search($table, $categoryMap) ?: 'Unknown Category';
 $tableDisplayName = htmlspecialchars(ucwords(str_replace('_', ' ', $tableName)));
 
-$items = [];
+$brands = $items = [];
+$brandFilter = $_GET['brands'] ?? [];
+$minPrice = $_GET['min_price'] ?? null;
+$maxPrice = $_GET['max_price'] ?? null;
+
 if ($tableName !== 'Unknown Category') {
     try {
-        $stmt = $pdo->query("SELECT *, '$table' AS item_table FROM $table ORDER BY brand");
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmtBrands = $pdo->query("SELECT DISTINCT brand FROM $table ORDER BY brand");
+        $brands = $stmtBrands->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmtPriceRange = $pdo->query("SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM $table");
+        $priceRange = $stmtPriceRange->fetch(PDO::FETCH_ASSOC);
+
+        $minPrice = $minPrice ?: $priceRange['min_price'];
+        $maxPrice = $maxPrice ?: $priceRange['max_price'];
+
+        $minPriceNumeric = (float)preg_replace('/[^\d]/', '', $minPrice);
+        $maxPriceNumeric = (float)preg_replace('/[^\d]/', '', $maxPrice);
+
+        $formattedMinPrice = number_format($minPriceNumeric, 0, ',', '.');
+        $formattedMaxPrice = number_format($maxPriceNumeric, 0, ',', '.');
+
+        $brandCondition = $brandFilter
+            ? "AND brand IN ('" . implode("','", array_map('htmlspecialchars', $brandFilter)) . "')"
+            : '';
+
+        $priceCondition = "AND price BETWEEN :min_price AND :max_price";
+
+        $stmtItems = $pdo->prepare("SELECT *, '$table' AS item_table FROM $table WHERE 1 $brandCondition $priceCondition ORDER BY brand");
+        $stmtItems->bindParam(':min_price', $minPriceNumeric, PDO::PARAM_INT);
+        $stmtItems->bindParam(':max_price', $maxPriceNumeric, PDO::PARAM_INT);
+        $stmtItems->execute();
+        $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
         include 'scripts/sort_by.php';
     } catch (PDOException $e) {
@@ -26,30 +54,81 @@ if ($tableName !== 'Unknown Category') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $tableDisplayName ?> - MinhPhungPC</title>
     <link rel="icon" href="icon.png" type="image/png">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .sidebar-container { position: sticky; top: 0; height: 100%; background-color: #343a40; padding: 1rem; overflow-y: auto; }
+        .content-container { padding: 1rem; }
+        .card { min-width: 200px; }
+        .card img { height: auto; max-width: 100%; object-fit: contain; }
+        .form-inline input { width: 45%; }
+        .price-caption { font-size: 0.9rem; color: #6c757d; }
+    </style>
 </head>
-<body style="transition: 0.5s;">
-
+<body>
 <div class="wrapper">
     <div class="content">
         <?php include 'web_sections/navbar.php'; ?>
-
-        <main class="container my-4">
-            <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
-            <?php include 'scripts/add_to_cart.php'; ?>
-            <?php include 'web_sections/item_display.php'; ?>
-        </main>
+        <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
+        <div class="container-fluid my-1 mx-1">
+            <?php if ($items): ?>
+                <?php include 'scripts/add_to_cart.php'; ?>
+                <div class="row">
+                    <?php if ($brands || $minPrice || $maxPrice): ?>
+                        <div class="col-12 col-md-3 sidebar-container">
+                            <h5>Filter by Price (VND)</h5>
+                            <form method="get">
+                                <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
+                                <div class="form-inline mb-3">
+                                    <label for="minPrice" class="mr-2">Min Price:</label>
+                                    <input type="text" class="form-control" id="minPrice" name="min_price" 
+                                           value="<?= $formattedMinPrice ?>" data-price="<?= $minPriceNumeric ?>" oninput="formatPriceInput(this)">
+                                    <label for="maxPrice" class="mr-2 ml-3">Max Price:</label>
+                                    <input type="text" class="form-control" id="maxPrice" name="max_price" 
+                                           value="<?= $formattedMaxPrice ?>" data-price="<?= $maxPriceNumeric ?>" oninput="formatPriceInput(this)">
+                                </div>
+                                <?php if ($brands): ?>
+                                    <h5>Filter by Brand</h5>
+                                    <?php foreach ($brands as $brand): ?>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="brand-<?= htmlspecialchars($brand['brand']) ?>"
+                                                   name="brands[]" value="<?= htmlspecialchars($brand['brand']) ?>"
+                                                   <?= in_array($brand['brand'], $brandFilter) ? 'checked' : '' ?>>
+                                            <label class="form-check-label" for="brand-<?= htmlspecialchars($brand['brand']) ?>">
+                                                <?= htmlspecialchars($brand['brand']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                <button type="submit" class="btn btn-primary btn-sm mt-3 w-100">Apply Filter</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                    <div class="col-12 col-md-9 content-container">
+                        <?php include 'web_sections/item_display.php'; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="container my-4">
+                    <div class="alert alert-warning">No items found for this category.</div>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
-
     <?php include 'web_sections/footer.php'; ?>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="darkmode.js"></script>
+<script src="scrolledPosition.js"></script>
+<script>
+    function formatPriceInput(input) {
+        let value = input.value.replace(/[^\d]/g, '');
+        input.value = new Intl.NumberFormat('de-DE').format(value);
+    }
+</script>
 </body>
 </html>
