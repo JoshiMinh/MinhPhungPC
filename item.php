@@ -54,7 +54,7 @@ if ($table && $id) {
     <title><?= htmlspecialchars($item['name']) ?> - MinhPhungPC</title>
     <link rel="icon" href="icon.png" type="image/png">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -66,6 +66,12 @@ if ($table && $id) {
         }
         .additional-details li {
             list-style-type: disc;
+        }
+        .ratings .fa-star {
+            color: yellow;
+        }
+        .ratings .fa-star-o {
+            color: #d3d3d3;
         }
     </style>
 </head>
@@ -80,6 +86,17 @@ if ($table && $id) {
             <div class="col">
                 <div class="card p-3 bg-white text-dark">
                     <h2><?= htmlspecialchars($item['name']) ?></h2>
+                    
+                    <div class="ratings mb-2">
+                        <?php 
+                            $rating = isset($item['rating']) && $item['rating'] !== null ? $item['rating'] : 0; 
+                            for ($i = 0; $i < 5; $i++):
+                                $starClass = $i < $rating ? 'fa fa-star' : 'fa fa-star-o'; 
+                        ?>
+                            <span class="<?= $starClass ?>"></span>
+                        <?php endfor; ?>
+                    </div>
+
                     <p class="card-text"><?= number_format($item['price'], 0, ',', '.') . '₫' ?></p>
                     <p class="card-text"><strong>Brand:</strong> <?= htmlspecialchars($item['brand']) ?></p>
                     <form method="post">
@@ -92,7 +109,7 @@ if ($table && $id) {
                     <h4>Description</h4>
                     <ul>
                         <?php foreach ($item as $key => $value): ?>
-                            <?php if (!in_array($key, ['id', 'name', 'price', 'image', 'brand'])): ?>
+                            <?php if (!in_array($key, ['id', 'name', 'price', 'image', 'brand', 'rating'])): ?>
                                 <li><strong><?= htmlspecialchars(ucwords(str_replace('_', ' ', $key))) ?>:</strong> <?= htmlspecialchars($value) ?></li>
                             <?php endif; ?>
                         <?php endforeach; ?>

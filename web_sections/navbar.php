@@ -71,7 +71,7 @@
 }
 
 .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%2888, 88, 88, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='%23888888' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
 }
 
 .navbar-mobile {
@@ -98,10 +98,54 @@
 .navbar-mobile-secondary {
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
 }
+
+.offcanvas-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: var(--bg-primary);
+    height: 100%;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1050;
+}
+
+.offcanvas.show {
+    transform: translateY(0);
+}
+
+.navbar-mobile {
+    transition: margin-top 0.3s ease-in-out;
+}
+
+.navbar-mobile.open {
+    margin-top: 60px;
+}
+
+.navbar-mobile.closed {
+    margin-top: 0;
+}
+
+.offcanvas-body {
+    padding: 20px;
+}
+
+.btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+}
 </style>
 
 <nav>
-    <nav class="navbar navbar-expand-lg navbar-main d-none d-lg-flex">
+    <div class="navbar navbar-expand-lg navbar-main d-none d-lg-flex">
         <a href="index.php" class="navbar-brand" style="width: 10%;" title="Home">
             <img src="logo.png" alt="MinhPhungPC Logo" style="width: 100%;">
         </a>
@@ -144,9 +188,9 @@
                 </a>
             <?php endif; ?>
         </div>
-    </nav>
+    </div>
 
-    <nav class="navbar navbar-secondary navbar-gradient d-none d-lg-flex">
+    <div class="navbar navbar-secondary navbar-gradient d-none d-lg-flex">
         <div class="navbar-collapse">
             <ul class="navbar-nav flex-row w-100">
                 <?php foreach ($categoryMap as $category => $tableName): ?>
@@ -156,23 +200,35 @@
                 <?php endforeach; ?>
             </ul>
         </div>
-    </nav>
+    </div>
 
     <div class="d-lg-none">
         <div class="d-flex align-items-center p-2">
             <a href="index.php" class="navbar-brand" style="width: 30%;" title="Home">
                 <img src="logo_light.png" alt="MinhPhungPC Logo" style="width: 100%;">
             </a>
+
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <div class="mx-2">
+                    <a href="account.php">
+                        <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" class="rounded-circle" style="width: 35px; height: 35px;" title="Profile">
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="mx-2">
+                    <a href="account.php" class="btn btn-primary" title="Sign In">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            <?php endif; ?>
+
             <button class="btn btn-link ml-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavbar" aria-controls="mobileNavbar">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
 
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileNavbar" aria-labelledby="offcanvasLabel">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="offcanvasLabel">Menu</h5>
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
+        <!-- Offcanvas -->
+        <div class="offcanvas offcanvas-top" tabindex="-1" id="mobileNavbar" aria-labelledby="offcanvasLabel">
             <div class="offcanvas-body">
                 <div class="search-input-container p-2">
                     <input type="text" class="search-input" id="mobileSearchQuery" placeholder="Find component" onkeypress="checkEnter(event)" onkeyup="debouncedSearchComponents()">
@@ -192,58 +248,79 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const performSearch = () => {
-    const query = document.getElementById('searchQuery').value;
-    if (query) window.location.href = 'search_result.php?query=' + encodeURIComponent(query);
-};
+    document.addEventListener('DOMContentLoaded', () => {
+        const offcanvas = document.getElementById('mobileNavbar');
+        const toggleButton = document.querySelector('[data-bs-toggle="offcanvas"]');
+        const body = document.body;
 
-const checkEnter = (event) => event.key === 'Enter' && performSearch();
+        toggleButton.addEventListener('click', () => {
+            offcanvas.classList.toggle('show');
+            body.classList.toggle('no-scroll');
+        });
 
-let debounceTimer;
-function debouncedSearchComponents() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(searchComponents, 100);
-}
-
-function searchComponents() {
-    const searchQuery = document.getElementById("searchQuery").value;
-    const searchDropdown = document.getElementById("searchDropdown");
-
-    if (searchQuery.length > 0) {
-        searchDropdown.style.display = 'block';
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", "_search.php?search=" + encodeURIComponent(searchQuery), true);
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                const components = JSON.parse(xhr.responseText);
-                let output = components.length === 0 
-                    ? "<button class='dropdown-item' disabled>No results found</button>" 
-                    : components.map(component => ` 
-                        <div class='dropdown-item' onclick='window.location.href="item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.id)}"' style='display: flex; align-items: center;'>
-                            <img src='${component.image}' alt='${component.name}' style='width: 60px; height: 60px; margin-right: 10px;'>
-                            <div style='display: flex; flex-direction: column;'>
-                                <strong>${component.name}</strong>
-                                <span>${new Intl.NumberFormat('vi-VN').format(component.price)}₫</span>
-                                <span>${component.brand}</span>
-                            </div>
-                        </div>`).join('');
-                searchDropdown.innerHTML = output;
-            } else {
-                searchDropdown.innerHTML = "<button class='dropdown-item' disabled>Error loading results</button>";
+        document.addEventListener('click', (event) => {
+            if (!offcanvas.contains(event.target) && !toggleButton.contains(event.target)) {
+                offcanvas.classList.remove('show');
+                body.classList.remove('no-scroll');
             }
-        };
+        });
+    });
 
-        xhr.onerror = () => searchDropdown.innerHTML = "<button class='dropdown-item' disabled>Error loading results</button>";
-        xhr.send();
-    } else {
-        searchDropdown.style.display = 'none';
-    }
-}
+    const performSearch = () => {
+        const query = document.getElementById('searchQuery').value;
+        if (query) window.location.href = `search_result.php?query=${encodeURIComponent(query)}`;
+    };
 
-document.addEventListener('click', (event) => {
-    if (!document.getElementById('searchQuery').contains(event.target) && !document.getElementById('searchDropdown').contains(event.target)) {
-        document.getElementById('searchDropdown').style.display = 'none';
+    const checkEnter = (event) => event.key === 'Enter' && performSearch();
+
+    let debounceTimer;
+    function debouncedSearchComponents() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(searchComponents, 100);
     }
-});
+
+    function searchComponents() {
+        const searchQuery = document.getElementById("searchQuery").value;
+        const searchDropdown = document.getElementById("searchDropdown");
+
+        if (searchQuery.length > 0) {
+            searchDropdown.style.display = 'block';
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `_search.php?search=${encodeURIComponent(searchQuery)}`, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const components = JSON.parse(xhr.responseText);
+                    let output = components.length
+                        ? components.map(component => `
+                            <div class="dropdown-item" onclick="window.location.href='item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.id)}'" style="display: flex; align-items: center;">
+                                <img src="${component.image}" alt="${component.name}" style="width: 60px; height: 60px; margin-right: 10px;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <strong>${component.name}</strong>
+                                    <span>${new Intl.NumberFormat('vi-VN').format(component.price)}₫</span>
+                                    <span>${component.brand}</span>
+                                </div>
+                            </div>`).join('')
+                        : "<button class='dropdown-item' disabled>No results found</button>";
+
+                    searchDropdown.innerHTML = output;
+                } else {
+                    searchDropdown.innerHTML = "<button class='dropdown-item' disabled>Error loading results</button>";
+                }
+            };
+
+            xhr.onerror = () => searchDropdown.innerHTML = "<button class='dropdown-item' disabled>Error loading results</button>";
+            xhr.send();
+        } else {
+            searchDropdown.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('click', (event) => {
+        const searchQuery = document.getElementById('searchQuery');
+        const searchDropdown = document.getElementById('searchDropdown');
+        if (!searchQuery.contains(event.target) && !searchDropdown.contains(event.target)) {
+            searchDropdown.style.display = 'none';
+        }
+    });
 </script>
