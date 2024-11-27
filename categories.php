@@ -73,48 +73,53 @@ if ($tableName !== 'Unknown Category') {
         <?php include 'web_sections/navbar.php'; ?>
         <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
         <div class="container-fluid my-1 mx-1">
-            <?php if ($items): ?>
-                <?php include 'scripts/add_to_cart.php'; ?>
-                <div class="row">
-                    <?php if ($brands || $minPrice || $maxPrice): ?>
-                        <div class="col-12 col-md-3 sidebar-container">
-                            <h5>Filter by Price (VND)</h5>
-                            <form method="get">
-                                <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
-                                <div class="form-inline mb-3">
-                                    <label for="minPrice" class="mr-2">Min Price:</label>
-                                    <input type="text" class="form-control" id="minPrice" name="min_price" 
-                                           value="<?= $formattedMinPrice ?>" data-price="<?= $minPriceNumeric ?>" oninput="formatPriceInput(this)">
-                                    <label for="maxPrice" class="mr-2 ml-3">Max Price:</label>
-                                    <input type="text" class="form-control" id="maxPrice" name="max_price" 
-                                           value="<?= $formattedMaxPrice ?>" data-price="<?= $maxPriceNumeric ?>" oninput="formatPriceInput(this)">
+            <div class="row">
+                <?php if ($brands || $minPrice || $maxPrice): ?>
+                    <div class="col-12 col-md-3 sidebar-container">
+                        <h5>Filter by Price (VND)</h5>
+                        <form method="get">
+                            <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
+                            <div class="form-inline mb-3">
+                                <div class="form-group mr-3">
+                                    <label for="minPrice" class="mr-2">Min Price: </label>
+                                    <input type="text" class="form-control" id="minPrice" name="min_price"
+                                        value="<?= $formattedMinPrice ?>" data-price="<?= $minPriceNumeric ?>"
+                                        oninput="formatPriceInput(this)">
                                 </div>
-                                <?php if ($brands): ?>
-                                    <h5>Filter by Brand</h5>
-                                    <?php foreach ($brands as $brand): ?>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" id="brand-<?= htmlspecialchars($brand['brand']) ?>"
-                                                   name="brands[]" value="<?= htmlspecialchars($brand['brand']) ?>"
-                                                   <?= in_array($brand['brand'], $brandFilter) ? 'checked' : '' ?>>
-                                            <label class="form-check-label" for="brand-<?= htmlspecialchars($brand['brand']) ?>">
-                                                <?= htmlspecialchars($brand['brand']) ?>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                                <button type="submit" class="btn btn-primary btn-sm mt-3 w-100">Apply Filter</button>
-                            </form>
-                        </div>
-                    <?php endif; ?>
-                    <div class="col-12 col-md-9 content-container">
-                        <?php include 'web_sections/item_display.php'; ?>
+                                <div class="form-group">
+                                    <label for="maxPrice" class="mr-2">Max Price:</label>
+                                    <input type="text" class="form-control" id="maxPrice" name="max_price"
+                                        value="<?= $formattedMaxPrice ?>" data-price="<?= $maxPriceNumeric ?>"
+                                        oninput="formatPriceInput(this)">
+                                </div>
+                            </div>
+                            <?php if ($brands): ?>
+                                <h5>Filter by Brand</h5>
+                                <?php foreach ($brands as $brand): ?>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" 
+                                               id="brand-<?= htmlspecialchars($brand['brand']) ?>"
+                                               name="brands[]" value="<?= htmlspecialchars($brand['brand']) ?>"
+                                               <?= in_array($brand['brand'], $brandFilter) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="brand-<?= htmlspecialchars($brand['brand']) ?>">
+                                            <?= htmlspecialchars($brand['brand']) ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            <button type="submit" class="btn btn-primary btn-sm mt-3 w-100">Apply Filter</button>
+                        </form>
                     </div>
+                <?php endif; ?>
+
+                <div class="col-12 col-md-9 content-container">
+                    <?php if ($items): ?>
+                        <?php include 'web_sections/item_display.php'; ?>
+                    <?php else: ?>
+                        <div class="alert alert-warning">No items found.</div>
+                    <?php endif; ?>
                 </div>
-            <?php else: ?>
-                <div class="container my-4">
-                    <div class="alert alert-warning">No items found for this category.</div>
-                </div>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
     <?php include 'web_sections/footer.php'; ?>

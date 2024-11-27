@@ -54,25 +54,14 @@ if ($table && $id) {
     <title><?= htmlspecialchars($item['name']) ?> - MinhPhungPC</title>
     <link rel="icon" href="icon.png" type="image/png">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <style>
-        .additional-details p {
-            margin-bottom: 5px;
-        }
-        .additional-details ul {
-            padding-left: 20px;
-        }
-        .additional-details li {
-            list-style-type: disc;
-        }
-        .ratings .fa-star {
-            color: yellow;
-        }
-        .ratings .fa-star-o {
-            color: #d3d3d3;
-        }
+        .additional-details p { margin-bottom: 5px; }
+        .additional-details ul { padding-left: 20px; }
+        .additional-details li { list-style-type: disc; }
+        .ratings .fa-star, .ratings .fa-star-o { font-size: 1.5rem; color: #ffcc00; }
     </style>
 </head>
 <body style="transition: 0.5s;">
@@ -86,17 +75,15 @@ if ($table && $id) {
             <div class="col">
                 <div class="card p-3 bg-white text-dark">
                     <h2><?= htmlspecialchars($item['name']) ?></h2>
-                    
                     <div class="ratings mb-2">
                         <?php 
-                            $rating = isset($item['rating']) && $item['rating'] !== null ? $item['rating'] : 0; 
-                            for ($i = 0; $i < 5; $i++):
+                            $rating = isset($item['rating']) ? (int) $item['rating'] : 0; 
+                            for ($i = 0; $i < 5; $i++): 
                                 $starClass = $i < $rating ? 'fa fa-star' : 'fa fa-star-o'; 
                         ?>
                             <span class="<?= $starClass ?>"></span>
                         <?php endfor; ?>
                     </div>
-
                     <p class="card-text"><?= number_format($item['price'], 0, ',', '.') . '₫' ?></p>
                     <p class="card-text"><strong>Brand:</strong> <?= htmlspecialchars($item['brand']) ?></p>
                     <form method="post">
