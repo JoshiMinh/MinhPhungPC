@@ -15,30 +15,58 @@ if ($table && $id) {
         exit("<h1>Item Not Found</h1>");
     }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
-        $userId = $_SESSION['user_id'] ?? '';
-        $content = trim($_POST['comment']);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!empty($_POST['comment'])) {
+            $userId = $_SESSION['user_id'] ?? '';
+            $content = trim($_POST['comment']);
+            if ($userId && $content) {
+                $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, product_table, content, time) VALUES (:user_id, :product_id, :product_table, :content, NOW())");
+                $insertStmt->execute([
+                    'user_id' => $userId,
+                    'product_id' => $id,
+                    'product_table' => $table,
+                    'content' => $content
+                ]);
+                header("Location: " . $_SERVER['PHP_SELF'] . "?table=$table&id=$id");
+                exit;
+            }
+        }
 
-        if ($userId && $content) {
-            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, product_table, content, time) VALUES (:user_id, :product_id, :product_table, :content, NOW())");
-            $insertStmt->execute([
-                'user_id' => $userId,
-                'product_id' => $id,
-                'product_table' => $table,
-                'content' => $content
-            ]);
-            header("Location: " . $_SERVER['PHP_SELF'] . "?table=$table&id=$id");
-            exit;
+        if (isset($_POST['rating'])) {
+            $rating = (int)$_POST['rating'];
+            $userId = $_SESSION['user_id'] ?? '';
+            if ($rating >= 1 && $rating <= 5 && $userId) {
+                $stmt = $pdo->prepare("SELECT ratings FROM $table WHERE id = :id");
+                $stmt->execute(['id' => $id]);
+                $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($product) {
+                    $ratings = explode(' ', $product['ratings']);
+                    $userRated = false;
+                    foreach ($ratings as &$ratingItem) {
+                        $ratingParts = explode('-', $ratingItem);
+                        if (count($ratingParts) == 2) {
+                            list($existingUserId, $existingRating) = $ratingParts;
+                            if ($existingUserId == $userId) {
+                                $ratingItem = "$userId-$rating";
+                                $userRated = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!$userRated) {
+                        $ratings[] = "$userId-$rating";
+                    }
+
+                    $updateStmt = $pdo->prepare("UPDATE $table SET ratings = :ratings WHERE id = :id");
+                    $updateStmt->execute(['ratings' => implode(' ', $ratings), 'id' => $id]);
+                }
+            }
         }
     }
 
-    $commentStmt = $pdo->prepare("
-        SELECT comments.content, comments.time, users.name, users.profile_image
-        FROM comments
-        JOIN users ON comments.user_id = users.user_id
-        WHERE comments.product_id = :product_id AND comments.product_table = :product_table
-        ORDER BY comments.comment_id DESC
-    ");
+    $commentStmt = $pdo->prepare("SELECT comments.content, comments.time, users.name, users.profile_image FROM comments JOIN users ON comments.user_id = users.user_id WHERE comments.product_id = :product_id AND comments.product_table = :product_table ORDER BY comments.comment_id DESC");
     $commentStmt->execute(['product_id' => $id, 'product_table' => $table]);
     $comments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
@@ -61,7 +89,9 @@ if ($table && $id) {
         .additional-details p { margin-bottom: 5px; }
         .additional-details ul { padding-left: 20px; }
         .additional-details li { list-style-type: disc; }
-        .ratings .fa-star, .ratings .fa-star-o { font-size: 1.5rem; color: #ffcc00; }
+        .ratings .fa-star { font-size: 1.5rem; color: #ccc; }
+        .ratings .star.fas.fa-star, .ratings .star.hover { color: #ffcc00; }
+        .ratings .star { cursor: pointer; }
     </style>
 </head>
 <body style="transition: 0.5s;">
@@ -75,13 +105,9 @@ if ($table && $id) {
             <div class="col">
                 <div class="card p-3 bg-white text-dark">
                     <h2><?= htmlspecialchars($item['name']) ?></h2>
-                    <div class="ratings mb-2">
-                        <?php 
-                            $rating = isset($item['rating']) ? (int) $item['rating'] : 0; 
-                            for ($i = 0; $i < 5; $i++): 
-                                $starClass = $i < $rating ? 'fa fa-star' : 'fa fa-star-o'; 
-                        ?>
-                            <span class="<?= $starClass ?>"></span>
+                    <div class="ratings mb-2" id="rating-stars">
+                        <?php for ($i = 0; $i < 5; $i++): ?>
+                            <span class="star <?= $i < (int)($item['rating'] ?? 0) ? 'fas fa-star' : 'far fa-star' ?>" data-index="<?= $i ?>"></span>
                         <?php endfor; ?>
                     </div>
                     <p class="card-text"><?= number_format($item['price'], 0, ',', '.') . '₫' ?></p>
@@ -126,7 +152,7 @@ if ($table && $id) {
                             <img src="<?= htmlspecialchars($comment['profile_image']) ?>" alt="<?= htmlspecialchars($comment['name']) ?>" class="mr-3 rounded-circle" style="width: 50px; height: 50px;">
                             <div class="media-body">
                                 <h5 class="mt-0 mb-1" style="color: var(--text-primary);"><?= htmlspecialchars($comment['name']) ?> <small style="color: var(--text-secondary);"><?= date("F j, Y, g:i a", strtotime($comment['time'])) ?></small></h5>
-                                <p style="color: var(--text-primary);"><?= $comment['content'] ?></p>
+                                <p style="color: var(--text-primary);"><?= htmlspecialchars($comment['content']) ?></p>
                             </div>
                         </li>
                     <?php endforeach; ?>
@@ -142,5 +168,39 @@ if ($table && $id) {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="darkmode.js"></script>
     <script src="scrolledPosition.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingStars = document.getElementById('rating-stars');
+            const stars = ratingStars.querySelectorAll('.star');
+            const ratingForm = document.createElement('form');
+            const ratingInput = document.createElement('input');
+            
+            ratingInput.type = 'hidden';
+            ratingInput.name = 'rating';
+            ratingForm.method = 'POST';
+            ratingForm.appendChild(ratingInput);
+            document.body.appendChild(ratingForm);
+
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    stars.forEach(s => s.classList.remove('hover'));
+                    for (let i = 0; i <= index; i++) {
+                        stars[i].classList.add('hover');
+                    }
+                });
+
+                ratingStars.addEventListener('mouseleave', function() {
+                    stars.forEach(s => s.classList.remove('hover'));
+                });
+
+                star.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index')) + 1;
+                    ratingInput.value = index;
+                    ratingForm.submit();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
