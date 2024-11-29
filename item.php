@@ -24,7 +24,7 @@ if ($table && $id) {
                 'product_table' => $table,
                 'content' => trim($_POST['comment'])
             ]);
-            header("Location: " . $_SERVER['PHP_SELF'] . "?table=$table&id=$id");
+            header("Location: {$_SERVER['PHP_SELF']}?table=$table&id=$id");
             exit;
         }
 
@@ -189,37 +189,46 @@ if ($table && $id) {
     <script src="darkmode.js"></script>
     <script src="scrolledPosition.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const ratingStars = document.getElementById('rating-stars');
             const stars = ratingStars.querySelectorAll('.star');
             const ratingForm = document.createElement('form');
             const ratingInput = document.createElement('input');
             
+            const initialRating = [...stars].filter(star => star.classList.contains('fas')).length;
+
             ratingInput.type = 'hidden';
             ratingInput.name = 'rating';
             ratingForm.method = 'POST';
             ratingForm.appendChild(ratingInput);
             document.body.appendChild(ratingForm);
 
+            const updateStars = (upTo, isHover = false) => {
+                stars.forEach((star, index) => {
+                    star.classList.toggle('fas', index <= upTo);
+                    star.classList.toggle('fa', index > upTo);
+                    if (isHover) star.classList.toggle('hover', index <= upTo);
+                });
+            };
+
+            const resetToInitialRating = () => updateStars(initialRating - 1);
+
             stars.forEach(star => {
-                star.addEventListener('mouseenter', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    stars.forEach(s => s.classList.remove('hover'));
-                    for (let i = 0; i <= index; i++) {
-                        stars[i].classList.add('hover');
-                    }
+                star.addEventListener('mouseenter', () => {
+                    const index = parseInt(star.getAttribute('data-index'));
+                    updateStars(index, true);
                 });
 
-                ratingStars.addEventListener('mouseleave', function() {
-                    stars.forEach(s => s.classList.remove('hover'));
-                });
+                ratingStars.addEventListener('mouseleave', resetToInitialRating);
 
-                star.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index')) + 1;
+                star.addEventListener('click', () => {
+                    const index = parseInt(star.getAttribute('data-index')) + 1;
                     ratingInput.value = index;
                     ratingForm.submit();
                 });
             });
+
+            resetToInitialRating();
         });
     </script>
 </body>
