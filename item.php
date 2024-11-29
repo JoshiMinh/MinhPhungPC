@@ -16,26 +16,21 @@ if ($table && $id) {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (!empty($_POST['comment'])) {
-            $userId = $_SESSION['user_id'] ?? '';
-            $content = trim($_POST['comment']);
-            if ($userId && $content) {
-                $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, product_table, content, time) VALUES (:user_id, :product_id, :product_table, :content, NOW())");
-                $insertStmt->execute([
-                    'user_id' => $userId,
-                    'product_id' => $id,
-                    'product_table' => $table,
-                    'content' => $content
-                ]);
-                header("Location: " . $_SERVER['PHP_SELF'] . "?table=$table&id=$id");
-                exit;
-            }
+        if (!empty($_POST['comment']) && isset($_SESSION['user_id'])) {
+            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, product_table, content, time) VALUES (:user_id, :product_id, :product_table, :content, NOW())");
+            $insertStmt->execute([
+                'user_id' => $_SESSION['user_id'],
+                'product_id' => $id,
+                'product_table' => $table,
+                'content' => trim($_POST['comment'])
+            ]);
+            header("Location: " . $_SERVER['PHP_SELF'] . "?table=$table&id=$id");
+            exit;
         }
 
-        if (isset($_POST['rating'])) {
+        if (isset($_POST['rating']) && is_numeric($_POST['rating'])) {
             $rating = (int)$_POST['rating'];
-            $userId = $_SESSION['user_id'] ?? '';
-            if ($rating >= 1 && $rating <= 5 && $userId) {
+            if ($rating >= 1 && $rating <= 5 && isset($_SESSION['user_id'])) {
                 $stmt = $pdo->prepare("SELECT ratings FROM $table WHERE id = :id");
                 $stmt->execute(['id' => $id]);
                 $product = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,24 +38,23 @@ if ($table && $id) {
                 if ($product) {
                     $ratings = explode(' ', $product['ratings']);
                     $userRated = false;
+
                     foreach ($ratings as &$ratingItem) {
                         $ratingParts = explode('-', $ratingItem);
-                        if (count($ratingParts) == 2) {
-                            list($existingUserId, $existingRating) = $ratingParts;
-                            if ($existingUserId == $userId) {
-                                $ratingItem = "$userId-$rating";
-                                $userRated = true;
-                                break;
-                            }
+                        if ($ratingParts[0] == $_SESSION['user_id']) {
+                            $ratingItem = "{$_SESSION['user_id']}-$rating";
+                            $userRated = true;
+                            break;
                         }
                     }
 
                     if (!$userRated) {
-                        $ratings[] = "$userId-$rating";
+                        $ratings[] = "{$_SESSION['user_id']}-$rating";
                     }
 
                     $updateStmt = $pdo->prepare("UPDATE $table SET ratings = :ratings WHERE id = :id");
                     $updateStmt->execute(['ratings' => implode(' ', $ratings), 'id' => $id]);
+                    echo "<script>window.location.href = window.location.href;</script>";
                 }
             }
         }
@@ -94,7 +88,7 @@ if ($table && $id) {
         .ratings .star { cursor: pointer; }
     </style>
 </head>
-<body style="transition: 0.5s;">
+<body>
     <?php include 'web_sections/navbar.php'; ?>
     <main class="container my-4">
         <?php include 'scripts/add_to_cart.php'; ?>
@@ -105,24 +99,50 @@ if ($table && $id) {
             <div class="col">
                 <div class="card p-3 bg-white text-dark">
                     <h2><?= htmlspecialchars($item['name']) ?></h2>
+                    <?php
+                    $ratings = $item['ratings'] ?? '';
+                    $ratingArray = explode(' ', $ratings);
+                    $totalRating = 0;
+                    $userCount = 0;
+                    $userRating = null;
+
+                    foreach ($ratingArray as $rating) {
+                        $ratingParts = explode('-', $rating);
+                        if (count($ratingParts) === 2) {
+                            $userId = $ratingParts[0];
+                            $ratingValue = (int)$ratingParts[1];
+                            
+                            if ($userId == $_SESSION['user_id']) {
+                                $userRating = $ratingValue;
+                            }
+                    
+                            $totalRating += $ratingValue;
+                            $userCount++;
+                        }
+                    }
+
+                    $averageRating = $userCount ? $totalRating / $userCount : 0;
+                    ?>
+
                     <div class="ratings mb-2" id="rating-stars">
                         <?php for ($i = 0; $i < 5; $i++): ?>
-                            <span class="star <?= $i < (int)($item['rating'] ?? 0) ? 'fas fa-star' : 'far fa-star' ?>" data-index="<?= $i ?>"></span>
+                            <span class="star <?= ($userRating !== null && $i < $userRating) || ($userRating === null && $i < floor($averageRating)) ? 'fas fa-star' : 'fa fa-star' ?>" data-index="<?= $i ?>"></span>
                         <?php endfor; ?>
                     </div>
+
                     <p class="card-text"><?= number_format($item['price'], 0, ',', '.') . '₫' ?></p>
                     <p class="card-text"><strong>Brand:</strong> <?= htmlspecialchars($item['brand']) ?></p>
                     <form method="post">
                         <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
                         <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
-                        <button type="submit" class="btn btn-primary w-100 h-100 border-0">Add to Cart</button>
+                        <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
                     </form>
                 </div>
                 <div class="additional-details mt-3 p-3 card bg-white text-dark">
                     <h4>Description</h4>
                     <ul>
                         <?php foreach ($item as $key => $value): ?>
-                            <?php if (!in_array($key, ['id', 'name', 'price', 'image', 'brand', 'rating'])): ?>
+                            <?php if (!in_array($key, ['id', 'name', 'price', 'image', 'brand', 'ratings'])): ?>
                                 <li><strong><?= htmlspecialchars(ucwords(str_replace('_', ' ', $key))) ?>:</strong> <?= htmlspecialchars($value) ?></li>
                             <?php endif; ?>
                         <?php endforeach; ?>
