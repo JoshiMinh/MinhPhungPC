@@ -49,10 +49,9 @@
     background-color: var(--primary-color);
     border: 1px solid var(--primary-color);
     border-radius: 0 4px 4px 0;
-    padding: 8px 12px;
+    padding: 0px 12px;
     cursor: pointer;
     color: white;
-    transition: background-color 0.3s;
 }
 
 .search-button:hover {
@@ -64,6 +63,30 @@
     overflow-y: auto;
     position: absolute;
     z-index: 1000;
+}
+
+#searchDropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#searchDropdown .dropdown-item {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+#searchDropdown .dropdown-item:hover {
+    opacity: 0.6;
 }
 
 .navbar-toggler {
@@ -116,10 +139,6 @@
     transform: translateY(0);
 }
 
-.navbar-mobile {
-    transition: margin-top 0.3s ease-in-out;
-}
-
 .navbar-mobile.open {
     margin-top: 60px;
 }
@@ -155,7 +174,7 @@
                 <button class="search-button" id="searchBtn" onclick="performSearch()">
                     <i class="fas fa-search"></i>
                 </button>
-                <div id="searchDropdown" class="dropdown-menu w-100 bg-dark text-light p-0"></div>
+                <div id="searchDropdown" class="dropdown-menu w-100 p-0"></div>
             </div>
         </div>
         <div class="d-flex align-items-center ml-auto">
@@ -201,86 +220,73 @@
             </ul>
         </div>
     </div>
+</nav>
 
+<nav class="navbar-mobile-secondary">
     <div class="d-lg-none">
-        <div class="d-flex align-items-center p-2">
-            <a href="index.php" class="navbar-brand" style="width: 30%;" title="Home">
+        <div class="d-flex align-items-center p-2 justify-content-between">
+            <a href="index.php" class="navbar-brand" style="width: 40%;" title="Home">
                 <img src="logo_light.png" alt="MinhPhungPC Logo" style="width: 100%;">
             </a>
-
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <div class="mx-2">
-                    <a href="account.php">
-                        <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" class="rounded-circle" style="width: 35px; height: 35px;" title="Profile">
+            <div class="d-flex align-items-center">
+                <button id="switchBtn" class="btn btn-link p-0" aria-label="Toggle dark mode">
+                    <i class="bi bi-moon icon"></i>
+                </button>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div class="mx-2">
+                        <a href="account.php">
+                            <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" class="rounded-circle" style="width: 35px; height: 35px;" title="Profile">
+                        </a>
+                    </div>
+                    <a href="cart.php" class="btn btn-secondary" title="View Cart">
+                        <i class="fas fa-shopping-cart"></i> <?= $cart_amount; ?>
                     </a>
-                </div>
-            <?php else: ?>
-                <div class="mx-2">
-                    <a href="account.php" class="btn btn-primary" title="Sign In">
-                        <i class="fas fa-user"></i>
+                <?php else: ?>
+                    <div class="mx-2">
+                        <a href="account.php" class="btn btn-primary" title="Sign In">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </div>
+                    <a href="account.php" class="btn btn-secondary" title="View Cart">
+                        <i class="fas fa-shopping-cart"></i>
                     </a>
-                </div>
-            <?php endif; ?>
-
-            <button class="btn btn-link ml-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavbar" aria-controls="mobileNavbar">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-
-        <!-- Offcanvas -->
-        <div class="offcanvas offcanvas-top" tabindex="-1" id="mobileNavbar" aria-labelledby="offcanvasLabel">
-            <div class="offcanvas-body">
-                <div class="search-input-container p-2">
-                    <input type="text" class="search-input" id="mobileSearchQuery" placeholder="Find component" onkeypress="checkEnter(event)" onkeyup="debouncedSearchComponents()">
-                    <button class="search-button" onclick="performSearch()">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                <div class="navbar-mobile-secondary">
-                    <?php foreach ($categoryMap as $category => $tableName): ?>
-                        <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link" title="Explore <?= htmlspecialchars($category); ?>"><?= htmlspecialchars($category); ?></a>
-                    <?php endforeach; ?>
-                </div>
+                <?php endif; ?>
             </div>
+        </div>
+        <div class="search-input-container p-2 mb-3">
+            <input 
+                type="text" 
+                class="form-control search-input" 
+                id="mobileSearchQuery" 
+                placeholder="Find component" 
+                onkeypress="checkEnter(event)" 
+                onkeyup="debouncedSearchComponents()"
+            >
+            <button class="search-button" id="searchBtn" onclick="performSearch()">
+                <i class="fas fa-search"></i>
+            </button>
+            <div id="searchDropdown" class="dropdown-menu w-100 p-0"></div>
         </div>
     </div>
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const offcanvas = document.getElementById('mobileNavbar');
-        const toggleButton = document.querySelector('[data-bs-toggle="offcanvas"]');
-        const body = document.body;
-
-        toggleButton.addEventListener('click', () => {
-            offcanvas.classList.toggle('show');
-            body.classList.toggle('no-scroll');
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!offcanvas.contains(event.target) && !toggleButton.contains(event.target)) {
-                offcanvas.classList.remove('show');
-                body.classList.remove('no-scroll');
-            }
-        });
-    });
-
     const performSearch = () => {
-        const query = document.getElementById('searchQuery').value;
+        const query = document.getElementById('mobileSearchQuery').value;
         if (query) window.location.href = `search_result.php?query=${encodeURIComponent(query)}`;
     };
 
     const checkEnter = (event) => event.key === 'Enter' && performSearch();
 
     let debounceTimer;
-    function debouncedSearchComponents() {
+    const debouncedSearchComponents = () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(searchComponents, 100);
-    }
+    };
 
-    function searchComponents() {
-        const searchQuery = document.getElementById("searchQuery").value;
+    const searchComponents = () => {
+        const searchQuery = document.getElementById("mobileSearchQuery").value;
         const searchDropdown = document.getElementById("searchDropdown");
 
         if (searchQuery.length > 0) {
@@ -288,25 +294,19 @@
             const xhr = new XMLHttpRequest();
             xhr.open("GET", `_search.php?search=${encodeURIComponent(searchQuery)}`, true);
 
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    const components = JSON.parse(xhr.responseText);
-                    let output = components.length
-                        ? components.map(component => `
-                            <div class="dropdown-item" onclick="window.location.href='item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.id)}'" style="display: flex; align-items: center;">
-                                <img src="${component.image}" alt="${component.name}" style="width: 60px; height: 60px; margin-right: 10px;">
-                                <div style="display: flex; flex-direction: column;">
-                                    <strong>${component.name}</strong>
-                                    <span>${new Intl.NumberFormat('vi-VN').format(component.price)}₫</span>
-                                    <span>${component.brand}</span>
-                                </div>
-                            </div>`).join('')
-                        : "<button class='dropdown-item' disabled>No results found</button>";
-
-                    searchDropdown.innerHTML = output;
-                } else {
-                    searchDropdown.innerHTML = "<button class='dropdown-item' disabled>Error loading results</button>";
-                }
+            xhr.onload = () => {
+                const components = JSON.parse(xhr.responseText);
+                searchDropdown.innerHTML = components.length
+                    ? components.map(component => `
+                        <div class="dropdown-item" onclick="window.location.href='item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.id)}'" style="display: flex; align-items: center;">
+                            <img src="${component.image}" alt="${component.name}" style="width: 60px; height: 60px; margin-right: 10px; background-color: white;">
+                            <div style="display: flex; flex-direction: column;">
+                                <strong>${component.name}</strong>
+                                <span>${new Intl.NumberFormat('vi-VN').format(component.price)}₫</span>
+                                <span>${component.brand}</span>
+                            </div>
+                        </div>`).join('')
+                    : "<button class='dropdown-item' disabled>No results found</button>";
             };
 
             xhr.onerror = () => searchDropdown.innerHTML = "<button class='dropdown-item' disabled>Error loading results</button>";
@@ -314,10 +314,10 @@
         } else {
             searchDropdown.style.display = 'none';
         }
-    }
+    };
 
     document.addEventListener('click', (event) => {
-        const searchQuery = document.getElementById('searchQuery');
+        const searchQuery = document.getElementById('mobileSearchQuery');
         const searchDropdown = document.getElementById('searchDropdown');
         if (!searchQuery.contains(event.target) && !searchDropdown.contains(event.target)) {
             searchDropdown.style.display = 'none';

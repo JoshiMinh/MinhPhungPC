@@ -14,7 +14,7 @@
 
 .dark-theme {
     --bg-primary: #1c1c1c;
-    --bg-secondary: #1e1e1e;
+    --bg-secondary: #3b3b3b;
     --bg-elevated: #2d2d2d;
     --text-primary: #e0e0e0;
     --text-secondary: #a0a0a0;
@@ -51,8 +51,13 @@ a:hover {
     text-decoration: none;
 }
 
-form .form-control{
+.form-control {
     border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.form-control:focus {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
 }
@@ -129,39 +134,7 @@ form .form-control{
     color: white;
 }
 
-#searchDropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    max-height: 300px;
-    overflow-y: auto;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    transition: background-color 0.3s, color 0.3s;
-}
-
-#searchDropdown .dropdown-item {
-    color: var(--text-primary);
-    cursor: pointer;
-}
-
-#searchDropdown .dropdown-item:hover {
-    opacity: 0.7;
-}
-
-.dark-mode #searchDropdown {
-    background-color: var(--bg-secondary);
-    border-color: var(--border-color);
-}
-
-.dark-mode #searchDropdown .dropdown-item {
-    color: var(--text-primary);
-}
-
-.modal-content{
+.modal-content {
     background-color: var(--bg-elevated);
     color: var(--text-primary);
 }

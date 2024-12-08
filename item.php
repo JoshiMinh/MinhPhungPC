@@ -214,18 +214,18 @@ if ($table && $id) {
             const resetToInitialRating = () => updateStars(initialRating - 1);
 
             stars.forEach(star => {
-                star.addEventListener('mouseenter', () => {
-                    const index = parseInt(star.getAttribute('data-index'));
-                    updateStars(index, true);
-                });
+                const index = parseInt(star.getAttribute('data-index'));
 
-                ratingStars.addEventListener('mouseleave', resetToInitialRating);
-
+                star.addEventListener('mouseenter', () => updateStars(index, true));
                 star.addEventListener('click', () => {
-                    const index = parseInt(star.getAttribute('data-index')) + 1;
-                    ratingInput.value = index;
+                    ratingInput.value = index + 1;
                     ratingForm.submit();
                 });
+            });
+
+            ratingStars.addEventListener('mouseleave', () => {
+                resetToInitialRating();
+                stars.forEach(star => star.classList.remove('hover'));
             });
 
             resetToInitialRating();

@@ -59,7 +59,7 @@ if ($tableName !== 'Unknown Category') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
     <style>
-        .sidebar-container { position: sticky; top: 0; height: 100%; background-color: #343a40; padding: 1rem; overflow-y: auto; }
+        .sidebar-container { position: sticky; height: 100%; background-color: var(--bg-elevated); padding: 1.75rem; }
         .content-container { padding: 1rem; }
         .card { min-width: 200px; }
         .card img { height: auto; max-width: 100%; object-fit: contain; }
@@ -76,19 +76,19 @@ if ($tableName !== 'Unknown Category') {
             <div class="row">
                 <?php if ($brands || $minPrice || $maxPrice): ?>
                     <div class="col-12 col-md-3 sidebar-container">
-                        <h5>Filter by Price (VND)</h5>
+                        <h5>Filter by Price (₫)</h5>
                         <form method="get">
                             <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
                             <div class="form-inline mb-3">
                                 <div class="form-group mr-3">
                                     <label for="minPrice" class="mr-2">Min Price: </label>
-                                    <input type="text" class="form-control" id="minPrice" name="min_price"
+                                    <input type="text" class="form-control w-100" id="minPrice" name="min_price"
                                         value="<?= $formattedMinPrice ?>" data-price="<?= $minPriceNumeric ?>"
                                         oninput="formatPriceInput(this)">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mt-2">
                                     <label for="maxPrice" class="mr-2">Max Price:</label>
-                                    <input type="text" class="form-control" id="maxPrice" name="max_price"
+                                    <input type="text" class="form-control w-100" id="maxPrice" name="max_price"
                                         value="<?= $formattedMaxPrice ?>" data-price="<?= $maxPriceNumeric ?>"
                                         oninput="formatPriceInput(this)">
                                 </div>
