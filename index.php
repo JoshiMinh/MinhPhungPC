@@ -1,5 +1,3 @@
-<!--responsive problem-->
-
 <?php
 include 'db.php';
 
@@ -13,11 +11,7 @@ if (isset($_SESSION['user_id'])) {
     $stmt->execute([$userId]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($result && !empty($result['buildset'])) {
-        $buildset = $result['buildset'];
-    } else {
-        $buildset = null;
-    }
+    $buildset = $result && !empty($result['buildset']) ? $result['buildset'] : null;
 
     if (isset($_COOKIE['buildset']) && $_COOKIE['buildset'] !== '') {
         echo '<script type="text/javascript">
@@ -33,12 +27,10 @@ if (isset($_SESSION['user_id'])) {
         if ($_GET['action'] === 'replaceBuildSet') {
             $stmt = $pdo->prepare("UPDATE users SET buildset = ? WHERE user_id = ?");
             $stmt->execute([$_COOKIE['buildset'], $userId]);
-
             setcookie('buildset', '', time() - 3600, '/');
         } elseif ($_GET['action'] === 'discardBuildSet') {
             setcookie('buildset', '', time() - 3600, '/');
         }
-
         header('Location: index.php');
         exit;
     }
@@ -144,12 +136,13 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
                     }
                     ?>
                     
-                    <div class="component-card my-4 shadow-sm bg-white text-dark rounded" id="<?= htmlspecialchars($tableName); ?>">
+                    <div class="component-card my-4 shadow-sm bg-white text-dark rounded" id="<?= htmlspecialchars($tableName); ?>"> 
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            <span class="text-center" style="flex-shrink: 0; width: 120px;">
+                                <?= htmlspecialchars($componentName); ?>
+                            </span>
+
                             <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
-                                <span class="text-center" style="flex-shrink: 0; width: 120px;">
-                                    <?= htmlspecialchars($componentName); ?>
-                                </span>
                                 <div class="p-2">
                                     <img src="<?= $selectedComponent ? htmlspecialchars($selectedComponent['image']) : 'component_icons/' . htmlspecialchars($tableName . '.png'); ?>"
                                         alt="<?= htmlspecialchars($componentName); ?>"
@@ -157,30 +150,26 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
                                         class="component-image"
                                         style="background-color: #ffffff; opacity: 0.7; transition: opacity 0.3s ease; width: 50px; height: 50px; padding: 10px; border-radius: 5px;">
                                 </div>
-                                <span class="text-muted d-none d-md-inline">
-                                    <?= $selectedComponent 
-                                        ? "<span class='text-dark'>" . htmlspecialchars($selectedComponent['name']) . "</span><br> - <span class='text-success'>" . number_format($selectedComponent['price']) . "₫</span>" 
-                                        : "Please select a component"; ?>
+                                <span class="text-muted d-md-inline">
+                                    <?= $selectedComponent ? "<span class='text-dark'>" . htmlspecialchars($selectedComponent['name']) . "</span><br> - <span class='text-success'>" . number_format($selectedComponent['price']) . "₫</span>" : "Please select a component"; ?>
                                 </span>
                             </div>
 
                             <div class="d-flex flex-column flex-md-row align-items-center mt-2 mt-md-0">
                                 <?php if ($selectedComponent): ?>
-                                    <form method="post" action="_remove_component.php" class="mb-2 mb-md-0">
-                                        <input type="hidden" name="table" value="<?= htmlspecialchars($tableName); ?>">
-                                        <button type="submit" class="btn btn-danger px-2 mx-1">Remove</button>
-                                    </form>
-                                    <button class="btn btn-primary px-3 select-btn mx-1"
+                                    <div class="d-flex gap-2">
+                                        <form method="post" action="_remove_component.php" style="display: inline;">
+                                            <input type="hidden" name="table" value="<?= htmlspecialchars($tableName); ?>">
+                                            <button type="submit" class="btn btn-danger px-2 mt-2 mt-md-0 mx-1">Remove</button>
+                                        </form>
+                                        <button class="btn btn-primary px-3 select-btn mt-2 mt-md-0 mx-1"
                                             onclick="modalFetchItems('<?= htmlspecialchars($componentName); ?>', '<?= htmlspecialchars($tableName); ?>')"
-                                            data-toggle="modal"
-                                            data-target="#componentModal">Change
-                                    </button>
+                                            data-toggle="modal" data-target="#componentModal">Change</button>
+                                    </div>
                                 <?php else: ?>
                                     <button class="btn btn-primary px-4 select-btn mx-1"
-                                            onclick="modalFetchItems('<?= htmlspecialchars($componentName); ?>', '<?= htmlspecialchars($tableName); ?>')"
-                                            data-toggle="modal"
-                                            data-target="#componentModal">Select
-                                    </button>
+                                        onclick="modalFetchItems('<?= htmlspecialchars($componentName); ?>', '<?= htmlspecialchars($tableName); ?>')"
+                                        data-toggle="modal" data-target="#componentModal">Select</button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -192,7 +181,7 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
                         document.querySelectorAll('.component-card img').forEach(image => {
                             if (image.src.includes('component_icons/')) return;
 
-                        image.style.cssText = 'padding: 5px; object-fit: cover; opacity: 0.9; border-radius: 10px; width: 60px; height: 60px;';
+                            image.style.cssText = 'padding: 5px; object-fit: cover; opacity: 0.9; border-radius: 10px; width: 60px; height: 60px;';
                             image.classList.add('updated-image');
 
                             image.addEventListener('click', () => {
@@ -206,21 +195,22 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
 
                     document.addEventListener("DOMContentLoaded", applyImageStyles);
                 </script>
-            </div>
 
-            <div class="container my-4">
-                <div class="d-flex justify-content-between align-items-center my-4 px-2">
-                    <div class="d-flex align-items-center">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center my-4 px-2">
+                    <div class="d-flex align-items-center mb-3 mb-md-0">
                         <h5>Total: <span id="totalAmount" class="text-success"><?= htmlspecialchars($totalAmountFormatted); ?></span></h5>
                     </div>
-                    <div>
-                        <form action="index.php" method="post" style="display: inline;">
-                            <input type="hidden" name="action" value="clearBuildSet">
-                            <button type="submit" class="btn btn-danger mr-1">Clear</button>
-                        </form>
-                        <button id="addToCartButton" class="btn btn-success">Add to Cart</button>
+                    <div class="d-flex flex-column flex-md-row align-items-center">
+                        <div class="d-flex mb-2 mb-md-0">
+                            <form action="index.php" method="post" style="display: inline;">
+                                <input type="hidden" name="action" value="clearBuildSet">
+                                <button type="submit" class="btn btn-danger mr-2 mb-2 mb-md-0">Clear</button>
+                            </form>
+                            <button id="addToCartButton" class="btn btn-success mb-2 mb-md-0">Add to Cart</button>
+                        </div>
                     </div>
                 </div>
+                
             </div>
 
             <script>
@@ -287,14 +277,11 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
 let selectedComponent = {};
 
 function modalFetchItems(componentName, tableName) {
-	$('#componentModalLabel').text("Select " + componentName);
+	$('#componentModalLabel').text(`Select ${componentName}`);
 	$('#modalItemContainer').empty();
 
 	const modalFooter = $('.modal-footer');
-	const updatedMessage = modalFooter.find('.updated-message');
-	if (updatedMessage.length > 0) {
-		updatedMessage.remove();
-	}
+	modalFooter.find('.updated-message').remove();
 
 	fetch(`_fetch_items.php?table=${tableName}`)
 		.then(response => {
@@ -303,7 +290,7 @@ function modalFetchItems(componentName, tableName) {
 		})
 		.then(data => {
 			const count = data.count || 0;
-			$('#componentModalLabel').text("Select " + componentName + " - " + count + " Available");
+			$('#componentModalLabel').text(`Select ${componentName} - ${count} Available`);
 
 			if (count > 0) {
 				data.items.forEach(component => {
@@ -354,12 +341,22 @@ function confirmSelection() {
         const componentCard = document.getElementById(selectedComponent.tableName);
 
         if (componentCard) {
-            componentCard.querySelector('.text-muted').innerHTML = `<span class='text-dark'>${selectedComponent.name}</span> <br> - <span class='text-success'>${parseInt(selectedComponent.price).toLocaleString('vi-VN')}₫</span>`;
+            componentCard.querySelector('.text-muted').innerHTML = `
+                <span class='text-dark'>${selectedComponent.name}</span><br> 
+                - <span class='text-success'>${parseInt(selectedComponent.price).toLocaleString('vi-VN')}₫</span>
+            `;
             
             const componentImage = componentCard.querySelector('img');
             componentImage.src = selectedComponent.image;
             componentImage.style.cssText = "padding: 5px; object-fit: cover; border-radius: 10px; width: 60px; height: 60px; opacity: 0.9;";
             componentImage.classList.add('updated-image');
+
+            componentImage.addEventListener('click', () => {
+                const modalImage = document.getElementById('modalImage');
+                modalImage.src = componentImage.src;
+                modalImage.style.backgroundColor = 'white';
+                $('#imageModal').modal('show');
+            });
 
             const existingRemoveButton = componentCard.querySelector('.btn-danger');
             if (existingRemoveButton) {
@@ -387,10 +384,7 @@ function confirmSelection() {
 
         const confirmationText = `<span style="color: green;">Updated</span>`;
         const modalFooter = document.querySelector('.modal-footer');
-        const existingMessage = modalFooter.querySelector('.updated-message');
-        if (existingMessage) {
-            existingMessage.remove();
-        }
+        modalFooter.querySelector('.updated-message')?.remove();
 
         const updatedMessage = document.createElement('div');
         updatedMessage.innerHTML = confirmationText;

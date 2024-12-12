@@ -1,5 +1,5 @@
 :root {
-    --bg-primary: #ffffff;
+    --bg-primary: #fff;
     --bg-secondary: #f8f9fa;
     --bg-elevated: #e7e7e7;
     --text-primary: #212529;
@@ -27,14 +27,16 @@
 }
 
 body {
-    background-color: var(--bg-primary);
+    background: var(--bg-primary);
     color: var(--text-primary);
-    transition: background-color 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s;
+    margin: 0;
+    height: 100%;
 }
 
 html, body {
-    height: 100%;
     margin: 0;
+    height: 100%;
 }
 
 .wrapper {
@@ -53,25 +55,25 @@ a:hover {
 
 .form-control {
     border: 1px solid var(--border-color);
-    background-color: var(--bg-secondary);
+    background: var(--bg-secondary);
     color: var(--text-primary);
 }
 
 .form-control:focus {
-    background-color: var(--bg-secondary);
+    background: var(--bg-secondary);
     color: var(--text-primary);
 }
 
 .component-card,
 .card {
-    background-color: var(--bg-elevated);
+    background: var(--bg-elevated);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     box-shadow: var(--card-shadow);
     padding: 1.5rem;
     margin-bottom: 1rem;
     border-radius: 0.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
 }
 
 .component-card:hover,
@@ -82,29 +84,25 @@ a:hover {
 .dark-mode .component-card,
 .dark-mode .card,
 .dark-mode .bg-white {
-    background-color: var(--bg-elevated) !important;
+    background: var(--bg-elevated) !important;
     color: var(--text-primary) !important;
 }
 
-.dark-mode .text-dark,
-.dark-mode .component-card .text-dark,
-.dark-mode .card .text-dark {
+.dark-mode .text-dark {
     color: var(--text-primary) !important;
 }
 
-.dark-mode .text-muted,
-.dark-mode .component-card .text-muted,
-.dark-mode .card .text-muted {
+.dark-mode .text-muted {
     color: var(--text-secondary) !important;
 }
 
 .dark-mode .btn-primary {
-    background-color: var(--primary-color);
+    background: var(--primary-color);
     border-color: var(--primary-color);
 }
 
 .dark-mode .btn-primary:hover {
-    background-color: var(--primary-hover);
+    background: var(--primary-hover);
     border-color: var(--primary-hover);
 }
 
@@ -119,7 +117,7 @@ a:hover {
 }
 
 .footer-gradient a {
-    color: white;
+    color: #fff;
     text-decoration: none;
     transition: color 0.3s;
 }
@@ -131,10 +129,15 @@ a:hover {
 .footer-gradient h5 {
     font-size: 1.25rem;
     margin-bottom: 10px;
-    color: white;
+    color: #fff;
 }
 
 .modal-content {
-    background-color: var(--bg-elevated);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+input[readonly] {
+    background: var(--text-secondary);
     color: var(--text-primary);
 }

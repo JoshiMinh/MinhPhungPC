@@ -65,7 +65,7 @@
     z-index: 1000;
 }
 
-#searchDropdown {
+#desktopSearchDropdown, #mobileSearchDropdown {
     display: none;
     position: absolute;
     top: 100%;
@@ -78,14 +78,14 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
-#searchDropdown .dropdown-item {
+#desktopSearchDropdown .dropdown-item, #mobileSearchDropdown .dropdown-item {
     background-color: var(--bg-elevated);
     border-color: var(--border-color);
     color: var(--text-primary);
     cursor: pointer;
 }
 
-#searchDropdown .dropdown-item:hover {
+#desktopSearchDropdown .dropdown-item:hover, #mobileSearchDropdown .dropdown-item:hover {
     opacity: 0.6;
 }
 
@@ -122,33 +122,12 @@
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
 }
 
-.offcanvas-top {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    background-color: var(--bg-primary);
-    height: 100%;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease-in-out;
-    z-index: 1050;
-}
-
-.offcanvas.show {
-    transform: translateY(0);
-}
-
 .navbar-mobile.open {
     margin-top: 60px;
 }
 
 .navbar-mobile.closed {
     margin-top: 0;
-}
-
-.offcanvas-body {
-    padding: 20px;
 }
 
 .btn-close {
@@ -170,11 +149,11 @@
         </a>
         <div class="mx-auto" style="width: 50%;">
             <div class="search-input-container">
-                <input type="text" class="search-input" id="searchQuery" placeholder="Find component" onkeypress="checkEnter(event)" onkeyup="debouncedSearchComponents()">
-                <button class="search-button" id="searchBtn" onclick="performSearch()">
+                <input type="text" class="search-input" id="searchQuery" placeholder="Find component" onkeyup="debouncedSearchComponents('searchQuery')" onkeypress="checkEnter(event, 'searchQuery')">
+                <button class="search-button" id="searchBtn" onclick="performSearch('searchQuery')">
                     <i class="fas fa-search"></i>
                 </button>
-                <div id="searchDropdown" class="dropdown-menu w-100 p-0"></div>
+                <div id="desktopSearchDropdown" class="dropdown-menu w-100 p-0"></div>
             </div>
         </div>
         <div class="d-flex align-items-center ml-auto">
@@ -229,7 +208,7 @@
                 <img src="logo_light.png" alt="MinhPhungPC Logo" style="width: 100%;">
             </a>
             <div class="d-flex align-items-center">
-                <button id="switchBtn" class="btn btn-link p-0" aria-label="Toggle dark mode">
+                <button id="switchBtnMobile" class="btn btn-link p-0" aria-label="Toggle dark mode">
                     <i class="bi bi-moon icon"></i>
                 </button>
                 <?php if (isset($_SESSION['user_id'])): ?>
@@ -259,35 +238,38 @@
                 class="form-control search-input" 
                 id="mobileSearchQuery" 
                 placeholder="Find component" 
-                onkeypress="checkEnter(event)" 
-                onkeyup="debouncedSearchComponents()"
+                onkeyup="debouncedSearchComponents('mobileSearchQuery')" 
+                onkeypress="checkEnter(event, 'mobileSearchQuery')"
             >
-            <button class="search-button" id="searchBtn" onclick="performSearch()">
+            <button class="search-button" id="searchBtnMobile" onclick="performSearch('mobileSearchQuery')">
                 <i class="fas fa-search"></i>
             </button>
-            <div id="searchDropdown" class="dropdown-menu w-100 p-0"></div>
+            <div id="mobileSearchDropdown" class="dropdown-menu w-100 p-0"></div>
         </div>
     </div>
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const performSearch = () => {
-        const query = document.getElementById('mobileSearchQuery').value;
+    const performSearch = (inputId) => {
+        const query = document.getElementById(inputId).value;
         if (query) window.location.href = `search_result.php?query=${encodeURIComponent(query)}`;
     };
 
-    const checkEnter = (event) => event.key === 'Enter' && performSearch();
-
-    let debounceTimer;
-    const debouncedSearchComponents = () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(searchComponents, 100);
+    const checkEnter = (event, inputId) => {
+        if (event.key === 'Enter') performSearch(inputId);
     };
 
-    const searchComponents = () => {
-        const searchQuery = document.getElementById("mobileSearchQuery").value;
-        const searchDropdown = document.getElementById("searchDropdown");
+    let debounceTimer;
+    const debouncedSearchComponents = (inputId) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => searchComponents(inputId), 300);
+    };
+
+    const searchComponents = (inputId) => {
+        const searchQuery = document.getElementById(inputId).value;
+        const dropdownId = inputId === 'searchQuery' ? 'desktopSearchDropdown' : 'mobileSearchDropdown';
+        const searchDropdown = document.getElementById(dropdownId);
 
         if (searchQuery.length > 0) {
             searchDropdown.style.display = 'block';
@@ -317,10 +299,17 @@
     };
 
     document.addEventListener('click', (event) => {
-        const searchQuery = document.getElementById('mobileSearchQuery');
-        const searchDropdown = document.getElementById('searchDropdown');
-        if (!searchQuery.contains(event.target) && !searchDropdown.contains(event.target)) {
-            searchDropdown.style.display = 'none';
+        const searchQueryDesktop = document.getElementById('searchQuery');
+        const searchDropdownDesktop = document.getElementById('desktopSearchDropdown');
+        const searchQueryMobile = document.getElementById('mobileSearchQuery');
+        const searchDropdownMobile = document.getElementById('mobileSearchDropdown');
+
+        if (!searchQueryDesktop.contains(event.target) && !searchDropdownDesktop.contains(event.target)) {
+            searchDropdownDesktop.style.display = 'none';
+        }
+
+        if (!searchQueryMobile.contains(event.target) && !searchDropdownMobile.contains(event.target)) {
+            searchDropdownMobile.style.display = 'none';
         }
     });
 </script>

@@ -149,6 +149,7 @@ if (isset($_SESSION['order_success'])) {
     <link rel="stylesheet" href="styles.css">
     <style>
         .cart-item { 
+            background-color: var(--bg-secondary);
             border-radius: 5px; 
             padding: 15px; 
             margin-bottom: 20px; 
@@ -241,6 +242,7 @@ if (isset($_SESSION['order_success'])) {
                     }
                 }
 
+                $cart_html = '';
                 foreach ($cart_items as $item) {
                     $stmt = $pdo->prepare("SELECT name, price, brand, image FROM {$item['table']} WHERE id = ?");
                     $stmt->execute([$item['id']]);
@@ -248,31 +250,45 @@ if (isset($_SESSION['order_success'])) {
 
                     if ($product) {
                         $totalAmount += $product['price'] * $item['amount'];
-                        echo '<div class="cart-item h-100 bg-white text-dark">';
-                        echo '<form method="post" style="position: absolute; top: -5px; right: 5px;">';
-                        echo '<input type="hidden" name="remove_item" value="' . htmlspecialchars($item['table']) . '-' . htmlspecialchars($item['id']) . '">';
-                        echo '<button class="remove-item-btn" type="submit">&times;</button>';
-                        echo '</form>';
-                        echo '<img src="' . htmlspecialchars($product['image']) . '" alt="' . htmlspecialchars($product['name']) . '">';
-                        echo '<div class="cart-item-details">';
-                        echo '<h5>' . htmlspecialchars($product['name']) . '</h5>';
-                        echo '<p class="price text-success">' . number_format($product['price'], 0, ',', '.') . '₫</p>';
-                        echo '<p class="brand">' . htmlspecialchars($product['brand']) . '</p>';
-                        echo '</div>';
-                        echo '<div class="quantity">';
-                        echo '<a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', -1, \'' . $item['table'] . '\')"><</a>';
-                        echo '<span>' . (int)$item['amount'] . '</span>';
-                        echo '<a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', 1, \'' . $item['table'] . '\')">></a>';
-                        echo '</div>';
-                        echo '</div>';
+                        $cart_html .= '
+                            <div class="cart-item h-100 bg-white text-dark shadow rounded">
+                                <form method="post" style="position: absolute; top: -5px; right: 5px;">
+                                    <input type="hidden" name="remove_item" value="' . htmlspecialchars($item['table']) . '-' . htmlspecialchars($item['id']) . '">
+                                    <button class="remove-item-btn" type="submit">&times;</button>
+                                </form>
+                                <a href="item.php?table=' . urlencode($item['table']) . '&id=' . urlencode($item['id']) . '">
+                                    <img src="' . htmlspecialchars($product['image']) . '" alt="' . htmlspecialchars($product['name']) . '">
+                                </a>
+                                <div class="cart-item-details">
+                                    <h5>' . htmlspecialchars($product['name']) . '</h5>
+                                    <p class="price text-success">' . number_format($product['price'], 0, ',', '.') . '₫</p>
+                                    <p class="brand">' . htmlspecialchars($product['brand']) . '</p>
+                                </div>
+                                <div class="quantity">
+                                    <a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', -1, \'' . $item['table'] . '\')"><</a>
+                                    <span>' . (int)$item['amount'] . '</span>
+                                    <a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', 1, \'' . $item['table'] . '\')">></a>
+                                </div>
+                            </div>';
                     }
                 }
 
-                echo '<div class="cart-actions">';
-                echo '<div class="totalAmount">Total: <span id="totalAmount" class="text-success">' . number_format($totalAmount, 0, ',', '.') . '₫</span></div>';
-                echo '<form method="post"><button type="submit" name="remove_all" class="btn btn-danger">Remove All</button></form>';
-                echo '<button class="btn btn-success" onclick="showOrderModal()"><b>Order</b></button>';
-                echo '</div>';
+                $cart_html .= '
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center my-4 px-2">
+                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                            <h5>Total: <span id="totalAmount" class="text-success">' . number_format($totalAmount, 0, ',', '.') . '₫</span></h5>
+                        </div>
+                        <div class="d-flex flex-column flex-md-row align-items-center">
+                            <div class="d-flex mb-2 mb-md-0">
+                                <form method="post" style="display: inline;">
+                                    <button type="submit" name="remove_all" class="btn btn-danger mr-2 mb-2 mb-md-0">Remove All</button>
+                                </form>
+                                <button class="btn btn-success mb-2 mb-md-0" onclick="showOrderModal()"><b>Order</b></button>
+                            </div>
+                        </div>
+                    </div>';
+
+                echo $cart_html;
             } else {
                 echo '<div class="alert alert-danger" style="margin: 6rem 0;">No items found in the cart.</div>';
             }
