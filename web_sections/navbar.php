@@ -232,19 +232,21 @@
                 <?php endif; ?>
             </div>
         </div>
-        <div class="search-input-container p-2 mb-3">
-            <input 
-                type="text" 
-                class="form-control search-input" 
-                id="mobileSearchQuery" 
-                placeholder="Find component" 
-                onkeyup="debouncedSearchComponents('mobileSearchQuery')" 
-                onkeypress="checkEnter(event, 'mobileSearchQuery')"
-            >
+        <div class="search-input-container p-2">
+            <input type="text" class="form-control search-input" id="mobileSearchQuery" placeholder="Find component" onkeyup="debouncedSearchComponents('mobileSearchQuery')" onkeypress="checkEnter(event, 'mobileSearchQuery')">
             <button class="search-button" id="searchBtnMobile" onclick="performSearch('mobileSearchQuery')">
                 <i class="fas fa-search"></i>
             </button>
             <div id="mobileSearchDropdown" class="dropdown-menu w-100 p-0"></div>
+        </div>
+        <div class="categories">
+            <ul class="navbar-nav flex-row" style="white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; color: grey;">
+                <?php foreach ($categoryMap as $category => $tableName): ?>
+                    <li class="px-1">
+                        <a href="categories.php?table=<?= urlencode($tableName); ?>"><?= htmlspecialchars($category); ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
         </div>
     </div>
 </nav>

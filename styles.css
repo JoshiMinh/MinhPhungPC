@@ -136,8 +136,3 @@ a:hover {
     background: var(--bg-elevated);
     color: var(--text-primary);
 }
-
-input[readonly] {
-    background: var(--text-secondary);
-    color: var(--text-primary);
-}

@@ -12,7 +12,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
     $stmt = $pdo->prepare("UPDATE orders SET status = 'cancelled' WHERE order_id = ?");
     $stmt->execute([$_POST['cancel_order_id']]);
-    echo "<script>window.location.reload();</script>";
+    echo "<script>window.location.href = window.location.href;</script>";
     exit();
 }
 ?>

@@ -71,6 +71,7 @@ if ($tableName !== 'Unknown Category') {
 <div class="wrapper">
     <div class="content">
         <?php include 'web_sections/navbar.php'; ?>
+        <?php include 'scripts/add_to_cart.php'; ?>
         <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
         <div class="container-fluid my-1 mx-1">
             <div class="row">
@@ -114,7 +115,40 @@ if ($tableName !== 'Unknown Category') {
 
                 <div class="col-12 col-md-9 content-container">
                     <?php if ($items): ?>
-                        <?php include 'web_sections/item_display.php'; ?>
+                        <div class="container">
+                            <div class="row">
+                                <?php foreach ($items as $index => $item): ?>
+                                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 slide-up" style="animation-delay: <?= $index * 0.1 ?>s;">
+                                        <div class="card h-100 text-dark p-0" style="border: none; border-radius: 10px; background-color: var(--bg-elevated);">
+                                            <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>" class="nav-link">
+                                                <img src="<?= htmlspecialchars($item['image']) ?>" 
+                                                     alt="<?= htmlspecialchars($item['name']) ?>" 
+                                                     class="card-img-top" 
+                                                     style="height: 200px; object-fit: cover; background-color: white;">
+                                            </a>
+                                            <div class="card-body">
+                                                <p class="card-text mb-2" style="font-family: 'Roboto', sans-serif; font-weight: 100; font-size: 1.1rem;">
+                                                    <strong><?= number_format($item['price'], 0, ',', '.') . '₫' ?></strong>
+                                                </p>
+                                                <h6 class="card-title h6 mb-0">
+                                                    <?= htmlspecialchars($item['name']) ?>
+                                                </h6>
+                                            </div>
+                                            <div class="card-footer d-flex" style="padding: 0; height: 50px; border: none;">
+                                                <form method="post" style="flex: 7; height: 100%; margin: 0;">
+                                                    <input type="hidden" name="table" value="<?= htmlspecialchars($item['item_table']) ?>">
+                                                    <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
+                                                    <button type="submit" class="btn btn-primary btn-sm w-100 h-100" style="border-radius: 0;">Add to Cart</button>
+                                                </form>
+                                                <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>">
+                                                    <button class="btn btn-secondary w-100 h-100" style="flex: 3; border-radius: 0;">View</button>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                     <?php else: ?>
                         <div class="alert alert-warning">No items found.</div>
                     <?php endif; ?>
