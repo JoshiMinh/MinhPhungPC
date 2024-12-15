@@ -9,32 +9,42 @@ $stmt = $pdo->prepare("SELECT * FROM orders WHERE customer_id = ? ORDER BY order
 $stmt->execute([$userId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
-    $stmt = $pdo->prepare("UPDATE orders SET status = 'cancelled' WHERE order_id = ?");
-    $stmt->execute([$_POST['cancel_order_id']]);
-    echo "<script>window.location.href = window.location.href;</script>";
-    exit();
+$items = [];
+foreach ($orders as $order) {
+    foreach (explode(' ', $order['items']) as $item) {
+        list($itemTable, $itemId) = explode('-', $item);
+        $items[$itemTable][] = $itemId;
+    }
+}
+
+$itemDetailsMap = [];
+foreach ($items as $table => $ids) {
+    $placeholders = rtrim(str_repeat('?,', count($ids)), ',');
+    $stmt = $pdo->prepare("SELECT id, name, price FROM $table WHERE id IN ($placeholders)");
+    $stmt->execute($ids);
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $itemDetailsMap[$table][$row['id']] = $row;
+    }
 }
 ?>
 
 <main class="container my-4">
     <?php if ($orders): ?>
         <?php foreach ($orders as $index => $order): ?>
-            <div class="card mb-4 p-1">
+            <div class="card mb-4 p-1" id="order-<?= $order['order_id'] ?>">
                 <div class="card-body">
                     <h4 class="card-title">Order #<?= count($orders) - $index ?></h4>
                     <?php
-                    $statusClass = '';
-                    if ($order['status'] === 'cancelled') {
-                        $statusClass = 'text-danger';
-                    } elseif ($order['status'] === 'delivered') {
-                        $statusClass = 'text-success';
-                    }
+                    $statusClass = match ($order['status']) {
+                        'cancelled' => 'text-danger',
+                        'delivered' => 'text-success',
+                        default => ''
+                    };
                     ?>
                     <div class="row">
                         <div class="col-md-6">
                             <p class="card-text"><strong>Date:</strong> <?= htmlspecialchars($order['order_date']) ?></p>
-                            <p class="card-text"><strong>Status:</strong> <span class="<?= $statusClass ?>"><?= ucfirst(htmlspecialchars($order['status'])) ?></span></p>
+                            <p class="card-text"><strong>Status:</strong> <span class="<?= $statusClass ?>" id="status-<?= $order['order_id'] ?>"><?= ucfirst(htmlspecialchars($order['status'])) ?></span></p>
                             <p class="card-text"><strong>Total Amount:</strong> <?= number_format($order['total_amount'], 0, ',', '.') ?>₫</p>
                         </div>
                         <div class="col-md-6">
@@ -43,24 +53,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
                             <p class="card-text"><strong>Payment Status:</strong> <?= ucfirst(htmlspecialchars($order['payment_status'])) ?></p>
                         </div>
                     </div>
-
                     <?php
-                    $itemsDetails = [];
-                    foreach (explode(' ', $order['items']) as $item) {
-                        list($itemTable, $itemId, $itemQuantity) = explode('-', $item);
-                        $itemStmt = $pdo->prepare("SELECT name, price FROM $itemTable WHERE id = ?");
-                        $itemStmt->execute([$itemId]);
-                        $itemDetails = $itemStmt->fetch(PDO::FETCH_ASSOC);
-
-                        if ($itemDetails) {
-                            $itemsDetails[] = htmlspecialchars($itemDetails['name']) . " (" . number_format($itemDetails['price'], 0, ',', '.') . "₫) x" . $itemQuantity;
+                    $itemsDetails = array_map(function ($item) use ($itemDetailsMap) {
+                        list($table, $id, $quantity) = explode('-', $item);
+                        if (isset($itemDetailsMap[$table][$id])) {
+                            $detail = $itemDetailsMap[$table][$id];
+                            return htmlspecialchars($detail['name']) . " (" . number_format($detail['price'], 0, ',', '.') . "₫) x$quantity";
                         }
-                    }
+                        return '';
+                    }, explode(' ', $order['items']));
                     ?>
                     <p class="card-text mt-4"><strong>Items:</strong> <?= implode(', ', $itemsDetails) ?></p>
-
                     <?php if (!in_array($order['status'], ['delivered', 'shipped', 'cancelled'])): ?>
-                        <button class="btn btn-danger" data-toggle="modal" data-target="#cancelModal" data-order-id="<?= $order['order_id'] ?>">Cancel Order</button>
+                        <button class="btn btn-danger cancel-order-btn" data-toggle="modal" data-target="#cancelModal" data-order-id="<?= $order['order_id'] ?>">Cancel Order</button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -79,22 +84,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order_id'])) {
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">Do you really want to cancel the order?</div>
+            <div class="modal-body">Are you sure you want to cancel this order?</div>
             <div class="modal-footer">
-                <form method="POST" id="cancelOrderForm">
-                    <input type="hidden" name="cancel_order_id" id="cancelOrderId">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger">Yes, Cancel Order</button>
-                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmCancel">Yes, Cancel Order</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    $('#cancelModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var orderId = button.data('order-id');
-        $(this).find('#cancelOrderId').val(orderId);
+    let currentOrderId = null;
+    document.querySelectorAll('.cancel-order-btn').forEach(button => button.addEventListener('click', function () {
+        currentOrderId = this.dataset.orderId;
+    }));
+    document.getElementById('confirmCancel').addEventListener('click', function () {
+        if (!currentOrderId) return;
+        fetch('_cancelOrder.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: currentOrderId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const statusElement = document.getElementById(`status-${currentOrderId}`);
+                statusElement.textContent = 'Cancelled';
+                statusElement.classList.add('text-danger');
+                document.querySelector(`[data-order-id='${currentOrderId}']`).style.display = 'none';
+                $('#cancelModal').modal('hide');
+            } else alert('Error cancelling order: ' + data.error);
+        })
+        .catch(error => alert('Unexpected error: ' + error));
     });
 </script>
