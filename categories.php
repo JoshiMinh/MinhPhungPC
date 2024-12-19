@@ -81,13 +81,13 @@ if ($tableName !== 'Unknown Category') {
                         <form method="get">
                             <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
                             <div class="form-inline mb-3">
-                                <div class="form-group mr-3">
+                                <div class="form-group mb-2 w-100">
                                     <label for="minPrice" class="mr-2">Min Price: </label>
                                     <input type="text" class="form-control w-100" id="minPrice" name="min_price"
                                         value="<?= $formattedMinPrice ?>" data-price="<?= $minPriceNumeric ?>"
                                         oninput="formatPriceInput(this)">
                                 </div>
-                                <div class="form-group mt-2">
+                                <div class="form-group mb-2 w-100">
                                     <label for="maxPrice" class="mr-2">Max Price:</label>
                                     <input type="text" class="form-control w-100" id="maxPrice" name="max_price"
                                         value="<?= $formattedMaxPrice ?>" data-price="<?= $maxPriceNumeric ?>"
@@ -99,56 +99,22 @@ if ($tableName !== 'Unknown Category') {
                                 <?php foreach ($brands as $brand): ?>
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" 
-                                               id="brand-<?= htmlspecialchars($brand['brand']) ?>"
-                                               name="brands[]" value="<?= htmlspecialchars($brand['brand']) ?>"
-                                               <?= in_array($brand['brand'], $brandFilter) ? 'checked' : '' ?>>
+                                            id="brand-<?= htmlspecialchars($brand['brand']) ?>"
+                                            name="brands[]" value="<?= htmlspecialchars($brand['brand']) ?>"
+                                            <?= in_array($brand['brand'], $brandFilter) ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="brand-<?= htmlspecialchars($brand['brand']) ?>">
                                             <?= htmlspecialchars($brand['brand']) ?>
                                         </label>
                                     </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
-                            <button type="submit" class="btn btn-primary btn-sm mt-3 w-100">Apply Filter</button>
+                            <button type="submit" class="btn btn-primary btn-sm mt-3 w-100">Filter</button>
                         </form>
                     </div>
                 <?php endif; ?>
 
                 <div class="col-12 col-md-9 content-container">
-                    <?php if ($items): ?>
-                        <div class="container">
-                            <div class="row">
-                                <?php foreach ($items as $index => $item): ?>
-                                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 slide-up" style="animation-delay: <?= $index * 0.1 ?>s;">
-                                        <div class="card h-100 text-dark p-0" style="border: none; border-radius: 10px; background-color: var(--bg-elevated);">
-                                            <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>" class="nav-link">
-                                                <img src="<?= htmlspecialchars($item['image']) ?>" 
-                                                     alt="<?= htmlspecialchars($item['name']) ?>" 
-                                                     class="card-img-top" 
-                                                     style="height: 200px; object-fit: cover; background-color: white;">
-                                            </a>
-                                            <div class="card-body">
-                                                <p class="card-text mb-2" style="font-family: 'Roboto', sans-serif; font-weight: 100; font-size: 1.1rem;">
-                                                    <strong><?= number_format($item['price'], 0, ',', '.') . '₫' ?></strong>
-                                                </p>
-                                                <h6 class="card-title h6 mb-0">
-                                                    <?= htmlspecialchars($item['name']) ?>
-                                                </h6>
-                                            </div>
-                                            <div class="card-footer d-flex" style="padding: 0; height: 50px; border: none;">
-                                                <form method="post" style="flex: 7; height: 100%; margin: 0;">
-                                                    <input type="hidden" name="table" value="<?= htmlspecialchars($item['item_table']) ?>">
-                                                    <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
-                                                    <button type="submit" class="btn btn-primary btn-sm w-100 h-100" style="border-radius: 0;">Add to Cart</button>
-                                                </form>
-                                                <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>">
-                                                    <button class="btn btn-secondary w-100 h-100" style="flex: 3; border-radius: 0;">View</button>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
+                    <?php if ($items): include 'web_sections/item_display.php' ?>
                     <?php else: ?>
                         <div class="alert alert-warning">No items found.</div>
                     <?php endif; ?>
