@@ -98,7 +98,7 @@ if ($table && $id) {
             </div>
             <div class="col">
                 <div class="card p-3 bg-white text-dark">
-                    <h2><?= htmlspecialchars($item['name']) ?></h2>
+                   <h2><?= htmlspecialchars($item['name']) ?></h2>
                     <?php
                     $ratings = $item['ratings'] ?? '';
                     $ratingArray = explode(' ', $ratings);
@@ -109,13 +109,13 @@ if ($table && $id) {
                     foreach ($ratingArray as $rating) {
                         $ratingParts = explode('-', $rating);
                         if (count($ratingParts) === 2) {
-                            $userId = $ratingParts[0];
-                            $ratingValue = (int)$ratingParts[1];
-                            
+                            [$userId, $ratingValue] = $ratingParts;
+                            $ratingValue = (int)$ratingValue;
+
                             if ($userId == $_SESSION['user_id']) {
                                 $userRating = $ratingValue;
                             }
-                    
+
                             $totalRating += $ratingValue;
                             $userCount++;
                         }
@@ -128,6 +128,7 @@ if ($table && $id) {
                         <?php for ($i = 0; $i < 5; $i++): ?>
                             <span class="star <?= ($userRating !== null && $i < $userRating) || ($userRating === null && $i < floor($averageRating)) ? 'fas fa-star' : 'fa fa-star' ?>" data-index="<?= $i ?>"></span>
                         <?php endfor; ?>
+                        <span>(<?= $userCount ?>)</span>
                     </div>
 
                     <p class="card-text"><?= number_format($item['price'], 0, ',', '.') . '₫' ?></p>
