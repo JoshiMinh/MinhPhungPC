@@ -59,7 +59,7 @@ $recentOrdersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
                 </div>
-                <div class="card-body scrollable-card">
+                <div class="card-body scrollable-card p-0">
                     <table class="table table-dark table-striped text-light">
                         <thead>
                             <tr>

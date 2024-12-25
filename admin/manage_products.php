@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
                     </form>
                     <a href="index.php?view=add_or_edit_product" class="btn btn-success">Add</a>
                 </div>
-                <div class="card-body scrollable-card">
+                <div class="card-body scrollable-card p-0">
                     <table class="table table-dark table-striped text-light" id="productTable">
                         <thead>
                             <tr>
