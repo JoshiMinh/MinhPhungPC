@@ -1,9 +1,19 @@
-<div align="center" style="margin:20px 0;">
+<div align="center">
 
-  <img src="logo.png" alt="Icon" height="100px" style="margin:20px 0;">
+  <img src="logo.png" height="100px">
 
-  ### A website to sell and build desktop PCs using available components or purchase individual parts, featuring excellent functionalities and a robust compatibility checker.
+  ## Introduction
 
-  <img src="demo.png" alt="Demo" style="margin:20px 0; width:100%; height:auto;">
+  A website to sell and build desktop PCs using available components or purchase individual parts, featuring excellent functionalities and a robust compatibility checker.
+
+  ## Installation
+
+  Use it by placing it in the XAMPP `htdocs` folder, then open:
+
+  ```
+  localhost/MinhPhungPC
+  ```
+
+  <img src="demo.png" width="100%">
 
 </div>

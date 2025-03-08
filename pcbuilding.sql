@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 24, 2024 at 02:53 PM
+-- Generation Time: Mar 08, 2025 at 05:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -54,6 +54,16 @@ CREATE TABLE `comments` (
   `content` text DEFAULT NULL,
   `time` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`comment_id`, `user_id`, `product_id`, `product_table`, `content`, `time`) VALUES
+(34, '25', '8', 'motherboard', 'sản phẩm 10đ', '2024-12-24 20:57:59'),
+(35, '29', '10', 'memory', '10 điểm', '2024-12-25 14:12:02'),
+(36, '29', '5', 'memory', 'hello', '2025-03-08 11:44:42'),
+(37, '29', '7', 'memory', 'hello', '2025-03-08 11:48:49');
 
 -- --------------------------------------------------------
 
@@ -150,12 +160,12 @@ INSERT INTO `memory` (`id`, `name`, `brand`, `price`, `image`, `ddr`, `capacity`
 (2, 'RAM Desktop TEAMGROUP DELTA RGB (TF3D416G3200HC16F01)', 'TEAMGROUP', 1029000, 'https://hanoicomputercdn.com/media/product/65727_ram_desktop_teamgroup_delta_rgb_tf3d416g3200hc16f01_16gb_1x16gb_ddr4_3200mhz__3_.jpg', 4, '16', '3200', NULL),
 (3, 'Ram Desktop Adata XPG LANCER Black (AX5U5200C388G-CLABK)', 'Adata', 899000, 'https://hanoicomputercdn.com/media/product/85872_ram_desktop_adata_xpg_lancer_black___1_.jpg', 5, '8', '5200', ' 29-5 25-1'),
 (4, 'Ram Desktop Corsair Vengeance LPX (CMK16GX5M1B5600C40)', 'Corsair', 1599000, 'https://hanoicomputercdn.com/media/product/86270_file_pts_chu___n_l____0000_layer_1.jpg', 5, '16', '5600', NULL),
-(5, 'Ram Desktop Kingmax (KM-LD5-4800-16GS)', 'Kingmax', 1529000, 'https://hanoicomputercdn.com/media/product/85434_ram_desktop_kingmax_km_ld5_4800_16gs_16g_1x_16b_ddr5_4800mhz_0001_layer_1.jpg', 5, '16', '4800', NULL),
+(5, 'Ram Desktop Kingmax (KM-LD5-4800-16GS)', 'Kingmax', 1529000, 'https://hanoicomputercdn.com/media/product/85434_ram_desktop_kingmax_km_ld5_4800_16gs_16g_1x_16b_ddr5_4800mhz_0001_layer_1.jpg', 5, '16', '4800', ' 29-5'),
 (6, 'Ram Desktop Kingston (KVR16N11/8 / KVR16N11/8WP)', 'Kingston', 1199000, 'https://hanoicomputercdn.com/media/product/62905_ram_desktop_kingston_kvr16n11_8_kvr16n11_8wp_8gb_1x8gb_ddr3_1600mhz.jpg', 3, '8', '1600', NULL),
-(7, 'Ram Desktop Lexar Thor (LD4BU016G-R3200GSXG)', 'Lexar', 989000, 'https://hanoicomputercdn.com/media/product/86103_ram_desktop_lexar_thor_ld4bu016g_r3200gsxg_16gb_1x16gb_ddr4_3200mhz.jpg', 4, '16', '3200', NULL),
+(7, 'Ram Desktop Lexar Thor (LD4BU016G-R3200GSXG) test', 'Lexar', 989000, 'https://hanoicomputercdn.com/media/product/86103_ram_desktop_lexar_thor_ld4bu016g_r3200gsxg_16gb_1x16gb_ddr4_3200mhz.jpg', 4, '16', '3200', ' 29-5'),
 (8, 'Ram Desktop Gskill Aegis (F4-2666C19S-8GIS)', 'Gskill', 559000, 'https://hanoicomputercdn.com/media/product/62340_ram_desktop_gskill_aegis_f4_2666c19s_8gis_8gb_1x8gb_ddr4_2666mhz.jpg', 4, '8', '2666', NULL),
 (9, 'Ram Desktop PNY XLR8 RGB (MD16GD4320016XRGB)', 'PNY', 999000, 'https://hanoicomputercdn.com/media/product/79086_ram_desktop_pny_xlr8_rgb_md16gd4320016xrgb_16gb_1x16gb_ddr4_3200mhz__3_.jpg', 4, '16', '3200', NULL),
-(10, 'Ram Desktop Billion Reservoir Elite HeatSink Black (BR-PC-16G-5600)', 'Billion Reservoir', 1349000, 'https://hanoicomputercdn.com/media/product/86220_ram_desktop_billion_reservoir_elite_heatsink_black_br_pc_16g_4800_16gb_1x16gb_ddr5_4800mhz.jpg', 5, '16', '4800', ' 29-4');
+(10, 'Ram Desktop Billion Reservoir Elite HeatSink Black (BR-PC-16G-5600)', 'Billion Reservoir', 1349000, 'https://hanoicomputercdn.com/media/product/86220_ram_desktop_billion_reservoir_elite_heatsink_black_br_pc_16g_4800_16gb_1x16gb_ddr5_4800mhz.jpg', 5, '16', '4800', ' 29-5');
 
 -- --------------------------------------------------------
 
@@ -190,7 +200,7 @@ INSERT INTO `motherboard` (`id`, `brand`, `name`, `socket_type`, `chipset`, `mem
 (5, 'ASROCK', 'ASROCK B550M PRO4', 'AM4', 'AMD B550', 4, 128, '4', '2 x PCI Express x16', 2590000, 'https://mega.com.vn/media/product/17418_mainboard_asrock_b550m_pro4.png', ' 29-5'),
 (6, 'ASUS', 'ASUS ROG STRIX B760-G GAMING WIFI DDR5', 'LGA1700', 'Intel B760', 4, 192, '5', '1 x PCIe 5.0 x16 slo', 5400000, 'https://hanoicomputercdn.com/media/product/77917_mainboard_asus_rog_strix_b760_g_gaming_wifi_ddr5__3_.jpg', NULL),
 (7, 'ASUS', 'ASUS ROG MAXIMUS Z890 EXTREME DDR5', 'LGA1851', 'Intel Z890', 4, 192, '4', '2 x PCIe 5.0 x16 slo', 28999000, 'https://hanoicomputercdn.com/media/product/86789_mainboard_asus_rog_maximus_z890_extreme_ddr5__1_.jpg', NULL),
-(8, 'ASROCK', 'ASROCK B760M Steel Legend WiFi', 'LGA1700', 'Intel B760', 4, 192, '5', '1 x PCIe 5.0 x16 slo', 4049000, 'https://hanoicomputercdn.com/media/product/69779_mainboard_asrock_b760m_steel_legend_wifi__2_.jpg', NULL),
+(8, 'ASROCK', 'ASROCK B760M Steel Legend WiFi', 'LGA1700', 'Intel B760', 4, 192, '5', '1 x PCIe 5.0 x16 slo', 4049000, 'https://hanoicomputercdn.com/media/product/69779_mainboard_asrock_b760m_steel_legend_wifi__2_.jpg', ' 25-3'),
 (9, 'MSI', 'MSI X670E GAMING PLUS WIFI DDR5', 'AM5', 'AMD X670', 4, 255, '5', '3 x PCIe x16, 1 x PC', 8199000, 'https://hanoicomputercdn.com/media/product/85675_mainboard_msi_x670e_gaming_plus_wifi_ddr5__2_.jpg', NULL),
 (10, 'GIGABYTE', 'Gigabyte X670 AORUS ELITE AX', 'AM5', 'AMD X670', 4, 128, '5', '1 x PCIe x16 slot', 8399000, 'https://hanoicomputercdn.com/media/product/68590_mainboard_gigabyte_x670_aorus_elite_ax__6_.jpg', NULL),
 (11, 'ASUS', 'ASUS ROG MAXIMUS Z790 HERO DDR5', 'LGA1700', 'Intel Z790', 4, 128, '5', '2 x PCIe 5.0 x16 slo', 16499000, 'https://hanoicomputercdn.com/media/product/68460_mainboard_asus_rog_maximus_z790_hero__2_.jpg', NULL),
@@ -251,10 +261,13 @@ INSERT INTO `orders` (`order_id`, `customer_id`, `items`, `order_date`, `status`
 (16, 29, 'cpucooler-2-1 graphicscard-1-1 graphicscard-11-1 motherboard-10-1 motherboard-11-1 operatingsystem-1-1 pccase-2-1 powersupply-2-6 processor-2-4 storage-2-7', '2024-12-03 13:56:03', 'pending', 195516000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', NULL),
 (17, 29, 'processor-4-1 processor-6-1 processor-8-1', '2024-12-15 10:41:58', 'cancelled', 30597000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'Bank', 'pending'),
 (18, 29, 'cpucooler-4-1 graphicscard-1-1 memory-1-1 motherboard-12-1 operatingsystem-5-1 pccase-2-1 powersupply-1-1 processor-11-1 storage-1-1', '2024-12-15 11:16:34', 'shipped', 102581000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', NULL),
-(19, 29, 'cpucooler-3-1', '2024-12-15 11:52:30', NULL, 1699000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', 'paid'),
+(19, 29, 'cpucooler-3-1', '2024-12-15 11:52:30', 'cancelled', 1699000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', 'paid'),
 (20, 30, 'processor-4-1 processor-6-1', '2024-12-19 11:29:08', NULL, 24498000, 'sdSDádasdsad', 'COD', 'pending'),
 (21, 30, 'processor-4-1 processor-6-1', '2024-12-19 11:39:25', 'shipped', 24498000, 'vbcvb', 'COD', 'cancelled'),
-(22, 29, 'motherboard-2-1 storage-2-1', '2024-12-24 14:20:13', 'shipped', 40989000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', 'pending');
+(22, 29, 'motherboard-2-1 storage-2-1', '2024-12-24 14:20:13', 'shipped', 40989000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', 'pending'),
+(23, 25, 'motherboard-8-1', '2024-12-24 20:58:37', 'shipped', 4049000, 'vku', 'COD', 'cancelled'),
+(24, 29, 'cpucooler-1-1 graphicscard-3-1 memory-5-4 motherboard-6-1 operatingsystem-3-1 pccase-1-1 powersupply-1-1 processor-2-1 storage-9-1', '2024-12-25 14:10:26', 'shipped', 83809000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'COD', 'pending'),
+(25, 29, 'memory-5-1 operatingsystem-2-1', '2025-03-08 11:45:08', 'cancelled', 7798000, '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang', 'Bank', 'pending');
 
 -- --------------------------------------------------------
 
@@ -360,7 +373,8 @@ INSERT INTO `processor` (`id`, `name`, `brand`, `price`, `image`, `core_count`, 
 (13, 'Ryzen 5 5600X', 'AMD', 3499000, 'https://hanoicomputercdn.com/media/product/56282_cpu_amd_ryzen_5_5600x.jpg', 6, 12, 'AM4', 65, NULL),
 (14, 'Core i3-13100', 'Intel', 3399000, 'https://hanoicomputercdn.com/media/product/69897_cpu_intel_core_i3_13100_up_to_4_5ghz_4_nhan_10_luong_12mb_cache_65w_socket_intel_lga_1700_raptor_lake.jpg', 4, 8, 'LGA1700', 65, NULL),
 (15, 'Ryzen 5 5500', 'AMD', 2099000, 'https://hanoicomputercdn.com/media/product/65334_cpu_amd_ryzen_5_5500_3_6_ghz_upto_4_2ghz_19mb_6_cores_12_threads_65w_socket_am4.jpg', 6, 12, 'AM4', 65, NULL),
-(16, 'Threadripper 7960X', 'AMD', 42999000, 'https://hanoicomputercdn.com/media/product/78112_cpu_amd_ryzen_threadripper_7960x_4_2ghz_up_to_5_3ghz_153mb_24_cores_48_threads_350w_socket_str5.jpg', 24, 48, 'sTR5', 350, NULL);
+(16, 'Threadripper 7960X', 'AMD', 42999000, 'https://hanoicomputercdn.com/media/product/78112_cpu_amd_ryzen_threadripper_7960x_4_2ghz_up_to_5_3ghz_153mb_24_cores_48_threads_350w_socket_str5.jpg', 24, 48, 'sTR5', 350, NULL),
+(18, 'test', 'test', 12344, '#', 1, 1, '1', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -420,8 +434,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `name`, `email`, `password_hash`, `date_of_birth`, `profile_image`, `cart`, `buildset`, `address`) VALUES
-(25, 'Phụng_Nguyễn', 'nguyenvanphung270505@gmail.com', '$2y$10$h93AFfHanbkVpq00pjU65OQB4DlFNI6om4g3BWmaYbfSbR1FjFGaW', '2005-01-01', 'profile_images/Phụng_Nguyễn.png', 'graphicscard-1-1 memory-5-1 motherboard-2-1 processor-1-1', '', ''),
-(29, 'JoshiMinh', 'binhangia241273@gmail.com', '$2y$10$miTUIixRpYfb5m4bJfFaK.uMPtRPTPZBJyBpkHv.BNkXU3uMgpXTu', '2005-10-20', 'profile_images/JoshiMinh.jpg', '', '', '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang');
+(25, 'Phụng_Nguyễn', 'nguyenvanphung270505@gmail.com', '$2y$10$h93AFfHanbkVpq00pjU65OQB4DlFNI6om4g3BWmaYbfSbR1FjFGaW', '2005-01-01', 'profile_images/Phụng_Nguyễn.png', '', 'motherboard-3 processor-9', ''),
+(29, 'JoshiMinh', 'binhangia241273@gmail.com', '$2y$10$miTUIixRpYfb5m4bJfFaK.uMPtRPTPZBJyBpkHv.BNkXU3uMgpXTu', '2005-10-20', 'profile_images/JoshiMinh.jpg', 'memory-2-3 memory-4-1 memory-7-1 operatingsystem-1-1 processor-2-1', '', '47 Bui Huu Nghia, An Hai Bac, Son Tra, Da Nang');
 
 --
 -- Indexes for dumped tables
@@ -522,7 +536,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `cpucooler`
@@ -558,7 +572,7 @@ ALTER TABLE `operatingsystem`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `pccase`
@@ -576,7 +590,7 @@ ALTER TABLE `powersupply`
 -- AUTO_INCREMENT for table `processor`
 --
 ALTER TABLE `processor`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `storage`
