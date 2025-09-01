@@ -18,13 +18,14 @@ Route::get('/build', [BuildController::class, 'index']);
 Route::get('/cart', [CartController::class, 'index']);
 Route::get('/account', [AccountController::class, 'index']);
 Route::get('/forgot', [ForgotController::class, 'index']);
-Route::get('/search', [SearchController::class, 'search']);
+Route::get('/search', [SearchController::class, 'index']);
+Route::get('/products', [ProductController::class, 'index']);
 Route::get('/item', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
 // Admin routes
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/products', [AdminController::class, 'manageProducts'])->name('admin.products');
     Route::get('/admin/users', [AdminController::class, 'manageUsers'])->name('admin.users');
     Route::get('/admin/product/edit/{id}', [AdminController::class, 'editProduct'])->name('admin.product.edit');
@@ -32,6 +33,3 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/product/delete', [AdminController::class, 'deleteProduct'])->name('admin.product.delete');
     Route::post('/admin/order/update', [AdminController::class, 'updateOrder'])->name('admin.order.update');
 });
-
-// Admin index route
-Route::get('/admin', [AdminController::class, 'index']);
