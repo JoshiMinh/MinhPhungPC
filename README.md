@@ -13,3 +13,7 @@
   <img src="demo.png" width="100%">
 
 </div>
+
+
+
+-Use cloudinary for image storing
