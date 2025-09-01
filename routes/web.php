@@ -12,14 +12,15 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AdminController;
 
 // Public routes
+Route::get('/', [HomeController::class, 'index']);
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/build', [BuildController::class, 'index']);
 Route::get('/cart', [CartController::class, 'index']);
 Route::get('/account', [AccountController::class, 'index']);
 Route::get('/forgot', [ForgotController::class, 'index']);
 Route::get('/search', [SearchController::class, 'search']);
-Route::get('/product/{id}', [ProductController::class, 'show']);
-Route::get('/category/{type}', [CategoryController::class, 'show']);
+Route::get('/item', [ProductController::class, 'show']);
+Route::get('/categories', [CategoryController::class, 'index']);
 
 // Admin routes
 Route::middleware(['auth', 'admin'])->group(function () {
