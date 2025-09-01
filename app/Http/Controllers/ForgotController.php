@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class ForgotController extends Controller
 {
     public function index()
     {
-        return view('forgot');
+        $users = User::all();
+        return view('forgot', compact('users'));
     }
 }

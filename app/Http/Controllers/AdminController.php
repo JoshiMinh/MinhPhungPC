@@ -8,7 +8,7 @@ use App\Models\Order;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function index()
     {
         $totalRevenue = Order::sum('total_amount');
         $totalOrders = Order::count();
