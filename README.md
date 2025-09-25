@@ -1,61 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MinhPhungPC Laravel Conversion
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This repository tracks the migration of the MinhPhungPC storefront from the legacy PHP codebase in `OLD/` to a modern Laravel application.
 
-## About Laravel
+## Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.1+
+- Composer
+- Node.js 18+
+- NPM or Yarn
+- A database supported by Laravel (MySQL or MariaDB recommended)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Getting Started
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Copy `.env.example` to `.env` and adjust the database/mail settings for your environment.
+2. Install PHP dependencies with `composer install`.
+3. Generate an application key with `php artisan key:generate`.
+4. Run database migrations with `php artisan migrate`.
+5. Install and build front-end assets with `npm install` followed by `npm run build` (or `npm run dev` during development).
+6. Serve the application locally with `php artisan serve`.
 
-## Learning Laravel
+## Required Front-End Assets
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+To keep the repository lightweight, all binary assets (images, icons, and videos) have been removed. Before serving the UI, provide the following files so that the navigation, builder, and account screens render correctly:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Application Branding (place in `public/`)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- `logo.png`
+- `logo_light.png`
+- `icon.png`
+- `default.jpg` (default avatar/product image fallback)
 
-## Laravel Sponsors
+### Component Icons (place in `public/component_icons/`)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Create the directory if it does not exist and add PNG icons with the exact filenames below:
 
-### Premium Partners
+- `cooler.png`
+- `cpucooler.png`
+- `graphicscard.png`
+- `memory.png`
+- `motherboard.png`
+- `operatingsystem.png`
+- `pccase.png`
+- `powersupply.png`
+- `processor.png`
+- `storage.png`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Sample Profile Images (optional, place in `public/profile_images/`)
 
-## Contributing
+These filenames are referenced by seeded/demo data. You can provide your own avatars or omit them if you are not using the demo content:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- `Concac.jpeg`
+- `JoshiMinh.jpg`
+- `Joshi_GAV.png`
+- `Phụng_Nguyễn.png`
+- `a.jpg`
+- `caibuom.png`
 
-## Code of Conduct
+### Legacy Front-End Backup (`OLD/`)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+If you need to run the legacy PHP version, populate the mirrored directories under `OLD/` with the same filenames listed above. The PHP scripts expect the assets to exist at:
 
-## Security Vulnerabilities
+- `OLD/logo.png`, `OLD/logo_light.png`, `OLD/icon.png`, `OLD/default.jpg`
+- `OLD/component_icons/*.png` (same filenames as the Laravel app)
+- `OLD/profile_images/*` (same filenames as the optional avatars)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+You can restore these assets from your private backups of the original project or replace them with custom artwork that matches the expected filenames.
+
+## Testing
+
+Run the application test suite with:
+
+```bash
+php artisan test
+```
+
+> **Note:** The historical vendor directory included with the project may be incomplete. If Artisan fails to bootstrap, run `composer install` to download the missing packages.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project inherits the original licensing terms of the MinhPhungPC codebase. Consult the project stakeholders if you plan to redistribute or commercialize the software.
