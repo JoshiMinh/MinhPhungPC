@@ -3,7 +3,7 @@
 This document captures the immediate errors observed in the current codebase and a phased plan to complete the migration from the legacy PHP app in `OLD/` to the Laravel application.
 
 ## Current Issues to Triage
-- `php artisan test` currently fails because the committed `vendor/` directory is incomplete (`symfony/deprecation-contracts/function.php` is missing). Re-run `composer install` (and remove the committed vendor tree) to restore the full dependency set before any validation or CI.
+- `php artisan test` currently fails because the repository includes an incomplete `vendor/` directory (`symfony/deprecation-contracts/function.php` is missing). Remove the tracked `vendor/` tree from version control and regenerate dependencies with `composer install` before any validation or CI.
 - Required branding and component assets are absent (see `README.md`). Without restoring them under `public/` the UI will show broken images.
 - No environment file is committed; copy `.env.example` to `.env` and supply DB/mail credentials before running migrations or seeds.
 
