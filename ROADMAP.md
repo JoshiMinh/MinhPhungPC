@@ -25,7 +25,10 @@ This document captures the immediate errors observed in the current codebase and
 
 ### 3) Feature Parity by Surface
 - **Builder & Search:** Validate compatibility rules already coded in `BuildSetController` (socket type, DDR) against legacy behavior; add missing rules (PSU wattage, case form factor) before importing real data.
-- **Cart & Checkout:** Mirror `OLD/_buildsetToCart.php` and order creation logic; ensure stock/availability checks exist; add graceful handling when components disappear.
+- **Cart & Checkout:**
+  - Mirror `OLD/_buildsetToCart.php` logic when persisting carts to orders.
+  - Add stock/availability checks during add-to-cart and checkout.
+  - Gracefully handle cases where components disappear between selection and checkout.
 - **Account/Auth:** Confirm registration/profile flows match legacy fields (DOB, address). Wire password reset/email verification flows to replace `OLD/_emailForgot.php`.
 - **Admin:** Port `OLD/admin/*` (product CRUD, user/order management, dashboard) to Laravel resource controllers + Blade views with policies/guards.
 
