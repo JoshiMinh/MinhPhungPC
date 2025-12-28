@@ -2,6 +2,10 @@
 
 This document captures the immediate errors observed in the current codebase and a phased plan to complete the migration from the legacy PHP app in `OLD/` to the Laravel application.
 
+## Agent Status (for AI assistants)
+- **Current phase:** Roadmap drafted; execution not started.
+- **Up next:** Begin **Foundation & Bootstrap** (remove tracked `vendor/`, run `composer install`, set up `.env`, run migrations/build).
+
 ## Current Issues to Triage
 - `php artisan test` currently fails because the repository includes an incomplete `vendor/` directory (`symfony/deprecation-contracts/function.php` is missing). Remove the tracked `vendor/` tree from version control and regenerate dependencies with `composer install` before any validation or CI.
 - Required branding and component assets are absent (see `README.md`). Without restoring them under `public/` the UI will show broken images.
