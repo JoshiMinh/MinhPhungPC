@@ -1,46 +1,31 @@
 # MinhPhungPC → Laravel Migration Roadmap
 
-This document captures the immediate errors observed in the current codebase and a phased plan to complete the migration from the legacy PHP app in `OLD/` to the Laravel application.
+This roadmap is optimized for AI assistants and focuses on making the app minimally runnable for long-term archiving (not full feature parity).
 
-## Agent Status (for AI assistants)
-- **Current phase:** Roadmap drafted; execution not started.
-- **Up next:** Begin **Foundation & Bootstrap** (remove tracked `vendor/`, run `composer install`, set up `.env`, run migrations/build).
+### Agent Status
+- [x] **Draft roadmap ready**
+- [ ] **Next:** Foundation/Bootstrap (clean vendor, install deps, set up `.env`, run migrations/build)
 
-## Current Issues to Triage
-- `php artisan test` currently fails because the repository includes an incomplete `vendor/` directory (`symfony/deprecation-contracts/function.php` is missing). Remove the tracked `vendor/` tree from version control and regenerate dependencies with `composer install` before any validation or CI.
-- Required branding and component assets are absent (see `README.md`). Without restoring them under `public/` the UI will show broken images.
-- No environment file is committed; copy `.env.example` to `.env` and supply DB/mail credentials before running migrations or seeds.
+### Current Issues to Triage
+- [ ] **Incomplete dependencies:** Tracked `vendor/` is missing files (`symfony/deprecation-contracts/function.php`). Delete tracked `vendor/` and run `composer install` before any tests/CI.
+- [ ] **Missing assets:** Required branding/component images (see `README.md`) are absent; UI will show broken images until `public/` assets are restored.
+- [ ] **No environment file:** Copy `.env.example` to `.env`, fill DB/mail values, then run `php artisan key:generate`.
 
-## Migration Goals
-1. Reach feature parity for the storefront (builder, search, cart/checkout, account) and the admin console currently under `OLD/admin/`.
-2. Ensure data compatibility so legacy customer accounts, carts, and orders migrate cleanly into the Laravel schema.
-3. Establish reliable automated testing (PHPUnit) and deployment confidence for the new stack.
+### Minimal Run-Ready Checklist (for archival)
+- [ ] **Deps & build:** `composer install`, `npm install`, `npm run build` (or `dev`), `php artisan storage:link`.
+- [ ] **Env & config:** `.env` created with DB creds; `APP_KEY` generated.
+- [ ] **Database:** `php artisan migrate` succeeds on a clean DB.
+- [ ] **Seed demo data (optional):** Minimal catalog/users seeded for smoke testing.
+- [ ] **Assets restored:** Place required logos/component icons in `public/` per README.
+- [ ] **Smoke tests (manual):** Register/login, open builder, add a component to cart, view cart; checkout may remain stubbed but should not error fatally.
+- [ ] **Document non-working areas:** Note any intentionally unimplemented features to set archive expectations.
 
-## Phased Plan
-### 1) Foundation & Bootstrap
-- Clean the working tree of committed vendor artifacts and run `composer install`, `npm install`, and `npm run build` (or `dev`) to unblock tests and local UI.
-- Generate `.env`, set database/mail credentials, and run `php artisan key:generate`.
-- Run `php artisan migrate` against a throwaway DB to validate migrations; create `php artisan storage:link`.
+### Area-Specific Notes (scope kept minimal)
+- **Builder/Search:** Keep existing compatibility checks (socket type, DDR); no expansion unless required to avoid errors.
+- **Cart:** Basic add/view/remove flows should not throw; stock checks can be coarse (skip fine-grained availability if not critical).
+- **Auth/Account:** Ensure registration/login/logout works; password reset/email verification may be deferred—document if omitted.
+- **Admin (optional):** If time-limited, document that admin CRUD remains in `OLD/admin/` and is not ported; archive state is acceptable.
 
-### 2) Schema & Data Migration
-- Inventory legacy MySQL tables from `OLD/` scripts and align them with `database/migrations/*` (components, carts, orders, users). Add missing columns/indexes or new migrations as needed.
-- Define ETL scripts or Laravel commands to pull legacy data, transform field names/types, and load into the new schema. Pay special attention to password hashing (convert legacy hashes or force resets).
-- Seed representative catalog data (components by category) and demo accounts to mirror the legacy experience.
-
-### 3) Feature Parity by Surface
-- **Builder & Search:** Validate compatibility rules already coded in `BuildSetController` (socket type, DDR) against legacy behavior; add missing rules (PSU wattage, case form factor) before importing real data.
-- **Cart & Checkout:**
-  - Mirror `OLD/_buildsetToCart.php` logic when persisting carts to orders.
-  - Add stock/availability checks during add-to-cart and checkout.
-  - Gracefully handle cases where components disappear between selection and checkout.
-- **Account/Auth:** Confirm registration/profile flows match legacy fields (DOB, address). Wire password reset/email verification flows to replace `OLD/_emailForgot.php`.
-- **Admin:** Port `OLD/admin/*` (product CRUD, user/order management, dashboard) to Laravel resource controllers + Blade views with policies/guards.
-
-### 4) UX & Assets
-- Restore required images/icons to `public/` (and `public/component_icons/`) so builder cards and avatars render.
-- Convert any remaining legacy PHP views to Blade templates; reuse existing layout/components to keep styling consistent.
-
-### 5) Quality, Testing, and Release
-- After dependencies are restored, re-enable `php artisan test`; add targeted feature tests for builder compatibility filters, cart totals, and auth flows.
-- Add smoke checks for admin CRUD once ported.
-- Stage a pilot deployment alongside the legacy site, migrate a snapshot of data, and perform manual UAT before full cutover. Maintain a rollback plan until parity is confirmed.
+### Handoff for Archival
+- [ ] Confirm app boots (`php artisan serve`) without fatal errors after the steps above.
+- [ ] Record any skipped features and known limitations in README/ROADMAP for future reference.
