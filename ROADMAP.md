@@ -13,7 +13,7 @@ This roadmap is optimized for AI assistants and focuses on making the app minima
 
 ### Minimal Run-Ready Checklist (for archival)
 - [ ] **Deps & build:** `composer install`, `npm install`, `npm run build` (or `dev`), `php artisan storage:link`.
-- [ ] **Env & config:** `.env` created with DB creds; `APP_KEY` generated.
+- [ ] **Env & config:** `.env` created with DB credentials; `APP_KEY` generated.
 - [ ] **Database:** `php artisan migrate` succeeds on a clean DB.
 - [ ] **Seed demo data (optional):** Minimal catalog/users seeded for smoke testing.
 - [ ] **Assets restored:** Place required logos/component icons in `public/` per README.
@@ -22,7 +22,7 @@ This roadmap is optimized for AI assistants and focuses on making the app minima
 
 ### Area-Specific Notes (scope kept minimal)
 - **Builder/Search:** Keep existing compatibility checks (socket type, DDR); no expansion unless required to avoid errors.
-- **Cart:** Basic add/view/remove flows should not throw; stock checks can be coarse (skip fine-grained availability if not critical).
+- **Cart:** Basic add/view/remove flows should avoid unhandled exceptions; stock checks can be coarse (skip fine-grained availability if not critical).
 - **Auth/Account:** Ensure registration/login/logout works; password reset/email verification may be deferred—document if omitted.
 - **Admin (optional):** If time-limited, document that admin CRUD remains in `OLD/admin/` and is not ported; archive state is acceptable.
 
