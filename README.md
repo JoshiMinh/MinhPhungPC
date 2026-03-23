@@ -1,24 +1,24 @@
+div align center
+<img src="icon.png" width="100" />
+
 # MinhPhungPC
 
-Dynamic PC building and component management web application.
+A modernized web application for university web dev projects and competitions. PC Shop & Building WebsitePowered by PostgreSQL with a unified JSONB product system.
+</div>
 
-## Structure
-- `/app`: Application root (pages, admin, lib, components)
-- `/storage`: Media and user-uploaded content
-- `/scripts`, `/styles`: Consolidated assets
-- `schema.sql`: Database definition
-- `.env`: Environment configuration
+## Key Features
 
-## Setup
-1. Clone the repository.
-2. Import `schema.sql` into MySQL.
-3. Configure `.env` with your DB and SMTP credentials.
-4. Host with a PHP-compatible server (e.g., Apache/XAMPP).
-5. Access via `/app/index.php`.
+- **Unified Core**: Unified products table with JSONB specifications.
+- **PC Builder**: Dynamic hardware selection and real-time total.
+- **Admin Panel**: Integrated dashboard for products and orders.
+- **Modern UI**: Streamlined, responsive design for all devices.
 
-## Features
-- PC Build customizer
-- Categorized component browsing
-- User authentication and order history
-- Admin dashboard for product/user management
-- Dark mode and responsive design
+## Quick Start
+
+1. **Env**: Copy `.env.example` to `.env` and fill PG/SMTP credentials.
+2. **DB**: Execute `schema.sql` in your PostgreSQL instance.
+3. **Run**: Serve via PHP 8.1+ server (root: `app/index.php`).
+
+![Preview](preview.png)
+
+copyright joshiminh

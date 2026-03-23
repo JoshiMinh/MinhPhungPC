@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include 'config.php';
 
 if (isset($_POST['component_id'], $_POST['table_name'])) {
     $component_id = $_POST['component_id'];

@@ -1,6 +1,6 @@
 <?php
-include '../lib/db_conn.php';
-session_start();
+include '../core/config.php';
+
 
 if (!isset($_SESSION['minhphungpc_admin_id'])) {
     header('Location: login.php');
@@ -98,15 +98,15 @@ if (isset($_POST['logout'])) {
         <div class="d-flex flex-grow-1 overflow-hidden">
             <aside class="offcanvas-md offcanvas-start d-md-flex flex-column sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <a href="index.php">
+                    <a href="dash.php">
                         <img src="../../storage/images/logo_light.png" alt="Logo" class="img-fluid" style="width: 80%;">
                     </a>
                 </div>
                 <div class="flex-grow-1">
                     <ul class="nav flex-column p-2">
-                        <li class="nav-item"><a class="nav-link" href="index.php?view=dashboard">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="index.php?view=manage_products">Manage Products</a></li>
-                        <li class="nav-item"><a class="nav-link" href="index.php?view=manage_users">Manage Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dash.php?view=admin">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dash.php?view=products">Manage Products</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dash.php?view=users">Manage Users</a></li>
                     </ul>
                 </div>
                 <div class="mt-auto p-2 text-center">
@@ -123,11 +123,15 @@ if (isset($_POST['logout'])) {
                 <button class="btn btn-outline-primary d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">&#9776;</button>
                 <div>
                     <?php if ($view === ''): 
-                        include 'dashboard.php'; 
+                        include 'admin.php'; 
                     elseif (!in_array($view, $validViews)): ?>
                         <div class="centered-404"><h3>404 Page Not Found</h3></div>
                     <?php else: 
-                        include $view . '.php'; 
+                        $view_file = $view === 'manage_products' ? 'products' : 
+                                    ($view === 'manage_users' ? 'users' : 
+                                    ($view === 'dashboard' ? 'admin' : 
+                                    ($view === 'add_or_edit_product' ? 'edit' : $view)));
+                        include $view_file . '.php'; 
                     endif; ?>
                 </div>
             </main>

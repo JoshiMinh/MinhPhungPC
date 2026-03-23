@@ -1,8 +1,8 @@
 <?php
-include '../lib/tableColumns.php';
+include '../core/schema.php';
 
 if (empty($active) || !$active) {
-    header("Location: index.php");
+    header("Location: dash.php");
     exit();
 }
 

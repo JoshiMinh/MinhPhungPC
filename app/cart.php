@@ -1,5 +1,5 @@
 <?php
-include 'lib/db.php';
+include 'core/config.php';
 
 $user_id = $_SESSION['user_id'] ?? 0;
 

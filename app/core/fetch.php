@@ -1,6 +1,6 @@
 <?php
 
-include "db.php";
+include "config.php";
 
 if (isset($_GET["table"])) {
     $query = "SELECT id, name, brand, image, price FROM `{$_GET["table"]}`";

@@ -1,9 +1,9 @@
 <?php
-include 'db_conn.php';
+include 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $orderId = $_POST['order_id'] ?? null;
-    $newStatus = $_POST['status'] ?? null;
+    $orderId        = $_POST['order_id'] ?? null;
+    $newStatus      = $_POST['status'] ?? null;
     $newPaymentStatus = $_POST['payment_status'] ?? null;
 
     if ($orderId && ($newStatus || $newPaymentStatus)) {

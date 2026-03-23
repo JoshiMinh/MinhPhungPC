@@ -1,8 +1,8 @@
 <?php
-include '../lib/tableColumns.php';
+include '../core/schema.php';
 
 if (empty($active) || $active !== true) {
-    header("Location: index.php");
+    header("Location: dash.php");
     exit();
 }
 
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
                         <input type="text" name="search" id="searchQuery" placeholder="Search by name or brand" class="form-control" style="width:auto; display:inline-block;" value="<?= htmlspecialchars($searchQuery) ?>">
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
-                    <a href="index.php?view=add_or_edit_product" class="btn btn-success">Add</a>
+                    <a href="dash.php?view=edit" class="btn btn-success">Add</a>
                 </div>
                 <div class="card-body scrollable-card p-0">
                     <table class="table table-dark table-striped text-light" id="productTable">
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
                                         <img src="<?= htmlspecialchars($item['image']) ?>" alt="Product Image" width="50" class="product-image" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= htmlspecialchars($item['image']) ?>">
                                     </td>
                                     <td>
-                                        <a href="index.php?view=add_or_edit_product&product_id=<?= $item['id'] ?>&table=<?= $item['type'] ?>" class="btn btn-primary btn-sm">Edit</a>
+                                        <a href="dash.php?view=edit&product_id=<?= $item['id'] ?>&table=<?= $item['type'] ?>" class="btn btn-primary btn-sm">Edit</a>
                                         <form method="POST" style="display:inline-block;">
                                             <input type="hidden" name="id" value="<?= $item['id'] ?>">
                                             <input type="hidden" name="table" value="<?= $item['type'] ?>">

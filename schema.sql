@@ -1,171 +1,151 @@
--- PC Building Database Schema (PostgreSQL version)
--- Beautified, converted to PostgreSQL, no hardcoded values, no data inserts
-
--- Set timezone
+-- =========================
+-- TIMEZONE
+-- =========================
 SET TIME ZONE 'UTC';
 
--- Drop tables if they exist (for idempotency)
-DROP TABLE IF EXISTS comments, orders, users, admin, cpucooler, graphicscard, memory, motherboard, operatingsystem, pccase, powersupply, processor, storage CASCADE;
-
--- Admin table
-CREATE TABLE admin (
-  admin_id SERIAL PRIMARY KEY,
-  username VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL
+-- =========================
+-- ENUMS
+-- =========================
+CREATE TYPE product_type AS ENUM (
+    'cpu',
+    'gpu',
+    'ram',
+    'motherboard',
+    'storage',
+    'psu',
+    'case',
+    'cooler',
+    'os'
 );
 
--- Users table
+-- =========================
+-- BRANDS
+-- =========================
+CREATE TABLE brands (
+    brand_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    logo TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- USERS (Admin merged)
+-- =========================
 CREATE TABLE users (
-  user_id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  date_of_birth DATE,
-  profile_image VARCHAR(255) NOT NULL DEFAULT 'default.jpg',
-  cart TEXT,
-  buildset TEXT NOT NULL DEFAULT '',
-  address TEXT
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(20) DEFAULT 'user'
+        CHECK (role IN ('user','admin')),
+    profile_image TEXT DEFAULT 'default.jpg',
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Comments table
+-- =========================
+-- PRODUCTS (Unified + JSON specs)
+-- =========================
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    brand_id INTEGER REFERENCES brands(brand_id),
+    type product_type NOT NULL,
+    price NUMERIC(12,0) NOT NULL, -- VND only
+    image TEXT,
+
+    specs JSONB NOT NULL DEFAULT '{}'::jsonb,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- REVIEWS
+-- =========================
+CREATE TABLE reviews (
+    review_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(product_id) ON DELETE CASCADE,
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- COMMENTS (optional)
+-- =========================
 CREATE TABLE comments (
-  comment_id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(user_id),
-  product_id VARCHAR(255),
-  product_table VARCHAR(255),
-  content TEXT,
-  time TIMESTAMP
+    comment_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(product_id) ON DELETE CASCADE,
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- CPU Cooler table
-CREATE TABLE cpucooler (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  brand VARCHAR(20),
-  price INTEGER,
-  image TEXT,
-  cooling_type TEXT,
-  socket TEXT,
-  ratings TEXT
+-- =========================
+-- CART
+-- =========================
+CREATE TABLE cart_items (
+    cart_item_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(product_id),
+    quantity INTEGER NOT NULL DEFAULT 1
 );
 
--- Graphics Card table
-CREATE TABLE graphicscard (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  brand VARCHAR(20),
-  vram_capacity INTEGER,
-  cuda_cores INTEGER,
-  tdp INTEGER,
-  price INTEGER,
-  image TEXT,
-  ratings TEXT
+-- =========================
+-- BUILDS (PC Builder)
+-- =========================
+CREATE TABLE builds (
+    build_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    name TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Memory table
-CREATE TABLE memory (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  brand VARCHAR(255) NOT NULL,
-  price INTEGER NOT NULL,
-  image TEXT,
-  ddr INTEGER,
-  capacity VARCHAR(255),
-  speed VARCHAR(255),
-  ratings TEXT
+CREATE TABLE build_items (
+    id SERIAL PRIMARY KEY,
+    build_id INTEGER REFERENCES builds(build_id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(product_id)
 );
 
--- Motherboard table
-CREATE TABLE motherboard (
-  id SERIAL PRIMARY KEY,
-  brand VARCHAR(255),
-  name VARCHAR(255),
-  socket_type VARCHAR(50),
-  chipset VARCHAR(50),
-  memory_slots INTEGER,
-  max_memory_capacity INTEGER,
-  ddr VARCHAR(20),
-  expansion_slots VARCHAR(20),
-  price INTEGER,
-  image TEXT,
-  ratings TEXT
-);
-
--- Operating System table
-CREATE TABLE operatingsystem (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  version TEXT,
-  price INTEGER,
-  image TEXT,
-  brand VARCHAR(20),
-  ratings TEXT
-);
-
--- Orders table
+-- =========================
+-- ORDERS
+-- =========================
 CREATE TABLE orders (
-  order_id SERIAL PRIMARY KEY,
-  customer_id INTEGER REFERENCES users(user_id),
-  items TEXT,
-  order_date TIMESTAMP,
-  status VARCHAR(20) CHECK (status IN ('pending','processed','shipped','delivered','cancelled')),
-  total_amount INTEGER,
-  address VARCHAR(255),
-  payment_method VARCHAR(10) CHECK (payment_method IN ('Bank','COD')),
-  payment_status VARCHAR(10) CHECK (payment_status IN ('pending','paid','cancelled'))
+    order_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
+    total_amount NUMERIC(12,0),
+    status VARCHAR(20) DEFAULT 'pending'
+        CHECK (status IN ('pending','processed','shipped','delivered','cancelled')),
+    payment_method VARCHAR(20)
+        CHECK (payment_method IN ('Bank','COD')),
+    payment_status VARCHAR(20) DEFAULT 'pending'
+        CHECK (payment_status IN ('pending','paid','cancelled')),
+    shipping_address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- PC Case table
-CREATE TABLE pccase (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  brand VARCHAR(20),
-  price INTEGER,
-  image TEXT,
-  size TEXT,
-  ratings TEXT
+CREATE TABLE order_items (
+    order_item_id SERIAL PRIMARY KEY,
+    order_id INTEGER REFERENCES orders(order_id) ON DELETE CASCADE,
+    product_id INTEGER REFERENCES products(product_id),
+    quantity INTEGER NOT NULL,
+    price_at_purchase NUMERIC(12,0) NOT NULL
 );
 
--- Power Supply table
-CREATE TABLE powersupply (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  brand TEXT,
-  price INTEGER,
-  image TEXT,
-  wattage INTEGER,
-  efficiency_rating TEXT,
-  ratings TEXT
-);
+-- =========================
+-- INDEXES
+-- =========================
 
--- Processor table
-CREATE TABLE processor (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  brand TEXT,
-  price INTEGER,
-  image TEXT,
-  core_count INTEGER,
-  thread_count INTEGER,
-  socket_type TEXT,
-  tdp INTEGER,
-  ratings TEXT
-);
+-- Fast filtering
+CREATE INDEX idx_products_type ON products(type);
+CREATE INDEX idx_products_brand ON products(brand_id);
 
--- Storage table
-CREATE TABLE storage (
-  id SERIAL PRIMARY KEY,
-  name TEXT,
-  brand TEXT,
-  price INTEGER,
-  image TEXT,
-  type TEXT,
-  capacity TEXT,
-  speed TEXT,
-  port TEXT,
-  ratings TEXT
-);
+-- JSONB index (GIN for fast search within specs)
+CREATE INDEX idx_products_specs ON products USING GIN (specs);
 
--- Indexes for foreign keys (optional, for performance)
-CREATE INDEX idx_comments_user_id ON comments(user_id);
-CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+-- Reviews
+CREATE INDEX idx_reviews_product ON reviews(product_id);
+
+-- Orders
+CREATE INDEX idx_orders_user ON orders(user_id);

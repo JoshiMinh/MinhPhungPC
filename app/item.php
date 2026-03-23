@@ -1,6 +1,6 @@
 <?php
-include 'lib/db.php';
-include 'lib/categoryMap.php';
+include 'core/config.php';
+include 'core/schema.php';
 
 $table = $_GET['table'] ?? '';
 $id = $_GET['id'] ?? '';
@@ -91,7 +91,7 @@ if ($table && $id) {
 <body>
     <?php include 'components/navbar.php'; ?>
     <main class="container my-4">
-        <?php include 'lib/add_to_cart.php'; ?>
+        <?php include 'core/cart_add.php'; ?>
         <div class="row">
             <div class="col-md-6">
                 <img src="<?= htmlspecialchars($item['image']) ?>" class="img-fluid" alt="<?= htmlspecialchars($item['name']) ?>">
@@ -163,7 +163,7 @@ if ($table && $id) {
                     <button type="submit" class="btn btn-primary">Post Comment</button>
                 </form>
             <?php else: ?>
-                <p><a href="account.php">Log in</a> to post a comment.</p>
+                <p><a href="profile.php">Log in</a> to post a comment.</p>
             <?php endif; ?>
 
             <?php if ($comments): ?>

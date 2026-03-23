@@ -1,6 +1,6 @@
 <?php
-include 'db.php';
-require 'send_email.php';
+include 'config.php';
+require 'mailer.php';
 
 if (isset($_POST['email'])) {
     $email = $_POST['email'];

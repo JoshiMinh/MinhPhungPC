@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $table = $_POST['table'] ?? null;
@@ -28,6 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-header('Location: index.php');
+header('Location: home.php');
 exit;
 ?>

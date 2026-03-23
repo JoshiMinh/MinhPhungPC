@@ -1,4 +1,4 @@
-<?php include '../lib/categoryMap.php'; ?>
+<?php include '../core/schema.php'; ?>
 
 <style>
 .navbar-main, .navbar-secondary, .navbar-mobile, .navbar-mobile-secondary {
@@ -144,7 +144,7 @@
 
 <nav>
     <div class="navbar navbar-expand-lg navbar-main d-none d-lg-flex">
-        <a href="index.php" class="navbar-brand" style="width: 10%;" title="Home">
+        <a href="home.php" class="navbar-brand" style="width: 10%;" title="Home">
             <img src="logo.png" alt="MinhPhungPC Logo" style="width: 100%;">
         </a>
         <div class="mx-auto" style="width: 50%;">
@@ -168,7 +168,7 @@
                 $cart_amount = $cart_data ? count(explode(' ', trim($cart_data))) : 0;
             ?>
                 <div class="mx-2">
-                    <a href="account.php">
+                    <a href="profile.php">
                         <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" class="rounded-circle" style="width: 35px; height: 35px;" title="Profile">
                     </a>
                 </div>
@@ -177,11 +177,11 @@
                 </a>
             <?php else: ?>
                 <div class="mx-2">
-                    <a href="account.php" class="btn btn-primary" title="Sign In">
+                    <a href="profile.php" class="btn btn-primary" title="Sign In">
                         <i class="fas fa-user"></i>
                     </a>
                 </div>
-                <a href="account.php" class="btn btn-secondary" title="View Cart">
+                <a href="profile.php" class="btn btn-secondary" title="View Cart">
                     <i class="fas fa-shopping-cart"></i>
                 </a>
             <?php endif; ?>
@@ -193,7 +193,7 @@
             <ul class="navbar-nav flex-row w-100">
                 <?php foreach ($categoryMap as $category => $tableName): ?>
                     <li class="nav-item flex-fill">
-                        <a href="categories.php?table=<?= urlencode($tableName); ?>" class="nav-link" title="Explore <?= htmlspecialchars($category); ?>"><?= htmlspecialchars($category); ?></a>
+                        <a href="catalog.php?table=<?= urlencode($tableName); ?>" class="nav-link" title="Explore <?= htmlspecialchars($category); ?>"><?= htmlspecialchars($category); ?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -214,7 +214,7 @@
                 </button>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="mx-2">
-                        <a href="account.php">
+                        <a href="profile.php">
                             <img src="<?= htmlspecialchars($_SESSION['profile_image']); ?>" class="rounded-circle" style="width: 35px; height: 35px;" title="Profile">
                         </a>
                     </div>
@@ -223,11 +223,11 @@
                     </a>
                 <?php else: ?>
                     <div class="mx-2">
-                        <a href="account.php" class="btn btn-primary" title="Sign In">
+                        <a href="profile.php" class="btn btn-primary" title="Sign In">
                             <i class="fas fa-user"></i>
                         </a>
                     </div>
-                    <a href="account.php" class="btn btn-secondary" title="View Cart">
+                    <a href="profile.php" class="btn btn-secondary" title="View Cart">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
                 <?php endif; ?>
@@ -244,7 +244,7 @@
             <ul class="navbar-nav flex-row" style="white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; color: grey;">
                 <?php foreach ($categoryMap as $category => $tableName): ?>
                     <li class="px-1">
-                        <a href="categories.php?table=<?= urlencode($tableName); ?>"><?= htmlspecialchars($category); ?></a>
+                        <a href="catalog.php?table=<?= urlencode($tableName); ?>"><?= htmlspecialchars($category); ?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -277,7 +277,7 @@
         if (searchQuery.length > 0) {
             searchDropdown.style.display = 'block';
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", `lib/_search.php?query=${encodeURIComponent(searchQuery)}`, true);
+            xhr.open("GET", `../core/results.php?query=${encodeURIComponent(searchQuery)}`, true);
 
             xhr.onload = () => {
                 const components = JSON.parse(xhr.responseText);

@@ -1,18 +1,9 @@
-# Dependencies
-/vendor
-/node_modules
-
-# Configuration
+vendor/
+node_modules/
 .env
-
-# Storage & Assets
-/storage/profile_images/*
-!/storage/profile_images/.gitkeep
-/storage/images/*
-!/storage/images/.gitkeep
-
-# IDE & OS
-.vscode/
-.idea/
+storage/profiles/*
+!storage/profiles/.gitkeep
+storage/media/*
+!storage/media/.gitkeep
 .DS_Store
-Thumbs.db
+*.log

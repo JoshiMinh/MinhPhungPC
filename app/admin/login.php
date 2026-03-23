@@ -1,9 +1,9 @@
 <?php
-include '../lib/db_conn.php';
-session_start();
+include '../core/config.php';
+
 
 if (isset($_SESSION['minhphungpc_admin_id'])) {
-    header("Location: index.php");
+    header("Location: dash.php");
     exit();
 }
 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
         if (password_verify($password, $user['password_hash'])) {
             $_SESSION['minhphungpc_admin_id'] = $user['admin_id'];
-            header("Location: index.php");
+            header("Location: dash.php");
             exit();
         }
         echo "<script>alert('Incorrect password.');</script>";

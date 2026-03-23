@@ -1,6 +1,6 @@
 <?php
 if (empty($active) || $active !== true) {
-    header("Location: index.php");
+    header("Location: dash.php");
     exit();
 }
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('order_id', orderId);
             formData.append(select.name, select.value);
 
-            fetch('../lib/_update_order.php', { method: 'POST', body: formData })
+            fetch('../core/order_update.php', { method: 'POST', body: formData })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) alert('Order updated successfully!');

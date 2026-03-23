@@ -1,7 +1,6 @@
 <?php
-include 'lib/db.php';
-include 'lib/categoryMap.php';
-include 'lib/tableColumns.php';
+include 'core/config.php';
+include 'core/schema.php';
 
 $query = $_GET['query'] ?? '';
 $items = [];
@@ -16,7 +15,7 @@ if ($query) {
             echo "Error fetching data: " . htmlspecialchars($e->getMessage());
         }
     }
-    include 'lib/sort_by.php';
+    include 'core/sorter.php';
 }
 ?>
 
@@ -42,7 +41,7 @@ if ($query) {
             <h2 class="text-center my-3">Search Results for: <?= htmlspecialchars($query) ?></h2>
             
             <?php if ($items): ?>
-                <?php include 'lib/add_to_cart.php'; ?>
+                <?php include 'core/cart_add.php'; ?>
                 <?php include 'components/item_display.php'; ?>
             <?php else: ?>
                 <div class="alert alert-warning" style="margin: 4rem 0;">

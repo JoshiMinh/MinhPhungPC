@@ -1,6 +1,6 @@
 <?php
-include 'db.php';
-include 'scripts/tableColumns.php';
+include 'config.php';
+include 'schema.php';
 
 try {
     $search = '%' . $_GET['search'] . '%';

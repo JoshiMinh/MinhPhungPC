@@ -1,5 +1,5 @@
 <?php 
-include 'lib/db.php'; 
+include 'core/config.php';
 
 $username = 'Log in / Sign up';
 if (isset($_SESSION['user_id'])) {

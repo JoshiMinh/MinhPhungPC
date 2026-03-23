@@ -1,7 +1,7 @@
 <?php
 
 if (empty($active) || $active !== true) {
-    header("Location: index.php");
+    header("Location: dash.php");
     exit();
 }
 

@@ -1,5 +1,5 @@
 <?php
-require '../lib/send_email.php';
+require '../core/mailer.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $verificationCode = rand(100000, 999999);
@@ -185,7 +185,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
             <button type="submit" name="login" class="btn btn-primary w-100">Login</button>
             <div class="text-left mt-2">
-                <a href="forgot.php">Forgot Password?</a>
+                <a href="reset.php">Forgot Password?</a>
             </div>
         </form>
     </div>

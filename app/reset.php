@@ -1,8 +1,8 @@
 <?php
-include 'lib/db.php';
+include 'core/config.php';
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: account.php");
+    header("Location: profile.php");
     exit();
 }
 
@@ -56,7 +56,7 @@ if (isset($_POST['new_password']) && isset($_SESSION['email'])) {
         $_SESSION['profile_image'] = $user['profile_image'];
         $_SESSION['verified'] = false;
 
-        header("Location: account.php");
+        header("Location: profile.php");
         exit();
     }
 }
@@ -134,7 +134,7 @@ if (isset($_POST['new_password']) && isset($_SESSION['email'])) {
             if (email) {
                 $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...').prop('disabled', true);
                 $.ajax({
-                    url: 'lib/_emailForgot.php',
+                    url: 'core/reset_email.php',
                     type: 'POST',
                     data: { email: email },
                     success: function(response) {

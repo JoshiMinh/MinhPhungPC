@@ -100,7 +100,7 @@ foreach ($items as $table => $ids) {
     }));
     document.getElementById('confirmCancel').addEventListener('click', function () {
         if (!currentOrderId) return;
-        fetch('lib/_cancelOrder.php', {
+        fetch('../core/order_cancel.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ order_id: currentOrderId })

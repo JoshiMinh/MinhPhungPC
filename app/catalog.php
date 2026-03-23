@@ -1,6 +1,6 @@
 <?php
-include 'lib/db.php';
-include 'lib/categoryMap.php';
+include 'core/config.php';
+include 'core/schema.php';
 
 $table = $_GET['table'] ?? '';
 $tableName = array_search($table, $categoryMap) ?: 'Unknown Category';
@@ -40,7 +40,7 @@ if ($tableName !== 'Unknown Category') {
         $stmtItems->execute();
         $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-        include 'lib/sort_by.php';
+        include 'core/sorter.php';
     } catch (PDOException $e) {
         echo "Error fetching data: " . htmlspecialchars($e->getMessage());
     }
@@ -71,7 +71,7 @@ if ($tableName !== 'Unknown Category') {
 <div class="wrapper">
     <div class="content">
         <?php include 'components/navbar.php'; ?>
-        <?php include 'lib/add_to_cart.php'; ?>
+        <?php include 'core/cart_add.php'; ?>
         <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
         <div class="container-fluid my-1 mx-1">
             <div class="row">
