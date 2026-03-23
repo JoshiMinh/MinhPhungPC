@@ -12,7 +12,7 @@ $view = $_GET['view'] ?? 'dashboard';
 $validViews = ['dashboard', 'products', 'users', 'edit'];
 $active = true;
 
-$stmt = $pdo->prepare("SELECT username FROM admin WHERE admin_id = ?");
+$stmt = $pdo->prepare("SELECT name FROM users WHERE user_id = ? AND role = 'admin'");
 $stmt->bindParam(1, $admin_id, PDO::PARAM_INT);
 $stmt->execute();
 $username = $stmt->fetchColumn() ?: '';
@@ -98,15 +98,15 @@ if (isset($_POST['logout'])) {
         <div class="d-flex flex-grow-1 overflow-hidden">
             <aside class="offcanvas-md offcanvas-start d-md-flex flex-column sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <a href="dash.php">
+                    <a href="dashboard.php">
                         <img src="../../storage/images/logo_light.png" alt="Logo" class="img-fluid" style="width: 80%;">
                     </a>
                 </div>
                 <div class="flex-grow-1">
                     <ul class="nav flex-column p-2">
-                        <li class="nav-item"><a class="nav-link" href="dash.php?view=admin">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="dash.php?view=products">Manage Products</a></li>
-                        <li class="nav-item"><a class="nav-link" href="dash.php?view=users">Manage Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dashboard.php?view=dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dashboard.php?view=products">Manage Products</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dashboard.php?view=users">Manage Users</a></li>
                     </ul>
                 </div>
                 <div class="mt-auto p-2 text-center">

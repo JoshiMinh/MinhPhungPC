@@ -37,7 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "username" => $username,
                     "email" => $email,
                     "password_hash" => $passwordHash,
-                    "dob" => $dob,
                 ];
 
                 if (
@@ -107,12 +106,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (isset($_SESSION["pending_signup"])) {
                 $pendingSignup = $_SESSION["pending_signup"];
     
-                $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, date_of_birth) VALUES (:name, :email, :password_hash, :dob)");
+                $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash) VALUES (:name, :email, :password_hash)");
                 if ($stmt->execute([
                     ":name" => $pendingSignup["username"],
                     ":email" => $pendingSignup["email"],
                     ":password_hash" => $pendingSignup["password_hash"],
-                    ":dob" => $pendingSignup["dob"],
                 ])) {
                     $_SESSION["user_id"] = $pdo->lastInsertId();
                     $_SESSION["email"] = $pendingSignup["email"];
@@ -159,10 +157,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="form-group">
                 <label for="signup-retype-password">Retype Password</label>
                 <input type="password" class="form-control" id="signup-retype-password" name="retype-password" placeholder="Retype password" required>
-            </div>
-            <div class="form-group">
-                <label for="signup-dob">Date of Birth</label>
-                <input type="date" class="form-control" id="signup-dob" name="dob" required>
             </div>
             <button type="submit" name="signup" class="btn btn-primary w-100">Sign Up</button>
         </form>

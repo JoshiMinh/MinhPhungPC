@@ -1,19 +1,19 @@
 <?php
 
 if (empty($active) || $active !== true) {
-    header("Location: dash.php");
+    header("Location: dashboard.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     $pdo->prepare("DELETE FROM users WHERE user_id = ?")->execute([$_POST['user_id']]);
-    header("Location: index.php?view=$view&search=$search");
+    header("Location: dashboard.php?view=$view&search=$searchQuery");
     exit();
 }
 
 $view = $_GET['view'] ?? '';
 $searchQuery = $_GET['search'] ?? '';
-$usersStmt = $pdo->prepare("SELECT * FROM users WHERE name LIKE ? OR email LIKE ? ORDER BY user_id DESC LIMIT 10");
+$usersStmt = $pdo->prepare("SELECT * FROM users WHERE name ILIKE ? OR email ILIKE ? ORDER BY user_id DESC LIMIT 10");
 $usersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
 
 ?>
@@ -39,7 +39,6 @@ $usersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
                                 <th>ID</th>
                                 <th>User Name</th>
                                 <th>Email</th>
-                                <th>Date of Birth</th>
                                 <th>Profile Image</th>
                                 <th>Address</th>
                                 <th>Actions</th>
@@ -51,7 +50,6 @@ $usersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
                                     <td><?= htmlspecialchars($user['user_id']) ?></td>
                                     <td><?= htmlspecialchars($user['name']) ?></td>
                                     <td><?= htmlspecialchars($user['email']) ?></td>
-                                    <td><?= htmlspecialchars($user['date_of_birth']) ?></td>
                                     <td><img src="../../storage/profiles/<?= basename(htmlspecialchars($user['profile_image'])) ?>" alt="Profile Image" width="50"></td>
                                     <td><?= htmlspecialchars($user['address']) ?></td>
                                     <td>

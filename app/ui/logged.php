@@ -1,12 +1,11 @@
 <?php
 $userId = $_SESSION['user_id'] ?? 0;
 
-$stmt = $pdo->prepare("SELECT name, email, date_of_birth, profile_image, address, password_hash FROM users WHERE user_id = :user_id");
+$stmt = $pdo->prepare("SELECT name, email, profile_image, address, password_hash FROM users WHERE user_id = :user_id");
 $stmt->execute(['user_id' => $userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
     'name' => '',
     'email' => '',
-    'date_of_birth' => '',
     'profile_image' => 'default.jpg',
     'address' => '',
     'password_hash' => ''
@@ -36,10 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $uploadDir . $newFileName)) {
                     $profileImagePath = $uploadDir . $newFileName;
-                    $stmt = $pdo->prepare("UPDATE users SET name = :name, date_of_birth = :dob, address = :address, profile_image = :profile_image WHERE user_id = :user_id");
+                    $stmt = $pdo->prepare("UPDATE users SET name = :name, address = :address, profile_image = :profile_image WHERE user_id = :user_id");
                     $stmt->execute([
                         'name' => $newUsername,
-                        'dob' => $_POST['dob'] ?? $user['date_of_birth'],
                         'address' => $_POST['address'] ?? $user['address'],
                         'profile_image' => $profileImagePath,
                         'user_id' => $userId
@@ -49,10 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo "Error uploading file.";
                 }
             } else {
-                $stmt = $pdo->prepare("UPDATE users SET name = :name, date_of_birth = :dob, address = :address WHERE user_id = :user_id");
+                $stmt = $pdo->prepare("UPDATE users SET name = :name, address = :address WHERE user_id = :user_id");
                 $stmt->execute([
                     'name' => $newUsername,
-                    'dob' => $_POST['dob'] ?? $user['date_of_birth'],
                     'address' => $_POST['address'] ?? $user['address'],
                     'user_id' => $userId
                 ]);
@@ -121,10 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email']); ?>" readonly style="background: var(--bg-elevated); color: var(--text-primary);">
-                </div>
-                <div class="form-group">
-                    <label for="dob">Date of Birth</label>
-                    <input type="date" class="form-control" id="dob" name="dob" value="<?= htmlspecialchars($user['date_of_birth']); ?>">
                 </div>
                 <div class="form-group">
                     <label for="address">Address</label>

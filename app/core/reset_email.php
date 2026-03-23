@@ -1,6 +1,6 @@
 <?php
 include 'config.php';
-require 'mailer.php';
+require_once __DIR__ . '/mailer.php';
 
 if (isset($_POST['email'])) {
     $email = $_POST['email'];

@@ -1,6 +1,5 @@
 <?php
 include 'core/config.php';
-include 'core/config.php';
 include 'core/helpers.php';
 
 $type = $_GET['table'] ?? ''; // type slug
@@ -22,7 +21,7 @@ if ($type && $id) {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['comment']) && isset($_SESSION['user_id'])) {
-            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, content, created_at) VALUES (:user_id, :product_id, :content, NOW())");
+            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, content, created_at) VALUES (:user_id, :product_id, :content, CURRENT_TIMESTAMP)");
             $insertStmt->execute([
                 'user_id' => $_SESSION['user_id'],
                 'product_id' => $id,
@@ -86,7 +85,7 @@ if ($type && $id) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
     <style>
         .additional-details p { margin-bottom: 5px; }
         .additional-details ul { padding-left: 20px; }
@@ -97,7 +96,7 @@ if ($type && $id) {
     </style>
 </head>
 <body>
-    <?php include 'components/navbar.php'; ?>
+    <?php include 'ui/navbar.php'; ?>
     <main class="container my-4">
         <?php include 'core/cart_add.php'; ?>
         <div class="row">
@@ -166,11 +165,11 @@ if ($type && $id) {
             <?php endif; ?>
         </div>
     </main>
-    <?php include 'components/footer.php'; ?>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <?php include 'ui/footer.php'; ?>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="../scripts/main.js"></script>
+    <script src="../assets/main.js"></script>
+    <script src="../assets/js/builder.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const ratingStars = document.getElementById('rating-stars');

@@ -3,62 +3,37 @@ include 'core/config.php';
 include 'core/helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        header("Location: profile.php");
+        exit();
+    }
+
     if (isset($_POST['remove_all'])) {
-        $stmt = $pdo->prepare("UPDATE users SET cart = '' WHERE user_id = ?");
+        $stmt = $pdo->prepare("DELETE FROM cart_items WHERE user_id = ?");
         $stmt->execute([$user_id]);
         header("Location: cart.php");
         exit();
     }
 
     if (isset($_POST['remove_item'])) {
-        $item_to_remove = $_POST['remove_item'];
-        $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
-        $stmt->execute([$user_id]);
-        $cart_data = $stmt->fetchColumn() ?: '';
-
-        $cart_items_raw = explode(' ', $cart_data);
-        $updated_cart_items = array_filter($cart_items_raw, fn($item) => strpos($item, $item_to_remove . '-') !== 0);
-        $updated_cart = implode(' ', $updated_cart_items);
-
-        $stmt = $pdo->prepare("UPDATE users SET cart = ? WHERE user_id = ?");
-        $stmt->execute([$updated_cart, $user_id]);
+        $product_id = $_POST['remove_item'];
+        $stmt = $pdo->prepare("DELETE FROM cart_items WHERE user_id = ? AND product_id = ?");
+        $stmt->execute([$user_id, $product_id]);
         header("Location: cart.php");
         exit();
     }
 
     if (isset($_POST['update_quantity'])) {
-        $type = $_POST['table'];
         $id = $_POST['id'];
         $quantity = (int)$_POST['quantity'];
 
-        $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
+        $stmt = $pdo->prepare("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?");
+        $stmt->execute([$quantity, $user_id, $id]);
+
+        $stmt = $pdo->prepare("SELECT SUM(ci.quantity * p.price) FROM cart_items ci JOIN products p ON ci.product_id = p.product_id WHERE ci.user_id = ?");
         $stmt->execute([$user_id]);
-        $cart_data = $stmt->fetchColumn() ?: '';
-
-        $cart_items_raw = explode(' ', $cart_data);
-        $updated_cart_items = [];
-        foreach ($cart_items_raw as $item) {
-            $parts = explode('-', $item);
-            if (count($parts) === 3 && $parts[0] === $type && $parts[1] == $id) {
-                $parts[2] = $quantity;
-            }
-            $updated_cart_items[] = implode('-', $parts);
-        }
-
-        $updated_cart = implode(' ', $updated_cart_items);
-        $stmt = $pdo->prepare("UPDATE users SET cart = ? WHERE user_id = ?");
-        $stmt->execute([$updated_cart, $user_id]);
-
-        $totalAmount = 0;
-        foreach ($updated_cart_items as $item) {
-            $parts = explode('-', $item);
-            if (count($parts) === 3) {
-                $stmt = $pdo->prepare("SELECT price FROM products WHERE product_id = ?");
-                $stmt->execute([$parts[1]]);
-                $price = $stmt->fetchColumn();
-                $totalAmount += ($price ?: 0) * (int)$parts[2];
-            }
-        }
+        $totalAmount = $stmt->fetchColumn() ?: 0;
 
         header('Content-Type: application/json');
         echo json_encode(['newTotal' => number_format($totalAmount, 0, ',', '.') . '₫']);
@@ -69,49 +44,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $address = $_POST['address'];
         $payment_method = $_POST['payment_method'];
     
-        $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
+        $stmt = $pdo->prepare("SELECT ci.product_id, ci.quantity, p.price FROM cart_items ci JOIN products p ON ci.product_id = p.product_id WHERE ci.user_id = ?");
         $stmt->execute([$user_id]);
-        $cart_data = $stmt->fetchColumn();
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-        if (!empty($cart_data)) {
+        if (!empty($items)) {
             $totalAmount = 0;
-            $items_for_order = [];
-            $cart_items_raw = explode(' ', $cart_data);
-            foreach ($cart_items_raw as $item) {
-                $parts = explode('-', $item);
-                if (count($parts) === 3) {
-                    $stmt = $pdo->prepare("SELECT price FROM products WHERE product_id = ?");
-                    $stmt->execute([$parts[1]]);
-                    $price = $stmt->fetchColumn();
-                    if ($price) {
-                        $totalAmount += $price * $parts[2];
-                        $items_for_order[] = [
-                            'product_id' => $parts[1],
-                            'quantity' => $parts[2],
-                            'price' => $price
-                        ];
-                    }
-                }
+            foreach ($items as $item) {
+                $totalAmount += $item['price'] * $item['quantity'];
             }
     
-            // Using correct column names from schema.sql
             $stmt = $pdo->prepare("INSERT INTO orders (user_id, total_amount, status, payment_method, payment_status, shipping_address, created_at)
-                                   VALUES (?, ?, 'pending', ?, 'pending', ?, NOW())");
-            $stmt->execute([
-                $user_id,
-                $totalAmount,
-                $payment_method,
-                $address
-            ]);
+                                   VALUES (?, ?, 'pending', ?, 'pending', ?, CURRENT_TIMESTAMP)");
+            $stmt->execute([$user_id, $totalAmount, $payment_method, $address]);
             $order_id = $pdo->lastInsertId();
 
-            // Insert into order_items if it exists in schema.sql
-            foreach ($items_for_order as $item) {
+            foreach ($items as $item) {
                 $stmt = $pdo->prepare("INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)");
                 $stmt->execute([$order_id, $item['product_id'], $item['quantity'], $item['price']]);
             }
     
-            $stmt = $pdo->prepare("UPDATE users SET cart = '' WHERE user_id = ?");
+            $stmt = $pdo->prepare("DELETE FROM cart_items WHERE user_id = ?");
             $stmt->execute([$user_id]);
 
             $_SESSION['order_success'] = true;
@@ -210,59 +163,40 @@ if (isset($_SESSION['order_success'])) {
 
 <div class="wrapper">
     <div class="content">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'ui/navbar.php'; ?>
         <main class="container my-4">
             <?php
-            $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = ?");
-            $stmt->execute([$user_id]);
-            $cart_data = $stmt->fetchColumn();
+            $userId = $_SESSION['user_id'] ?? null;
+            $stmt = $pdo->prepare("SELECT ci.product_id, ci.quantity as amount, p.name, p.price, b.name as brand, p.image, pt.name as type FROM cart_items ci JOIN products p ON ci.product_id = p.product_id JOIN brands b ON p.brand_id = b.brand_id JOIN product_type pt ON CAST(p.type AS text) = pt.name WHERE ci.user_id = ?");
+            $stmt->execute([$userId]);
+            $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $cart_items = [];
             $totalAmount = 0;
 
-            if (!empty($cart_data)) {
-                $cart_items_raw = explode(' ', trim($cart_data));
-                $cart_items = [];
-                foreach ($cart_items_raw as $item) {
-                    $parts = explode('-', $item);
-                    if (count($parts) === 3) {
-                        $cart_items[] = [
-                            'type' => $parts[0],
-                            'id' => $parts[1],
-                            'amount' => (int)$parts[2]
-                        ];
-                    }
-                }
-
+            if (!empty($cart_items)) {
                 $cart_html = '';
                 foreach ($cart_items as $item) {
-                    $stmt = $pdo->prepare("SELECT p.name, p.price, b.name as brand, p.image FROM products p JOIN brands b ON p.brand_id = b.brand_id WHERE p.product_id = ?");
-                    $stmt->execute([$item['id']]);
-                    $product = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                    if ($product) {
-                        $totalAmount += $product['price'] * $item['amount'];
-                        $cart_html .= '
-                            <div class="cart-item h-100 bg-white text-dark shadow rounded">
-                                <form method="post" style="position: absolute; top: -5px; right: 5px;">
-                                    <input type="hidden" name="remove_item" value="' . htmlspecialchars($item['type']) . '-' . htmlspecialchars($item['id']) . '">
-                                    <button class="remove-item-btn" type="submit">&times;</button>
-                                </form>
-                                <a href="item.php?table=' . urlencode($item['type']) . '&id=' . urlencode($item['id']) . '">
-                                    <img src="' . htmlspecialchars($product['image']) . '" alt="' . htmlspecialchars($product['name']) . '">
-                                </a>
-                                <div class="cart-item-details">
-                                    <h5>' . htmlspecialchars($product['name']) . '</h5>
-                                    <p class="price text-success">' . number_format($product['price'], 0, ',', '.') . '₫</p>
-                                    <p class="brand">' . htmlspecialchars($product['brand']) . '</p>
-                                </div>
-                                <div class="quantity">
-                                    <a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', -1, \'' . $item['type'] . '\')"><</a>
-                                    <span>' . (int)$item['amount'] . '</span>
-                                    <a class="quantity-btn" onclick="updateQuantity(' . $item['id'] . ', 1, \'' . $item['type'] . '\')">></a>
-                                </div>
-                            </div>';
-                    }
+                    $totalAmount += $item['price'] * $item['amount'];
+                    $cart_html .= '
+                        <div class="cart-item h-100 bg-white text-dark shadow rounded">
+                            <form method="post" style="position: absolute; top: -5px; right: 5px;">
+                                <input type="hidden" name="remove_item" value="' . htmlspecialchars($item['product_id']) . '">
+                                <button class="remove-item-btn" type="submit">&times;</button>
+                            </form>
+                            <a href="item.php?table=' . urlencode($item['type']) . '&id=' . urlencode($item['product_id']) . '">
+                                <img src="' . htmlspecialchars($item['image']) . '" alt="' . htmlspecialchars($item['name']) . '">
+                            </a>
+                            <div class="cart-item-details">
+                                <h5>' . htmlspecialchars($item['name']) . '</h5>
+                                <p class="price text-success">' . number_format($item['price'], 0, ',', '.') . '₫</p>
+                                <p class="brand">' . htmlspecialchars($item['brand']) . '</p>
+                            </div>
+                            <div class="quantity">
+                                <a class="quantity-btn" onclick="updateQuantity(' . $item['product_id'] . ', -1, \'' . $item['type'] . '\')"><</a>
+                                <span>' . (int)$item['amount'] . '</span>
+                                <a class="quantity-btn" onclick="updateQuantity(' . $item['product_id'] . ', 1, \'' . $item['type'] . '\')">></a>
+                            </div>
+                        </div>';
                 }
 
                 $cart_html .= '
@@ -287,12 +221,13 @@ if (isset($_SESSION['order_success'])) {
             ?>
         </main>
     </div>
-    <?php include 'components/footer.php'; ?>
+    <?php include 'ui/footer.php'; ?>
 </div>
 
 <?php
+$userId = $_SESSION['user_id'] ?? null;
 $stmt = $pdo->prepare("SELECT name, email, address FROM users WHERE user_id = :user_id");
-$stmt->execute(['user_id' => $user_id]);
+$stmt->execute(['user_id' => $userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
     'name' => '',
     'email' => '',
@@ -355,7 +290,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="../scripts/main.js"></script>
+<script src="../assets/main.js"></script>
 <script>
     function updateQuantity(productId, delta, table) {
         const quantityElement = event.target.parentElement.querySelector('span');

@@ -72,12 +72,12 @@ if (isset($_POST['new_password']) && isset($_SESSION['email'])) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
 <div class="wrapper">
     <div class="content">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'ui/navbar.php'; ?>
         <main class="container">
             <div class="d-flex flex-column align-items-center w-100 my-5" style="min-height: 80vh;">
                 <?php if (!isset($_SESSION['verified']) || $_SESSION['verified'] == false): ?>
@@ -119,14 +119,14 @@ if (isset($_POST['new_password']) && isset($_SESSION['email'])) {
                 <?php endif; ?>
             </div>
         </main>
-        <?php include 'components/footer.php'; ?>
+        <?php include 'ui/footer.php'; ?>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="../scripts/main.js"></script>
+<script src="../assets/main.js"></script>
 <script>
     $(document).ready(function() {
         $('#sendOtpBtn').click(function() {

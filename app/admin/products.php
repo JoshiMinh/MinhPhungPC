@@ -12,10 +12,11 @@ $results = [];
 
 if (!empty($searchQuery)) {
     try {
-        $sql = "SELECT p.product_id AS id, p.name, b.name AS brand, p.price, p.image, p.type 
+        $sql = "SELECT p.product_id AS id, p.name, b.name AS brand, p.price, p.image, pt.name AS type 
                 FROM products p 
                 JOIN brands b ON p.brand_id = b.brand_id 
-                WHERE p.name LIKE ? OR b.name LIKE ? 
+                JOIN product_type pt ON p.type = pt.name 
+                WHERE p.name ILIKE ? OR b.name ILIKE ? 
                 ORDER BY b.name ASC, p.price DESC 
                 LIMIT 50";
         $stmt = $pdo->prepare($sql);
@@ -29,7 +30,7 @@ if (!empty($searchQuery)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
     $id = $_POST['id'];
     $pdo->prepare("DELETE FROM products WHERE product_id = ?")->execute([$id]);
-    header("Location: index.php?view=$view&search=$searchQuery");
+    header("Location: dashboard.php?view=products&search=$searchQuery");
     exit();
 }
 ?>

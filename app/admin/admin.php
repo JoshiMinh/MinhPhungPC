@@ -1,6 +1,6 @@
 <?php
 if (empty($active) || $active !== true) {
-    header("Location: dash.php");
+    header("Location: dashboard.php");
     exit();
 }
 
@@ -20,11 +20,11 @@ $totalRevenue = $pdo->query("SELECT COALESCE(SUM(total_amount), 0) FROM orders")
 $totalOrders = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $view = $_GET['view'] ?? '';
 $searchQuery = $_GET['search'] ?? '';
-$recentOrdersStmt = $pdo->prepare("SELECT o.order_id, o.customer_id, o.items, o.order_date, o.status, o.total_amount, o.address, o.payment_method, o.payment_status, u.name AS customer_name 
+$recentOrdersStmt = $pdo->prepare("SELECT o.order_id, o.user_id, o.created_at, o.status, o.total_amount, o.shipping_address, o.payment_method, o.payment_status, u.name AS customer_name 
     FROM orders o 
-    JOIN users u ON o.customer_id = u.user_id 
-    WHERE u.name LIKE ? OR o.order_id LIKE ? 
-    ORDER BY o.order_date DESC LIMIT 20");
+    JOIN users u ON o.user_id = u.user_id 
+    WHERE u.name ILIKE ? OR CAST(o.order_id AS TEXT) LIKE ? 
+    ORDER BY o.created_at DESC LIMIT 20");
 $recentOrdersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
 ?>
 
@@ -81,22 +81,21 @@ $recentOrdersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
                                     <td><?= htmlspecialchars($order['customer_name']) ?></td>
                                     <td>
                                         <?php
-                                        $itemsDetails = array_map(function ($item) use ($pdo) {
-                                            $parts = explode('-', $item);
-                                            if (count($parts) === 3) {
-                                                list($type, $id, $quantity) = $parts;
-                                                $stmt = $pdo->prepare("SELECT name, price FROM products WHERE product_id = ?");
-                                                $stmt->execute([$id]);
-                                                $detail = $stmt->fetch(PDO::FETCH_ASSOC);
-                                                return $detail ? htmlspecialchars($detail['name']) . " (" . number_format($detail['price'], 0, ',', '.') . "₫) x$quantity" : '';
-                                            }
-                                            return '';
-                                        }, explode(' ', $order['items']));
-                                        ?>
-                                        <p class="card-text"><?= implode(', ', $itemsDetails) ?></p>
+                                        $oiStmt = $pdo->prepare("SELECT oi.quantity, oi.price_at_purchase, p.name 
+                                                                  FROM order_items oi 
+                                                                  JOIN products p ON oi.product_id = p.product_id 
+                                                                  WHERE oi.order_id = ?");
+                                        $oiStmt->execute([$order['order_id']]);
+                                        $items = $oiStmt->fetchAll();
+                                        foreach ($items as $item): ?>
+                                            <p class="mb-0 small text-secondary">
+                                                <?= htmlspecialchars($item['name']) ?> 
+                                                (<?= number_format($item['price_at_purchase'], 0, ',', '.') ?>₫) x<?= $item['quantity'] ?>
+                                            </p>
+                                        <?php endforeach; ?>
                                     </td>
-                                    <td><?= htmlspecialchars($order['order_date']) ?></td>
-                                    <td class="text-success"><?= number_format($order['total_amount'], 2) ?>₫</td>
+                                    <td><?= htmlspecialchars($order['created_at']) ?></td>
+                                    <td class="text-success"><?= number_format($order['total_amount'], 0, ',', '.') ?>₫</td>
                                     <td>
                                         <select name="status" data-id="<?= htmlspecialchars($order['order_id']) ?>">
                                             <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
@@ -105,7 +104,7 @@ $recentOrdersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
                                             <option value="delivered" <?= $order['status'] === 'delivered' ? 'selected' : '' ?>>Delivered</option>
                                         </select>
                                     </td>
-                                    <td><?= htmlspecialchars($order['address']) ?></td>
+                                    <td><?= htmlspecialchars($order['shipping_address']) ?></td>
                                     <td><?= htmlspecialchars($order['payment_method']) ?></td>
                                     <td>
                                         <select name="payment_status" data-id="<?= htmlspecialchars($order['order_id']) ?>">

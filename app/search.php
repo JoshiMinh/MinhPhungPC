@@ -36,20 +36,20 @@ if ($query) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body style="transition: 0.5s;">
     
 <div class="wrapper">
     <div class="content">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'ui/navbar.php'; ?>
 
         <main class="container my-4">
             <h2 class="text-center my-3">Search Results for: <?= htmlspecialchars($query) ?></h2>
             
             <?php if ($items): ?>
                 <?php include 'core/cart_add.php'; ?>
-                <?php include 'components/item_display.php'; ?>
+                <?php include 'ui/item_display.php'; ?>
             <?php else: ?>
                 <div class="alert alert-warning" style="margin: 4rem 0;">
                     No items found for this search.
@@ -58,12 +58,12 @@ if ($query) {
         </main>
     </div>
 
-    <?php include 'components/footer.php'; ?>
+    <?php include 'ui/footer.php'; ?>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="../scripts/main.js"></script>
+    <script src="../assets/main.js"></script>
 </body>
 </html>

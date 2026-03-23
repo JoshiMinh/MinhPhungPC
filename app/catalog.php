@@ -2,8 +2,8 @@
 include 'core/config.php';
 include 'core/helpers.php';
 
-$type = $_GET['table'] ?? ''; // keeping parameter name 'table' for URL compatibility if needed, or change to 'type'
-$mapping = getProductTypeMapping();
+$type = $_GET['table'] ?? ''; 
+$mapping = getProductTypeMapping($pdo);
 $tableDisplayName = $mapping[$type] ?? 'Unknown Category';
 
 $brands = $items = [];
@@ -30,9 +30,6 @@ if ($tableDisplayName !== 'Unknown Category') {
         $formattedMinPrice = number_format($minPriceNumeric, 0, ',', '.');
         $formattedMaxPrice = number_format($maxPriceNumeric, 0, ',', '.');
 
-        $brandCondition = '';
-        $params = [':type' => $type, ':min_price' => $minPriceNumeric, ':max_price' => $maxPriceNumeric];
-        
         if ($brandFilter) {
             $placeholders = [];
             foreach ($brandFilter as $i => $brand) {
@@ -43,10 +40,11 @@ if ($tableDisplayName !== 'Unknown Category') {
             $brandCondition = "AND b.name IN (" . implode(',', $placeholders) . ")";
         }
 
+        // Use CAST for product_type compatibility if needed, or just standard comparison
         $query = "SELECT p.*, b.name as brand, :type as item_table 
                   FROM products p 
                   JOIN brands b ON p.brand_id = b.brand_id 
-                  WHERE p.type = :type $brandCondition AND price BETWEEN :min_price AND :max_price 
+                  WHERE CAST(p.type AS text) = :type $brandCondition AND price BETWEEN :min_price AND :max_price 
                   ORDER BY b.name";
         
         $stmtItems = $pdo->prepare($query);
@@ -85,7 +83,7 @@ if ($tableDisplayName !== 'Unknown Category') {
 <body>
 <div class="wrapper">
     <div class="content">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'ui/navbar.php'; ?>
         <?php include 'core/cart_add.php'; ?>
         <h2 class="text-center my-3"><?= $tableDisplayName ?></h2>
         <div class="container-fluid my-1 mx-1">
@@ -94,7 +92,7 @@ if ($tableDisplayName !== 'Unknown Category') {
                     <div class="col-12 col-md-3 sidebar-container">
                         <h5>Filter by Price (₫)</h5>
                         <form method="get">
-                            <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
+                            <input type="hidden" name="table" value="<?= htmlspecialchars($type) ?>">
                             <div class="form-inline mb-3">
                                 <div class="form-group mb-2 w-100">
                                     <label for="minPrice" class="mr-2">Min Price: </label>
@@ -129,7 +127,7 @@ if ($tableDisplayName !== 'Unknown Category') {
                 <?php endif; ?>
 
                 <div class="col-12 col-md-9 content-container">
-                    <?php if ($items): include 'components/item_display.php' ?>
+                    <?php if ($items): include 'ui/item_display.php' ?>
                     <?php else: ?>
                         <div class="alert alert-warning">No items found.</div>
                     <?php endif; ?>
@@ -137,7 +135,7 @@ if ($tableDisplayName !== 'Unknown Category') {
             </div>
         </div>
     </div>
-    <?php include 'components/footer.php'; ?>
+    <?php include 'ui/footer.php'; ?>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

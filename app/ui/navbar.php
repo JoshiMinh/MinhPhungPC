@@ -161,11 +161,10 @@
                 <i class="bi bi-moon icon"></i>
             </button>
             <?php if (isset($_SESSION['user_id'])): 
-                $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = :user_id");
+                $stmt = $pdo->prepare("SELECT SUM(quantity) FROM cart_items WHERE user_id = :user_id");
                 $stmt->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
                 $stmt->execute();
-                $cart_data = $stmt->fetchColumn();
-                $cart_amount = $cart_data ? count(explode(' ', trim($cart_data))) : 0;
+                $cart_amount = $stmt->fetchColumn() ?: 0;
             ?>
                 <div class="mx-2">
                     <a href="profile.php">
@@ -191,7 +190,7 @@
     <div class="navbar navbar-secondary navbar-gradient d-none d-lg-flex">
         <div class="navbar-collapse">
             <ul class="navbar-nav flex-row w-100">
-                <?php $mapping = getProductTypeMapping(); foreach ($mapping as $tableName => $category): ?>
+                <?php $mapping = getProductTypeMapping($pdo); foreach ($mapping as $tableName => $category): ?>
                     <li class="nav-item flex-fill">
                         <a href="catalog.php?table=<?= urlencode($tableName); ?>" class="nav-link" title="Explore <?= htmlspecialchars($category); ?>"><?= htmlspecialchars($category); ?></a>
                     </li>

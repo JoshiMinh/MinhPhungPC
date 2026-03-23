@@ -57,7 +57,7 @@ CREATE TABLE products (
     product_id   SERIAL PRIMARY KEY,
     name         TEXT NOT NULL,
     brand_id     INTEGER REFERENCES brands(brand_id),
-    type         product_type NOT NULL,
+    type         VARCHAR(50) NOT NULL,
     price        NUMERIC(12,0) NOT NULL, -- VND only
     image        TEXT,
     specs        JSONB NOT NULL DEFAULT '{}'::jsonb,

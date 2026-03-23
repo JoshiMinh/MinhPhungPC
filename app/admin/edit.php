@@ -1,7 +1,7 @@
 include '../core/helpers.php';
 
 if (empty($active) || !$active) {
-    header("Location: dash.php");
+    header("Location: dashboard.php");
     exit();
 }
 
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
         $stmt = $pdo->prepare("DELETE FROM products WHERE product_id = ?");
         $stmt->execute([$_POST['product_id']]);
-        header("Location: index.php?view=manage_products");
+        header("Location: dashboard.php?view=products");
         exit();
     }
 
@@ -53,14 +53,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO products (name, price, brand_id, image, type, specs, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
         $stmt->execute([$name, $price, $brand_id, $image, $type, $specsJson]);
         $newProductId = $pdo->lastInsertId();
-        header("Location: index.php?view=$view&product_id=$newProductId");
+        header("Location: dashboard.php?view=$view&product_id=$newProductId");
         exit();
     }
 
     if (isset($_POST['update'])) {
         $stmt = $pdo->prepare("UPDATE products SET name = ?, price = ?, brand_id = ?, image = ?, type = ?, specs = ? WHERE product_id = ?");
         $stmt->execute([$name, $price, $brand_id, $image, $type, $specsJson, $product_id]);
-        header("Location: index.php?view=$view&product_id=$product_id");
+        header("Location: dashboard.php?view=$view&product_id=$product_id");
         exit();
     }
 }
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="type" class="form-label">Product Type</label>
             <select name="type" id="type" class="form-control" required>
                 <option value="">Select Type</option>
-                <?php foreach (getProductTypeMapping() as $typeKey => $typeName): ?>
+                <?php foreach (getProductTypeMapping($pdo) as $typeKey => $typeName): ?>
                     <option value="<?= $typeKey ?>" <?= (isset($product['type']) && $product['type'] == $typeKey) ? 'selected' : '' ?>><?= htmlspecialchars($typeName) ?></option>
                 <?php endforeach; ?>
             </select>

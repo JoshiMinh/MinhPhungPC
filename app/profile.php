@@ -21,7 +21,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../assets/styles.css">
     <style>
         a:hover{
             text-decoration: none;
@@ -32,17 +32,17 @@ if (isset($_SESSION['user_id'])) {
 
 <div class="wrapper">
     <div class="content">
-        <?php include 'components/navbar.php'; ?>
+        <?php include 'ui/navbar.php'; ?>
         <main class="container my-4">
-            <?php include isset($_SESSION['user_id']) ? 'components/logged.php' : 'components/signin.php'; ?>
+            <?php include isset($_SESSION['user_id']) ? 'ui/logged.php' : 'ui/signin.php'; ?>
         </main>
     </div>
-    <?php include 'components/footer.php'; ?>
+    <?php include 'ui/footer.php'; ?>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="../scripts/main.js"></script>
+<script src="../assets/main.js"></script>
 </body>
 </html>

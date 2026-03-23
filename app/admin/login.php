@@ -3,28 +3,28 @@ include '../core/config.php';
 
 
 if (isset($_SESSION['minhphungpc_admin_id'])) {
-    header("Location: dash.php");
+    header("Location: dashboard.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
+    $email = $_POST['username'] ?? ''; // Using email since schema.sql users table has email as unique identifier
     $password = $_POST['password'] ?? '';
 
-    $stmt = $pdo->prepare("SELECT admin_id, password_hash FROM admin WHERE username = :username");
-    $stmt->bindParam(':username', $username);
+    $stmt = $pdo->prepare("SELECT user_id, password_hash FROM users WHERE email = :email AND role = 'admin'");
+    $stmt->bindParam(':email', $email);
     $stmt->execute();
 
     if ($stmt->rowCount()) {
         $user = $stmt->fetch();
         if (password_verify($password, $user['password_hash'])) {
-            $_SESSION['minhphungpc_admin_id'] = $user['admin_id'];
-            header("Location: dash.php");
+            $_SESSION['minhphungpc_admin_id'] = $user['user_id'];
+            header("Location: dashboard.php");
             exit();
         }
         echo "<script>alert('Incorrect password.');</script>";
     } else {
-        echo "<script>alert('Username not found.');</script>";
+        echo "<script>alert('Admin email not found.');</script>";
     }
 }
 ?>
