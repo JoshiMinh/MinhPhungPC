@@ -27,15 +27,16 @@
     --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+html,
 body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    transition: background 0.3s, color 0.3s;
     margin: 0;
     height: 100%;
 }
 
-html, body {
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background 0.3s, color 0.3s;
     margin: 0;
     height: 100%;
 }

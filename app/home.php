@@ -1,7 +1,6 @@
 <?php
 include 'core/config.php';
-
-$buildSetComponents = [];
+include 'core/helpers.php';
 $totalAmount = 0;
 
 if (isset($_SESSION['user_id'])) {
@@ -9,9 +8,7 @@ if (isset($_SESSION['user_id'])) {
     
     $stmt = $pdo->prepare("SELECT buildset FROM users WHERE user_id = ?");
     $stmt->execute([$userId]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $buildset = $result && !empty($result['buildset']) ? $result['buildset'] : null;
+    $buildset = $stmt->fetchColumn() ?: '';
 
     if (isset($_COOKIE['buildset']) && $_COOKIE['buildset'] !== '') {
         echo '<script type="text/javascript">
@@ -35,33 +32,28 @@ if (isset($_SESSION['user_id'])) {
         exit;
     }
 } else {
-    $buildset = $_COOKIE['buildset'] ?? null;
+    $buildset = $_COOKIE['buildset'] ?? '';
 }
 
 if ($buildset) {
-    $components = explode(' ', $buildset);
+    $buildset_array = parseBuildset($buildset);
 
-    foreach ($components as $component) {
-        $parts = explode('-', $component);
-        if (count($parts) === 2) {
-            list($table, $id) = $parts;
+    foreach ($buildset_array as $type => $id) {
+        if ($id !== null) {
+            $stmt = $pdo->prepare("SELECT p.name, p.price, p.image, b.name as brand FROM products p JOIN brands b ON p.brand_id = b.brand_id WHERE p.product_id = ?");
+            $stmt->execute([$id]);
+            $componentData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($id !== null) {
-                $stmt = $pdo->prepare("SELECT name, price, image, brand FROM $table WHERE id = ?");
-                $stmt->execute([$id]);
-                $componentData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($componentData) {
-                    $buildSetComponents[] = [
-                        'table' => $table,
-                        'id' => $id,
-                        'name' => $componentData['name'],
-                        'price' => $componentData['price'],
-                        'image' => $componentData['image'],
-                        'brand' => $componentData['brand']
-                    ];
-                    $totalAmount += $componentData['price'];
-                }
+            if ($componentData) {
+                $buildSetComponents[] = [
+                    'table' => $type,
+                    'id' => $id,
+                    'name' => $componentData['name'],
+                    'price' => $componentData['price'],
+                    'image' => $componentData['image'],
+                    'brand' => $componentData['brand']
+                ];
+                $totalAmount += $componentData['price'];
             }
         }
     }
@@ -116,15 +108,14 @@ $totalAmountFormatted = number_format($totalAmount, 0, ',', '.') . '₫';
 <div class="wrapper">
     <div class="content">
         <?php include 'components/navbar.php'; ?>
-        <?php include 'core/schema.php'; ?>
-
+        
         <main class="container">
             <div class="text-center my-5">
                 <h2>Build Your First PC!</h2>
             </div>
 
             <div class="container">
-                <?php foreach ($categoryMap as $componentName => $tableName): ?>
+                <?php $mapping = getProductTypeMapping(); foreach ($mapping as $tableName => $componentName): ?>
                     <?php
                     $selectedComponent = null;
                     foreach ($buildSetComponents as $component) {

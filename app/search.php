@@ -1,21 +1,28 @@
 <?php
 include 'core/config.php';
-include 'core/schema.php';
+include 'core/helpers.php';
 
 $query = $_GET['query'] ?? '';
 $items = [];
 
 if ($query) {
-    foreach (array_keys($components) as $table) {
-        try {
-            $stmt = $pdo->prepare("SELECT *, :table AS item_table FROM $table WHERE name LIKE :query OR brand LIKE :query ORDER BY brand");
-            $stmt->execute(['query' => '%' . $query . '%', 'table' => $table]);
-            $items = array_merge($items, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        } catch (PDOException $e) {
-            echo "Error fetching data: " . htmlspecialchars($e->getMessage());
+    try {
+        $stmt = $pdo->prepare("
+            SELECT p.*, b.name as brand, p.type AS item_table 
+            FROM products p 
+            JOIN brands b ON p.brand_id = b.brand_id 
+            WHERE p.name LIKE :query OR b.name LIKE :query 
+            ORDER BY b.name
+        ");
+        $stmt->execute(['query' => '%' . $query . '%']);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (isset($_GET['sort'])) {
+            sortItems($items, $_GET['sort']);
         }
+    } catch (PDOException $e) {
+        echo "Error fetching data: " . htmlspecialchars($e->getMessage());
     }
-    include 'core/sorter.php';
 }
 ?>
 

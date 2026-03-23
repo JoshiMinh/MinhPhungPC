@@ -82,11 +82,15 @@ $recentOrdersStmt->execute(["%$searchQuery%", "%$searchQuery%"]);
                                     <td>
                                         <?php
                                         $itemsDetails = array_map(function ($item) use ($pdo) {
-                                            list($table, $id, $quantity) = explode('-', $item);
-                                            $stmt = $pdo->prepare("SELECT name, price FROM $table WHERE id = ?");
-                                            $stmt->execute([$id]);
-                                            $detail = $stmt->fetch(PDO::FETCH_ASSOC);
-                                            return $detail ? htmlspecialchars($detail['name']) . " (" . number_format($detail['price'], 0, ',', '.') . "₫) x$quantity" : '';
+                                            $parts = explode('-', $item);
+                                            if (count($parts) === 3) {
+                                                list($type, $id, $quantity) = $parts;
+                                                $stmt = $pdo->prepare("SELECT name, price FROM products WHERE product_id = ?");
+                                                $stmt->execute([$id]);
+                                                $detail = $stmt->fetch(PDO::FETCH_ASSOC);
+                                                return $detail ? htmlspecialchars($detail['name']) . " (" . number_format($detail['price'], 0, ',', '.') . "₫) x$quantity" : '';
+                                            }
+                                            return '';
                                         }, explode(' ', $order['items']));
                                         ?>
                                         <p class="card-text"><?= implode(', ', $itemsDetails) ?></p>

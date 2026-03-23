@@ -1,51 +1,41 @@
 <?php
 include 'config.php';
+include 'helpers.php';
 
 if (isset($_POST['component_id'], $_POST['table_name'])) {
     $component_id = $_POST['component_id'];
-    $table_name = $_POST['table_name'];
+    $type = $_POST['table_name']; // maps to 'type' in new schema
     $totalAmount = 0;
 
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
+    $userId = $_SESSION['user_id'] ?? null;
+    $buildset = '';
+
+    if ($userId) {
         $stmt = $pdo->prepare("SELECT buildset FROM users WHERE user_id = ?");
-        $stmt->execute([$user_id]);
-        $buildset = $stmt->fetchColumn();
-
-        $updatedComponents = $buildset ? array_filter(explode(' ', $buildset), fn($item) => strpos($item, "$table_name-") === false) : [];
-        $updatedComponents[] = "$table_name-$component_id";
-        $updatedComponents = array_unique($updatedComponents);
-        $updatedBuildset = implode(' ', $updatedComponents);
-
-        $stmt = $pdo->prepare("UPDATE users SET buildset = ? WHERE user_id = ?");
-        $stmt->execute([$updatedBuildset, $user_id]);
-
-        foreach ($updatedComponents as $component) {
-            list($compTable, $compId) = explode('-', $component);
-            $priceStmt = $pdo->prepare("SELECT price FROM $compTable WHERE id = ?");
-            $priceStmt->execute([$compId]);
-            $totalAmount += $priceStmt->fetchColumn() ?: 0;
-        }
-
-        echo json_encode(['status' => 'success', 'message' => 'Buildset updated successfully.', 'totalAmount' => $totalAmount]);
+        $stmt->execute([$userId]);
+        $buildset = $stmt->fetchColumn() ?: '';
     } else {
         $buildset = $_COOKIE['buildset'] ?? '';
-        $updatedComponents = $buildset ? array_filter(explode(' ', $buildset), fn($item) => strpos($item, "$table_name-") === false) : [];
-        $updatedComponents[] = "$table_name-$component_id";
-        $updatedComponents = array_unique($updatedComponents);
-        $updatedBuildset = implode(' ', $updatedComponents);
-
-        setcookie('buildset', $updatedBuildset, time() + 3600 * 24 * 30, '/');
-
-        foreach ($updatedComponents as $component) {
-            list($compTable, $compId) = explode('-', $component);
-            $priceStmt = $pdo->prepare("SELECT price FROM $compTable WHERE id = ?");
-            $priceStmt->execute([$compId]);
-            $totalAmount += $priceStmt->fetchColumn() ?: 0;
-        }
-
-        echo json_encode(['status' => 'success', 'message' => 'Buildset updated in cookie.', 'totalAmount' => $totalAmount]);
     }
+
+    $buildset_array = parseBuildset($buildset);
+    $buildset_array[$type] = $component_id;
+    $updatedBuildset = formatBuildset($buildset_array);
+
+    if ($userId) {
+        $stmt = $pdo->prepare("UPDATE users SET buildset = ? WHERE user_id = ?");
+        $stmt->execute([$updatedBuildset, $userId]);
+    } else {
+        setcookie('buildset', $updatedBuildset, time() + 3600 * 24 * 30, '/');
+    }
+
+    foreach ($buildset_array as $compType => $compId) {
+        $priceStmt = $pdo->prepare("SELECT price FROM products WHERE product_id = ?");
+        $priceStmt->execute([$compId]);
+        $totalAmount += $priceStmt->fetchColumn() ?: 0;
+    }
+
+    echo json_encode(['status' => 'success', 'message' => 'Buildset updated successfully.', 'totalAmount' => $totalAmount]);
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Missing required data.']);
 }

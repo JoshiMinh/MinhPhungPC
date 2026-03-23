@@ -1,18 +1,20 @@
 <?php
 include 'config.php';
-include 'schema.php';
+include 'helpers.php';
 
 try {
-    $search = '%' . $_GET['search'] . '%';
-    $tables = array_keys($components);
+    $search = '%' . ($_GET['search'] ?? '') . '%';
     $components = [];
 
-    if ($search) {
-        foreach ($tables as $table) {
-            $stmt = $pdo->prepare("SELECT *, :table AS item_table FROM $table WHERE name LIKE :query OR brand LIKE :query");
-            $stmt->execute(['query' => $search, 'table' => $table]);
-            $components = array_merge($components, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        }
+    if ($search !== '%%') {
+        $stmt = $pdo->prepare("
+            SELECT p.*, b.name as brand, p.type AS item_table 
+            FROM products p 
+            JOIN brands b ON p.brand_id = b.brand_id 
+            WHERE p.name LIKE :query OR b.name LIKE :query
+        ");
+        $stmt->execute(['query' => $search]);
+        $components = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     echo json_encode($components);

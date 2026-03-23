@@ -1,5 +1,4 @@
-<?php
-include '../core/schema.php';
+include '../core/helpers.php';
 
 if (empty($active) || $active !== true) {
     header("Location: dash.php");
@@ -12,24 +11,24 @@ $searchQuery = $_GET['search'] ?? '';
 $results = [];
 
 if (!empty($searchQuery)) {
-    foreach ($components as $tableName => $columns) {
-        if (in_array('name', $columns) && in_array('brand', $columns)) {
-            $sql = "SELECT id, name, brand, price, image, '$tableName' AS type 
-                    FROM $tableName 
-                    WHERE name LIKE ? OR brand LIKE ? 
-                    ORDER BY brand ASC, price DESC 
-                    LIMIT 20";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute(["%$searchQuery%", "%$searchQuery%"]);
-            $results = array_merge($results, $stmt->fetchAll(PDO::FETCH_ASSOC));
-        }
+    try {
+        $sql = "SELECT p.product_id AS id, p.name, b.name AS brand, p.price, p.image, p.type 
+                FROM products p 
+                JOIN brands b ON p.brand_id = b.brand_id 
+                WHERE p.name LIKE ? OR b.name LIKE ? 
+                ORDER BY b.name ASC, p.price DESC 
+                LIMIT 50";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(["%$searchQuery%", "%$searchQuery%"]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_item'])) {
-    $table = $_POST['table'];
     $id = $_POST['id'];
-    $pdo->prepare("DELETE FROM $table WHERE id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM products WHERE product_id = ?")->execute([$id]);
     header("Location: index.php?view=$view&search=$searchQuery");
     exit();
 }

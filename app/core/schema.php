@@ -1,25 +1,28 @@
 <?php
+// Unified product schema metadata
 $categoryMap = [
-    "CPU"              => "processor",
+    "CPU"              => "cpu",
+    "Graphics Card"    => "gpu",
+    "RAM"              => "ram",
     "Motherboard"      => "motherboard",
-    "RAM"              => "memory",
-    "Graphics Card"    => "graphicscard",
     "Storage"          => "storage",
-    "Power Supply"     => "powersupply",
-    "Cooler"           => "cpucooler",
-    "Case"             => "pccase",
-    "Operating System" => "operatingsystem",
+    "Power Supply"     => "psu",
+    "Case"             => "case",
+    "Cooler"           => "cooler",
+    "Operating System" => "os",
+    "Fan"              => "fan",
 ];
 
-$components = [
-    'processor'       => ['id', 'name', 'brand', 'price', 'image', 'core_count', 'thread_count', 'socket_type', 'TDP'],
-    'motherboard'     => ['id', 'name', 'brand', 'price', 'image', 'socket_type', 'chipset', 'memory_slots', 'max_memory_capacity', 'ddr', 'expansion_slots'],
-    'memory'          => ['id', 'name', 'brand', 'price', 'image', 'ddr', 'capacity', 'speed'],
-    'graphicscard'    => ['id', 'name', 'brand', 'price', 'image', 'vram_capacity', 'cuda_cores', 'TDP'],
-    'storage'         => ['id', 'name', 'brand', 'price', 'image', 'type', 'capacity', 'speed', 'port'],
-    'cpucooler'       => ['id', 'name', 'brand', 'price', 'image', 'cooling_type', 'socket'],
-    'powersupply'     => ['id', 'name', 'brand', 'price', 'image', 'wattage', 'efficiency_rating'],
-    'pccase'          => ['id', 'name', 'brand', 'price', 'image', 'size'],
-    'operatingsystem' => ['id', 'name', 'brand', 'price', 'image', 'version'],
+// Specification fields for different product types (stored in specs JSONB)
+$specs_metadata = [
+    'cpu'         => ['core_count', 'thread_count', 'socket_type', 'TDP'],
+    'motherboard' => ['socket_type', 'chipset', 'memory_slots', 'max_memory_capacity', 'ddr', 'expansion_slots'],
+    'ram'         => ['ddr', 'capacity', 'speed'],
+    'gpu'         => ['vram_capacity', 'cuda_cores', 'TDP'],
+    'storage'     => ['type', 'capacity', 'speed', 'port'],
+    'cooler'      => ['cooling_type', 'socket'],
+    'psu'         => ['wattage', 'efficiency_rating'],
+    'case'        => ['size'],
+    'os'          => ['version'],
 ];
 ?>

@@ -30,7 +30,7 @@
         <?php foreach ($items as $index => $item): ?>
             <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 slide-up" style="animation-delay: <?= $index * 0.1 ?>s;">
                 <div class="card h-100 text-dark p-0" style="border: none; border-radius: 10px; background-color: var(--bg-elevated);">
-                    <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>" class="nav-link">
+                    <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['product_id']) ?>" class="nav-link">
                         <img src="<?= htmlspecialchars($item['image']) ?>" 
                              alt="<?= htmlspecialchars($item['name']) ?>" 
                              class="card-img-top" 
@@ -45,12 +45,12 @@
                         </h6>
                     </div>
                     <div class="card-footer d-flex" style="padding: 0; height: 50px; border: none;">
-                        <form method="post" style="flex: 7; height: 100%; margin: 0;">
+                        <form method="post" action="core/cart_add.php" style="flex: 7; height: 100%; margin: 0;">
                             <input type="hidden" name="table" value="<?= htmlspecialchars($item['item_table']) ?>">
-                            <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
+                            <input type="hidden" name="id" value="<?= htmlspecialchars($item['product_id']) ?>">
                             <button type="submit" class="btn btn-primary btn-sm w-100 h-100" style="border-radius: 0;">Add to Cart</button>
                         </form>
-                        <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['id']) ?>">
+                        <a href="item.php?table=<?= urlencode($item['item_table']) ?>&id=<?= urlencode($item['product_id']) ?>">
                             <button class="btn btn-secondary w-100 h-100" style="flex: 3; border-radius: 0;">View</button>
                         </a>
                     </div>

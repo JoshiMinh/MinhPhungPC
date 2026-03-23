@@ -1,18 +1,19 @@
 <?php
 include 'config.php';
-include 'cart_helper.php';
+include 'helpers.php';
 
 $response = ['success' => false, 'message' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'addToCart') {
-    if (!isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id'] ?? null;
+    if (!$userId) {
         $response['message'] = 'You must be logged in!';
         echo json_encode($response);
         exit;
     }
 
     $stmt = $pdo->prepare("SELECT buildset FROM users WHERE user_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([$userId]);
     $buildset = $stmt->fetchColumn();
 
     if (empty($buildset)) {
@@ -21,16 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     }
 
-    $userId = $_SESSION['user_id'];
-    $components = explode(' ', $buildset);
+    $components = explode(' ', trim($buildset));
     $newEntries = array_map(fn($c) => $c . '-1', $components); // append amount=1
 
     $stmt = $pdo->prepare("SELECT cart FROM users WHERE user_id = :userId");
     $stmt->bindParam(':userId', $userId);
     $stmt->execute();
-    $currentCart = $stmt->fetchColumn();
+    $currentCart = $stmt->fetchColumn() ?: '';
 
-    $updatedCartString = mergeCartEntries($currentCart ?: '', $newEntries);
+    $updatedCartString = mergeCartEntries($currentCart, $newEntries);
 
     $stmt = $pdo->prepare("UPDATE users SET cart = :cart WHERE user_id = :userId");
     $stmt->bindParam(':cart', $updatedCartString);

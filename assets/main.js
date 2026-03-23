@@ -9,20 +9,16 @@ if (theme === 'dark') {
     document.body.classList.add('dark-theme');
 }
 
-const toggleTheme = () => {
-    document.body.classList.toggle('dark-theme');
-    if (document.body.classList.contains('dark-theme')) {
-        localStorage.setItem('theme', 'dark');
-    } else {
-        localStorage.setItem('theme', 'light');
-    }
-};
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-theme');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
 
-if (switchBtn) switchBtn.addEventListener('click', toggleTheme);
-if (switchBtnMobile) switchBtnMobile.addEventListener('click', toggleTheme);
+switchBtn?.addEventListener('click', toggleTheme);
+switchBtnMobile?.addEventListener('click', toggleTheme);
 
 // Scroll Position Persistence
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', () => {
     const scrollPositions = JSON.parse(localStorage.getItem('scrollPositions')) || {};
     const path = window.location.pathname;
 
@@ -30,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
         window.scrollTo(0, scrollPositions[path]);
     }
 
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', () => {
         scrollPositions[path] = window.scrollY;
         localStorage.setItem('scrollPositions', JSON.stringify(scrollPositions));
     });

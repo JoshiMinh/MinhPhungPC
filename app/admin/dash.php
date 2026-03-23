@@ -8,8 +8,8 @@ if (!isset($_SESSION['minhphungpc_admin_id'])) {
 }
 
 $admin_id = $_SESSION['minhphungpc_admin_id'];
-$view = $_GET['view'] ?? '';
-$validViews = ['dashboard', 'manage_products', 'manage_users', 'add_or_edit_product'];
+$view = $_GET['view'] ?? 'dashboard';
+$validViews = ['dashboard', 'products', 'users', 'edit'];
 $active = true;
 
 $stmt = $pdo->prepare("SELECT username FROM admin WHERE admin_id = ?");
@@ -122,15 +122,10 @@ if (isset($_POST['logout'])) {
             <main class="flex-grow-1 p-3 overflow-auto">
                 <button class="btn btn-outline-primary d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">&#9776;</button>
                 <div>
-                    <?php if ($view === ''): 
-                        include 'admin.php'; 
-                    elseif (!in_array($view, $validViews)): ?>
+                    <?php if (!in_array($view, $validViews)): ?>
                         <div class="centered-404"><h3>404 Page Not Found</h3></div>
                     <?php else: 
-                        $view_file = $view === 'manage_products' ? 'products' : 
-                                    ($view === 'manage_users' ? 'users' : 
-                                    ($view === 'dashboard' ? 'admin' : 
-                                    ($view === 'add_or_edit_product' ? 'edit' : $view)));
+                        $view_file = $view === 'dashboard' ? 'admin' : $view;
                         include $view_file . '.php'; 
                     endif; ?>
                 </div>

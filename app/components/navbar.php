@@ -1,4 +1,4 @@
-<?php include '../core/schema.php'; ?>
+<?php include_once __DIR__ . '/../core/helpers.php'; ?>
 
 <style>
 .navbar-main, .navbar-secondary, .navbar-mobile, .navbar-mobile-secondary {
@@ -191,7 +191,7 @@
     <div class="navbar navbar-secondary navbar-gradient d-none d-lg-flex">
         <div class="navbar-collapse">
             <ul class="navbar-nav flex-row w-100">
-                <?php foreach ($categoryMap as $category => $tableName): ?>
+                <?php $mapping = getProductTypeMapping(); foreach ($mapping as $tableName => $category): ?>
                     <li class="nav-item flex-fill">
                         <a href="catalog.php?table=<?= urlencode($tableName); ?>" class="nav-link" title="Explore <?= htmlspecialchars($category); ?>"><?= htmlspecialchars($category); ?></a>
                     </li>
@@ -242,7 +242,7 @@
         </div>
         <div class="categories">
             <ul class="navbar-nav flex-row" style="white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; color: grey;">
-                <?php foreach ($categoryMap as $category => $tableName): ?>
+                <?php foreach ($mapping as $tableName => $category): ?>
                     <li class="px-1">
                         <a href="catalog.php?table=<?= urlencode($tableName); ?>"><?= htmlspecialchars($category); ?></a>
                     </li>
@@ -256,7 +256,7 @@
 <script>
     const performSearch = (inputId) => {
         const query = document.getElementById(inputId).value;
-        if (query) window.location.href = `search_result.php?query=${encodeURIComponent(query)}`;
+        if (query) window.location.href = `search.php?query=${encodeURIComponent(query)}`;
     };
 
     const checkEnter = (event, inputId) => {
@@ -277,13 +277,13 @@
         if (searchQuery.length > 0) {
             searchDropdown.style.display = 'block';
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", `../core/results.php?query=${encodeURIComponent(searchQuery)}`, true);
+            xhr.open("GET", `core/results.php?query=${encodeURIComponent(searchQuery)}`, true);
 
             xhr.onload = () => {
                 const components = JSON.parse(xhr.responseText);
                 searchDropdown.innerHTML = components.length
                     ? components.map(component => `
-                        <div class="dropdown-item" onclick="window.location.href='item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.id)}'" style="display: flex; align-items: center;">
+                        <div class="dropdown-item" onclick="window.location.href='item.php?table=${encodeURIComponent(component.item_table)}&id=${encodeURIComponent(component.product_id)}'" style="display: flex; align-items: center;">
                             <img src="${component.image}" alt="${component.name}" style="width: 60px; height: 60px; margin-right: 10px; background-color: white;">
                             <div style="display: flex; flex-direction: column;">
                                 <strong>${component.name}</strong>

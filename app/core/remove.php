@@ -1,33 +1,37 @@
 <?php
 include 'config.php';
+include 'helpers.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $table = $_POST['table'] ?? null;
+    $type = $_POST['table'] ?? null;
 
-    if ($table) {
-        if (isset($_SESSION['user_id'])) {
-            $userId = $_SESSION['user_id'];
+    if ($type) {
+        $userId = $_SESSION['user_id'] ?? null;
+        $buildset = '';
+
+        if ($userId) {
             $stmt = $pdo->prepare("SELECT buildset FROM users WHERE user_id = ?");
             $stmt->execute([$userId]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($result && !empty($result['buildset'])) {
-                $buildset = explode(' ', $result['buildset']);
-                $buildset = array_filter($buildset, fn($component) => !str_starts_with($component, $table . '-'));
-                $updatedBuildset = implode(' ', $buildset);
-
-                $updateStmt = $pdo->prepare("UPDATE users SET buildset = ? WHERE user_id = ?");
-                $updateStmt->execute([$updatedBuildset, $userId]);
-            }
+            $buildset = $stmt->fetchColumn() ?: '';
         } else {
             $buildset = $_COOKIE['buildset'] ?? '';
-            $buildsetArray = explode(' ', $buildset);
-            $buildsetArray = array_filter($buildsetArray, fn($component) => !str_starts_with($component, $table . '-'));
-            setcookie('buildset', implode(' ', $buildsetArray), time() + (86400 * 30), '/');
+        }
+
+        $buildset_array = parseBuildset($buildset);
+        if (isset($buildset_array[$type])) {
+            unset($buildset_array[$type]);
+            $updatedBuildset = formatBuildset($buildset_array);
+
+            if ($userId) {
+                $stmt = $pdo->prepare("UPDATE users SET buildset = ? WHERE user_id = ?");
+                $stmt->execute([$updatedBuildset, $userId]);
+            } else {
+                setcookie('buildset', $updatedBuildset, time() + 3600 * 24 * 30, '/');
+            }
         }
     }
 }
 
-header('Location: home.php');
+header('Location: ../home.php'); // adjusted path to root home.php
 exit;
 ?>

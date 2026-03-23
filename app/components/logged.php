@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="tab-pane fade" id="order-history" role="tabpanel" aria-labelledby="order-history-tab">
-            <?php include 'components/order_history.php'; ?>
+            <?php include 'order_history.php'; ?>
         </div>
     </div>
 </div>

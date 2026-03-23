@@ -1,5 +1,4 @@
-<?php
-include '../core/schema.php';
+include '../core/helpers.php';
 
 if (empty($active) || !$active) {
     header("Location: dash.php");
@@ -7,50 +6,61 @@ if (empty($active) || !$active) {
 }
 
 $product_id = $_GET['product_id'] ?? '';
-$table = $_GET['table'] ?? '';
 $view = $_GET['view'] ?? '';
-$addAction = !$product_id && !$table;
+$addAction = !$product_id;
+
+$product = [];
+$specs = [];
 
 if (!$addAction) {
-    $stmt = $pdo->prepare("SELECT * FROM $table WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT p.*, b.name as brand_name FROM products p JOIN brands b ON p.brand_id = b.brand_id WHERE p.product_id = ?");
     $stmt->execute([$product_id]);
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($product) {
+        $specs = json_decode($product['specs'], true) ?: [];
+    }
 }
+
+// Fetch all brands for dropdown
+$brands = $pdo->query("SELECT * FROM brands ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) {
-        $stmt = $pdo->prepare("DELETE FROM $table WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM products WHERE product_id = ?");
         $stmt->execute([$_POST['product_id']]);
         header("Location: index.php?view=manage_products");
         exit();
     }
 
-    if (isset($_POST['add'])) {
-        $table = $_POST['selected_table'];
-        if (!isset($components[$table])) {
-            die("Invalid table selected");
+    $name = $_POST['name'] ?? '';
+    $price = (float)str_replace(',', '', $_POST['price'] ?? '0');
+    $brand_id = $_POST['brand_id'] ?? '';
+    $image = $_POST['image'] ?? '';
+    $type = $_POST['type'] ?? '';
+
+    // Collect specs from POST
+    $updatedSpecs = [];
+    if (isset($_POST['spec_keys']) && isset($_POST['spec_values'])) {
+        foreach ($_POST['spec_keys'] as $index => $key) {
+            if (!empty($key)) {
+                $updatedSpecs[$key] = $_POST['spec_values'][$index] ?? '';
+            }
         }
-        $stmt = $pdo->prepare("INSERT INTO `$table` (name, price, brand, image) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$_POST['name'], $_POST['price'], $_POST['brand'], $_POST['image']]);
+    }
+    $specsJson = json_encode($updatedSpecs);
+
+    if (isset($_POST['add'])) {
+        $stmt = $pdo->prepare("INSERT INTO products (name, price, brand_id, image, type, specs, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([$name, $price, $brand_id, $image, $type, $specsJson]);
         $newProductId = $pdo->lastInsertId();
-        header("Location: index.php?view=$view&product_id=$newProductId&table=$table");
+        header("Location: index.php?view=$view&product_id=$newProductId");
         exit();
     }
 
     if (isset($_POST['update'])) {
-        $query = "UPDATE $table SET name = ?, price = ?, brand = ?, image = ?";
-        $params = [$_POST['name'], $_POST['price'], $_POST['brand'], $_POST['image']];
-        foreach ($components[$table] as $field) {
-            if (!in_array($field, ['id', 'name', 'brand', 'price', 'image'])) {
-                $query .= ", $field = ?";
-                $params[] = $_POST[$field];
-            }
-        }
-        $query .= " WHERE id = ?";
-        $params[] = $product_id;
-        $stmt = $pdo->prepare($query);
-        $stmt->execute($params);
-        header("Location: index.php?view=$view&product_id=$product_id&table=$table");
+        $stmt = $pdo->prepare("UPDATE products SET name = ?, price = ?, brand_id = ?, image = ?, type = ?, specs = ? WHERE product_id = ?");
+        $stmt->execute([$name, $price, $brand_id, $image, $type, $specsJson, $product_id]);
+        header("Location: index.php?view=$view&product_id=$product_id");
         exit();
     }
 }
@@ -80,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <input type="text" id="name" name="name" class="form-control" value="<?= $product['name'] ?? '' ?>" required>
+            <input type="text" id="name" name="name" class="form-control" value="<?= htmlspecialchars($product['name'] ?? '') ?>" required>
         </div>
         <div class="mb-3">
             <label for="price" class="form-label">Price (VNĐ)</label>
@@ -95,50 +105,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             >
         </div>
         <div class="mb-3">
-            <label for="brand" class="form-label">Brand</label>
-            <input type="text" id="brand" name="brand" class="form-control" value="<?= $product['brand'] ?? '' ?>" required>
+            <label for="brand_id" class="form-label">Brand</label>
+            <select name="brand_id" id="brand_id" class="form-control" required>
+                <option value="">Select Brand</option>
+                <?php foreach ($brands as $b): ?>
+                    <option value="<?= $b['brand_id'] ?>" <?= (isset($product['brand_id']) && $product['brand_id'] == $b['brand_id']) ? 'selected' : '' ?>><?= htmlspecialchars($b['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="type" class="form-label">Product Type</label>
+            <select name="type" id="type" class="form-control" required>
+                <option value="">Select Type</option>
+                <?php foreach (getProductTypeMapping() as $typeKey => $typeName): ?>
+                    <option value="<?= $typeKey ?>" <?= (isset($product['type']) && $product['type'] == $typeKey) ? 'selected' : '' ?>><?= htmlspecialchars($typeName) ?></option>
+                <?php endforeach; ?>
+            </select>
         </div>
         <div class="mb-3">
             <label for="image" class="form-label">Image (URL)</label>
-            <input type="text" id="image" name="image" class="form-control" value="<?= $product['image'] ?? '' ?>" required>
+            <input type="text" id="image" name="image" class="form-control" value="<?= htmlspecialchars($product['image'] ?? '') ?>" required>
         </div>
 
-        <?php if (!$addAction): ?>
-            <hr>
-            <?php foreach ($components[$table] as $field): ?>
-                <?php if (!in_array($field, ['id', 'name', 'brand', 'price', 'image'])): ?>
-                    <div class="mb-3">
-                        <label for="<?= $field ?>" class="form-label"><?= ucfirst(str_replace('_', ' ', $field)) ?></label>
-                        <input type="text" id="<?= $field ?>" name="<?= $field ?>" class="form-control" value="<?= $product[$field] ?? '' ?>" required>
+        <hr>
+        <h5>Specifications</h5>
+        <div id="specs-container">
+            <?php foreach ($specs as $key => $value): ?>
+                <div class="row mb-2 spec-row">
+                    <div class="col-5">
+                        <input type="text" name="spec_keys[]" class="form-control" placeholder="Key (e.g. socket_type)" value="<?= htmlspecialchars($key) ?>">
                     </div>
-                <?php endif; ?>
+                    <div class="col-6">
+                        <input type="text" name="spec_values[]" class="form-control" placeholder="Value" value="<?= htmlspecialchars($value) ?>">
+                    </div>
+                    <div class="col-1">
+                        <button type="button" class="btn btn-danger btn-sm remove-spec">&times;</button>
+                    </div>
+                </div>
             <?php endforeach; ?>
-            
-            <div class="mb-3 text-center">
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm mb-3" id="add-spec">Add Specification</button>
+
+        <div class="mb-3 text-center">
+            <?php if (!$addAction): ?>
                 <button type="submit" name="update" class="btn btn-primary">Update</button>
                 <button type="submit" name="delete" class="btn btn-danger" onclick="return confirmDelete()">Delete</button>
-                <input type="hidden" name="product_id" value="<?= $product['id'] ?? '' ?>">
-            </div>
-        <?php else: ?>
-            <div class="mb-3">
-                <div class="d-flex flex-wrap">
-                    <?php foreach ($components as $key => $fields): ?>
-                        <div class="form-check me-3 mb-2">
-                            <input class="form-check-input" type="radio" name="selected_table" id="<?= $key ?>" value="<?= $key ?>" <?= $key === $table ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="<?= $key ?>"><?= ucfirst($key) ?></label>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
-            <div class="mb-3 text-center">
+                <input type="hidden" name="product_id" value="<?= $product['product_id'] ?? '' ?>">
+            <?php else: ?>
                 <button type="submit" name="add" class="btn btn-success">Add Product</button>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </form>
 </div>
 
 <script>
+    document.getElementById('add-spec').addEventListener('click', function() {
+        const container = document.getElementById('specs-container');
+        const row = document.createElement('div');
+        row.className = 'row mb-2 spec-row';
+        row.innerHTML = `
+            <div class="col-5">
+                <input type="text" name="spec_keys[]" class="form-control" placeholder="Key">
+            </div>
+            <div class="col-6">
+                <input type="text" name="spec_values[]" class="form-control" placeholder="Value">
+            </div>
+            <div class="col-1">
+                <button type="button" class="btn btn-danger btn-sm remove-spec">&times;</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    document.getElementById('specs-container').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-spec')) {
+            e.target.closest('.spec-row').remove();
+        }
+    });
+
     function confirmDelete() {
         return confirm('Are you sure you want to delete this product?');
     }

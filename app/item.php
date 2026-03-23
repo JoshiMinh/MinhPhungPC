@@ -1,12 +1,13 @@
 <?php
 include 'core/config.php';
-include 'core/schema.php';
+include 'core/config.php';
+include 'core/helpers.php';
 
-$table = $_GET['table'] ?? '';
+$type = $_GET['table'] ?? ''; // type slug
 $id = $_GET['id'] ?? '';
 
-if ($table && $id) {
-    $stmt = $pdo->prepare("SELECT * FROM $table WHERE id = :id");
+if ($type && $id) {
+    $stmt = $pdo->prepare("SELECT p.*, b.name as brand FROM products p JOIN brands b ON p.brand_id = b.brand_id WHERE p.product_id = :id");
     $stmt->execute(['id' => $id]);
     $item = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -15,54 +16,61 @@ if ($table && $id) {
         exit("<h1>Item Not Found</h1>");
     }
 
+    // Decode specs and merge into item for display loop
+    $specs = json_decode($item['specs'], true) ?: [];
+    $item = array_merge($item, $specs);
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['comment']) && isset($_SESSION['user_id'])) {
-            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, product_table, content, time) VALUES (:user_id, :product_id, :product_table, :content, NOW())");
+            $insertStmt = $pdo->prepare("INSERT INTO comments (user_id, product_id, content, created_at) VALUES (:user_id, :product_id, :content, NOW())");
             $insertStmt->execute([
                 'user_id' => $_SESSION['user_id'],
                 'product_id' => $id,
-                'product_table' => $table,
                 'content' => trim($_POST['comment'])
             ]);
-            header("Location: {$_SERVER['PHP_SELF']}?table=$table&id=$id");
+            header("Location: {$_SERVER['PHP_SELF']}?table=$type&id=$id");
             exit;
         }
 
         if (isset($_POST['rating']) && is_numeric($_POST['rating'])) {
             $rating = (int)$_POST['rating'];
             if ($rating >= 1 && $rating <= 5 && isset($_SESSION['user_id'])) {
-                $stmt = $pdo->prepare("SELECT ratings FROM $table WHERE id = :id");
-                $stmt->execute(['id' => $id]);
-                $product = $stmt->fetch(PDO::FETCH_ASSOC);
+                $userId = $_SESSION['user_id'];
+                // Use reviews table instead of ratings column
+                $stmt = $pdo->prepare("SELECT review_id FROM reviews WHERE user_id = :user_id AND product_id = :product_id");
+                $stmt->execute(['user_id' => $userId, 'product_id' => $id]);
+                $existingReview = $stmt->fetchColumn();
 
-                if ($product) {
-                    $ratings = explode(' ', $product['ratings']);
-                    $userRated = false;
-
-                    foreach ($ratings as &$ratingItem) {
-                        $ratingParts = explode('-', $ratingItem);
-                        if ($ratingParts[0] == $_SESSION['user_id']) {
-                            $ratingItem = "{$_SESSION['user_id']}-$rating";
-                            $userRated = true;
-                            break;
-                        }
-                    }
-
-                    if (!$userRated) {
-                        $ratings[] = "{$_SESSION['user_id']}-$rating";
-                    }
-
-                    $updateStmt = $pdo->prepare("UPDATE $table SET ratings = :ratings WHERE id = :id");
-                    $updateStmt->execute(['ratings' => implode(' ', $ratings), 'id' => $id]);
-                    echo "<script>window.location.href = window.location.href;</script>";
+                if ($existingReview) {
+                    $updateStmt = $pdo->prepare("UPDATE reviews SET rating = :rating WHERE review_id = :review_id");
+                    $updateStmt->execute(['rating' => $rating, 'review_id' => $existingReview]);
+                } else {
+                    $insertStmt = $pdo->prepare("INSERT INTO reviews (user_id, product_id, rating) VALUES (:user_id, :product_id, :rating)");
+                    $insertStmt->execute(['user_id' => $userId, 'product_id' => $id, 'rating' => $rating]);
                 }
+                echo "<script>window.location.href = window.location.href;</script>";
+                exit;
             }
         }
     }
 
-    $commentStmt = $pdo->prepare("SELECT comments.content, comments.time, users.name, users.profile_image FROM comments JOIN users ON comments.user_id = users.user_id WHERE comments.product_id = :product_id AND comments.product_table = :product_table ORDER BY comments.comment_id DESC");
-    $commentStmt->execute(['product_id' => $id, 'product_table' => $table]);
+    $commentStmt = $pdo->prepare("SELECT comments.content, comments.created_at as time, users.name, users.profile_image FROM comments JOIN users ON comments.user_id = users.user_id WHERE comments.product_id = :product_id ORDER BY comments.comment_id DESC");
+    $commentStmt->execute(['product_id' => $id]);
     $comments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch average rating and count from reviews table
+    $ratingStmt = $pdo->prepare("SELECT AVG(rating) as avg_rating, COUNT(*) as count FROM reviews WHERE product_id = ?");
+    $ratingStmt->execute([$id]);
+    $ratingStats = $ratingStmt->fetch(PDO::FETCH_ASSOC);
+    $averageRating = (float)$ratingStats['avg_rating'];
+    $userCount = (int)$ratingStats['count'];
+
+    $userRating = null;
+    if (isset($_SESSION['user_id'])) {
+        $userRatingStmt = $pdo->prepare("SELECT rating FROM reviews WHERE user_id = ? AND product_id = ?");
+        $userRatingStmt->execute([$_SESSION['user_id'], $id]);
+        $userRating = $userRatingStmt->fetchColumn();
+    }
 } else {
     exit("<h1>Invalid request</h1>");
 }
@@ -99,31 +107,6 @@ if ($table && $id) {
             <div class="col">
                 <div class="card p-3 bg-white text-dark">
                    <h2><?= htmlspecialchars($item['name']) ?></h2>
-                    <?php
-                    $ratings = $item['ratings'] ?? '';
-                    $ratingArray = explode(' ', $ratings);
-                    $totalRating = 0;
-                    $userCount = 0;
-                    $userRating = null;
-
-                    foreach ($ratingArray as $rating) {
-                        $ratingParts = explode('-', $rating);
-                        if (count($ratingParts) === 2) {
-                            [$userId, $ratingValue] = $ratingParts;
-                            $ratingValue = (int)$ratingValue;
-
-                            if ($userId == $_SESSION['user_id']) {
-                                $userRating = $ratingValue;
-                            }
-
-                            $totalRating += $ratingValue;
-                            $userCount++;
-                        }
-                    }
-
-                    $averageRating = $userCount ? $totalRating / $userCount : 0;
-                    ?>
-
                     <div class="ratings mb-2" id="rating-stars">
                         <?php for ($i = 0; $i < 5; $i++): ?>
                             <span class="star <?= ($userRating !== null && $i < $userRating) || ($userRating === null && $i < floor($averageRating)) ? 'fas fa-star' : 'fa fa-star' ?>" data-index="<?= $i ?>"></span>
@@ -134,8 +117,8 @@ if ($table && $id) {
                     <p class="card-text"><?= number_format($item['price'], 0, ',', '.') . '₫' ?></p>
                     <p class="card-text"><strong>Brand:</strong> <?= htmlspecialchars($item['brand']) ?></p>
                     <form method="post">
-                        <input type="hidden" name="table" value="<?= htmlspecialchars($table) ?>">
-                        <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
+                        <input type="hidden" name="table" value="<?= htmlspecialchars($type) ?>">
+                        <input type="hidden" name="id" value="<?= htmlspecialchars($item['product_id']) ?>">
                         <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
                     </form>
                 </div>
@@ -143,7 +126,7 @@ if ($table && $id) {
                     <h4>Description</h4>
                     <ul>
                         <?php foreach ($item as $key => $value): ?>
-                            <?php if (!in_array($key, ['id', 'name', 'price', 'image', 'brand', 'ratings'])): ?>
+                            <?php if (!in_array($key, ['product_id', 'brand_id', 'name', 'price', 'image', 'brand', 'type', 'specs', 'created_at'])): ?>
                                 <li><strong><?= htmlspecialchars(ucwords(str_replace('_', ' ', $key))) ?>:</strong> <?= htmlspecialchars($value) ?></li>
                             <?php endif; ?>
                         <?php endforeach; ?>

@@ -1,22 +1,24 @@
 <?php
 include 'core/config.php';
-include 'core/schema.php';
+include 'core/helpers.php';
 
-$table = $_GET['table'] ?? '';
-$tableName = array_search($table, $categoryMap) ?: 'Unknown Category';
-$tableDisplayName = htmlspecialchars(ucwords(str_replace('_', ' ', $tableName)));
+$type = $_GET['table'] ?? ''; // keeping parameter name 'table' for URL compatibility if needed, or change to 'type'
+$mapping = getProductTypeMapping();
+$tableDisplayName = $mapping[$type] ?? 'Unknown Category';
 
 $brands = $items = [];
 $brandFilter = $_GET['brands'] ?? [];
 $minPrice = $_GET['min_price'] ?? null;
 $maxPrice = $_GET['max_price'] ?? null;
 
-if ($tableName !== 'Unknown Category') {
+if ($tableDisplayName !== 'Unknown Category') {
     try {
-        $stmtBrands = $pdo->query("SELECT DISTINCT brand FROM $table ORDER BY brand");
+        $stmtBrands = $pdo->prepare("SELECT DISTINCT b.name as brand FROM products p JOIN brands b ON p.brand_id = b.brand_id WHERE p.type = ? ORDER BY b.name");
+        $stmtBrands->execute([$type]);
         $brands = $stmtBrands->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmtPriceRange = $pdo->query("SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM $table");
+        $stmtPriceRange = $pdo->prepare("SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM products WHERE type = ?");
+        $stmtPriceRange->execute([$type]);
         $priceRange = $stmtPriceRange->fetch(PDO::FETCH_ASSOC);
 
         $minPrice = $minPrice ?: $priceRange['min_price'];
@@ -28,19 +30,32 @@ if ($tableName !== 'Unknown Category') {
         $formattedMinPrice = number_format($minPriceNumeric, 0, ',', '.');
         $formattedMaxPrice = number_format($maxPriceNumeric, 0, ',', '.');
 
-        $brandCondition = $brandFilter
-            ? "AND brand IN ('" . implode("','", array_map('htmlspecialchars', $brandFilter)) . "')"
-            : '';
+        $brandCondition = '';
+        $params = [':type' => $type, ':min_price' => $minPriceNumeric, ':max_price' => $maxPriceNumeric];
+        
+        if ($brandFilter) {
+            $placeholders = [];
+            foreach ($brandFilter as $i => $brand) {
+                $key = ":brand$i";
+                $placeholders[] = $key;
+                $params[$key] = $brand;
+            }
+            $brandCondition = "AND b.name IN (" . implode(',', $placeholders) . ")";
+        }
 
-        $priceCondition = "AND price BETWEEN :min_price AND :max_price";
-
-        $stmtItems = $pdo->prepare("SELECT *, '$table' AS item_table FROM $table WHERE 1 $brandCondition $priceCondition ORDER BY brand");
-        $stmtItems->bindParam(':min_price', $minPriceNumeric, PDO::PARAM_INT);
-        $stmtItems->bindParam(':max_price', $maxPriceNumeric, PDO::PARAM_INT);
-        $stmtItems->execute();
+        $query = "SELECT p.*, b.name as brand, :type as item_table 
+                  FROM products p 
+                  JOIN brands b ON p.brand_id = b.brand_id 
+                  WHERE p.type = :type $brandCondition AND price BETWEEN :min_price AND :max_price 
+                  ORDER BY b.name";
+        
+        $stmtItems = $pdo->prepare($query);
+        $stmtItems->execute($params);
         $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-        include 'core/sorter.php';
+        if (isset($_GET['sort'])) {
+            sortItems($items, $_GET['sort']);
+        }
     } catch (PDOException $e) {
         echo "Error fetching data: " . htmlspecialchars($e->getMessage());
     }

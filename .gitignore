@@ -1,9 +1,18 @@
+# Dependency directories
 vendor/
 node_modules/
+
+# Environment files
 .env
+
+# Storage (except .gitkeep files)
 storage/profiles/*
 !storage/profiles/.gitkeep
 storage/media/*
 !storage/media/.gitkeep
+
+# System files
 .DS_Store
+
+# Log files
 *.log

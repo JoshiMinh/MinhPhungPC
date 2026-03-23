@@ -1,29 +1,35 @@
 <?php
 $userId = $_SESSION['user_id'];
 
-$stmt = $pdo->prepare("SELECT name FROM users WHERE user_id = ?");
+// Fetch orders with items
+$stmt = $pdo->prepare("
+    SELECT o.*, oi.quantity, oi.price_at_purchase, p.name as product_name
+    FROM orders o
+    LEFT JOIN order_items oi ON o.order_id = oi.order_id
+    LEFT JOIN products p ON oi.product_id = p.product_id
+    WHERE o.user_id = ?
+    ORDER BY o.created_at DESC
+");
 $stmt->execute([$userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE customer_id = ? ORDER BY order_date DESC");
-$stmt->execute([$userId]);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$items = [];
-foreach ($orders as $order) {
-    foreach (explode(' ', $order['items']) as $item) {
-        list($itemTable, $itemId) = explode('-', $item);
-        $items[$itemTable][] = $itemId;
+// Group by order_id
+$orders = [];
+foreach ($results as $row) {
+    if (!isset($orders[$row['order_id']])) {
+        $orders[$row['order_id']] = [
+            'order_id'       => $row['order_id'],
+            'created_at'     => $row['created_at'],
+            'total_amount'   => $row['total_amount'],
+            'status'         => $row['status'],
+            'payment_method' => $row['payment_method'],
+            'payment_status' => $row['payment_status'],
+            'shipping_address' => $row['shipping_address'],
+            'items'          => []
+        ];
     }
-}
-
-$itemDetailsMap = [];
-foreach ($items as $table => $ids) {
-    $placeholders = rtrim(str_repeat('?,', count($ids)), ',');
-    $stmt = $pdo->prepare("SELECT id, name, price FROM $table WHERE id IN ($placeholders)");
-    $stmt->execute($ids);
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $itemDetailsMap[$table][$row['id']] = $row;
+    if ($row['product_name']) {
+        $orders[$row['order_id']]['items'][] = $row['product_name'] . " (" . number_format($row['price_at_purchase'], 0, ',', '.') . "₫) x" . $row['quantity'];
     }
 }
 ?>
@@ -43,27 +49,17 @@ foreach ($items as $table => $ids) {
                     ?>
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="card-text"><strong>Date:</strong> <?= htmlspecialchars($order['order_date']) ?></p>
+                            <p class="card-text"><strong>Date:</strong> <?= htmlspecialchars($order['created_at']) ?></p>
                             <p class="card-text"><strong>Status:</strong> <span class="<?= $statusClass ?>" id="status-<?= $order['order_id'] ?>"><?= ucfirst(htmlspecialchars($order['status'])) ?></span></p>
                             <p class="card-text"><strong>Total Amount:</strong> <?= number_format($order['total_amount'], 0, ',', '.') ?>₫</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="card-text"><strong>Address:</strong> <?= htmlspecialchars($order['address']) ?></p>
+                            <p class="card-text"><strong>Address:</strong> <?= htmlspecialchars($order['shipping_address']) ?></p>
                             <p class="card-text"><strong>Payment Method:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
                             <p class="card-text"><strong>Payment Status:</strong> <?= ucfirst(htmlspecialchars($order['payment_status'])) ?></p>
                         </div>
                     </div>
-                    <?php
-                    $itemsDetails = array_map(function ($item) use ($itemDetailsMap) {
-                        list($table, $id, $quantity) = explode('-', $item);
-                        if (isset($itemDetailsMap[$table][$id])) {
-                            $detail = $itemDetailsMap[$table][$id];
-                            return htmlspecialchars($detail['name']) . " (" . number_format($detail['price'], 0, ',', '.') . "₫) x$quantity";
-                        }
-                        return '';
-                    }, explode(' ', $order['items']));
-                    ?>
-                    <p class="card-text mt-4"><strong>Items:</strong> <?= implode(', ', $itemsDetails) ?></p>
+                    <p class="card-text mt-4"><strong>Items:</strong> <?= implode(', ', $order['items']) ?></p>
                     <?php if (!in_array($order['status'], ['delivered', 'shipped', 'cancelled'])): ?>
                         <button class="btn btn-danger cancel-order-btn" data-toggle="modal" data-target="#cancelModal" data-order-id="<?= $order['order_id'] ?>">Cancel Order</button>
                     <?php endif; ?>
