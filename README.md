@@ -1,15 +1,24 @@
-<div align="center">
+# MinhPhungPC
 
-  <img src="logo.png" height="100px">
+Dynamic PC building and component management web application.
 
-  A website to sell and build desktop PCs using available components or purchase individual parts, featuring excellent functionalities and a robust compatibility checker.
+## Structure
+- `/app`: Application root (pages, admin, lib, components)
+- `/storage`: Media and user-uploaded content
+- `/scripts`, `/styles`: Consolidated assets
+- `schema.sql`: Database definition
+- `.env`: Environment configuration
 
-  Use it by placing it in the XAMPP `htdocs` folder, then open:
+## Setup
+1. Clone the repository.
+2. Import `schema.sql` into MySQL.
+3. Configure `.env` with your DB and SMTP credentials.
+4. Host with a PHP-compatible server (e.g., Apache/XAMPP).
+5. Access via `/app/index.php`.
 
-  ```bash
-  localhost/MinhPhungPC
-  ```
-
-  <img src="demo.png" width="100%">
-
-</div>
+## Features
+- PC Build customizer
+- Categorized component browsing
+- User authentication and order history
+- Admin dashboard for product/user management
+- Dark mode and responsive design

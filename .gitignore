@@ -1,4 +1,18 @@
-*.tmp.driveupload
-/.tmp.driveupload
-.tmp.driveupload/141659
-desktop.ini
+# Dependencies
+/vendor
+/node_modules
+
+# Configuration
+.env
+
+# Storage & Assets
+/storage/profile_images/*
+!/storage/profile_images/.gitkeep
+/storage/images/*
+!/storage/images/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
