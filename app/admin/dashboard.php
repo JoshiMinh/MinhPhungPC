@@ -31,8 +31,8 @@ if (isset($_POST['logout'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../styles/styles.css">
-    <link rel="icon" type="image/png" href="../../storage/images/icon.png">
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="icon" type="image/png" href="../../icon.png">
     <style>
         body {
             background-color: var(--bg-primary);
@@ -99,7 +99,7 @@ if (isset($_POST['logout'])) {
             <aside class="offcanvas-md offcanvas-start d-md-flex flex-column sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <a href="dashboard.php">
-                        <img src="../../storage/images/logo_light.png" alt="Logo" class="img-fluid" style="width: 80%;">
+                        <img src="../../assets/images/logo/logo_light.png" alt="Logo" class="img-fluid" style="width: 80%;">
                     </a>
                 </div>
                 <div class="flex-grow-1">
@@ -132,7 +132,7 @@ if (isset($_POST['logout'])) {
             </main>
         </div>
     </div>
-    <script src="../../scripts/main.js"></script>
+    <script src="../../assets/js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

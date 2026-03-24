@@ -85,7 +85,7 @@ if ($type && $id) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
     <style>
         .additional-details p { margin-bottom: 5px; }
         .additional-details ul { padding-left: 20px; }
@@ -168,7 +168,7 @@ if ($type && $id) {
     <?php include 'ui/footer.php'; ?>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="../assets/main.js"></script>
+    <script src="../assets/js/main.js"></script>
     <script src="../assets/js/builder.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {

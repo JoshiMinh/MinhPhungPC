@@ -14,16 +14,16 @@ CREATE TABLE product_type (
 );
 
 INSERT INTO product_type (name, icon_path, is_active) VALUES
-    ('cpu',         '/icons/cpu.png',         TRUE),
-    ('gpu',         '/icons/gpu.png',         TRUE),
-    ('ram',         '/icons/ram.png',         TRUE),
-    ('motherboard', '/icons/motherboard.png', TRUE),
-    ('storage',     '/icons/storage.png',     TRUE),
-    ('psu',         '/icons/psu.png',         TRUE),
-    ('case',        '/icons/case.png',        TRUE),
-    ('cooler',      '/icons/cooler.png',      TRUE),
-    ('os',          '/icons/os.png',          TRUE),
-    ('fan',         '/icons/fan.png',         TRUE);
+    ('cpu',         '/assets/images/icons/cpu.png',         TRUE),
+    ('gpu',         '/assets/images/icons/gpu.png',         TRUE),
+    ('ram',         '/assets/images/icons/ram.png',         TRUE),
+    ('motherboard', '/assets/images/icons/motherboard.png', TRUE),
+    ('storage',     '/assets/images/icons/storage.png',     TRUE),
+    ('psu',         '/assets/images/icons/psu.png',         TRUE),
+    ('case',        '/assets/images/icons/case.png',        TRUE),
+    ('cooler',      '/assets/images/icons/cooler.png',      TRUE),
+    ('os',          '/assets/images/icons/os.png',          TRUE),
+    ('fan',         '/assets/images/icons/fan.png',         TRUE);
 
 -- ============================================
 -- BRANDS
@@ -45,7 +45,7 @@ CREATE TABLE users (
     password_hash  TEXT NOT NULL,
     role           VARCHAR(20) DEFAULT 'user'
                    CHECK (role IN ('user', 'admin')),
-    profile_image  TEXT DEFAULT 'default.jpg',
+    profile_image  TEXT DEFAULT '/assets/images/defaults/default.jpg',
     address        TEXT,
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

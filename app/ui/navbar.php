@@ -145,7 +145,7 @@
 <nav>
     <div class="navbar navbar-expand-lg navbar-main d-none d-lg-flex">
         <a href="home.php" class="navbar-brand" style="width: 10%;" title="Home">
-            <img src="logo.png" alt="MinhPhungPC Logo" style="width: 100%;">
+            <img src="../assets/images/logo/logo.png" alt="MinhPhungPC Logo" style="width: 100%;">
         </a>
         <div class="mx-auto" style="width: 50%;">
             <div class="search-input-container">
@@ -204,8 +204,8 @@
     <div class="d-lg-none">
         <div class="d-flex align-items-center p-2 justify-content-between">
             <a href="index.php" class="navbar-brand" style="width: 40%;" title="Home">
-                <img src="../storage/images/logo.png" height="30" alt="Logo" class="d-inline-block align-top logo-light">
-                <img src="../storage/images/logo_light.png" height="30" alt="Logo" class="d-inline-block align-top logo-dark">
+                <img src="../assets/images/logo/logo.png" height="30" alt="Logo" class="d-inline-block align-top logo-light">
+                <img src="../assets/images/logo/logo_light.png" height="30" alt="Logo" class="d-inline-block align-top logo-dark">
             </a>
             <div class="d-flex align-items-center">
                 <button id="switchBtnMobile" class="btn btn-link p-0" aria-label="Toggle dark mode">

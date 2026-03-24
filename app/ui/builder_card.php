@@ -22,7 +22,7 @@ if (isset($buildSetComponents)) {
 
         <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
             <div class="p-2">
-                <img src="<?= $selectedComponent ? htmlspecialchars($selectedComponent['image']) : '../storage/images/' . htmlspecialchars($tableName . '.png'); ?>"
+                <img src="<?= $selectedComponent ? htmlspecialchars($selectedComponent['image']) : '../assets/images/icons/' . htmlspecialchars($tableName . '.png'); ?>"
                     alt="<?= htmlspecialchars($componentName); ?>"
                     id="componentImage-<?= htmlspecialchars($tableName); ?>"
                     class="component-image"

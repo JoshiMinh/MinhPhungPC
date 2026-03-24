@@ -10,7 +10,7 @@
                     <a href="tel:+84907067721" class="text-white">0907067721</a>
                 </p>
                 <a href="index.php" class="navbar-brand" style="width: 50%;">
-                    <img src="logo_light.png" alt="MinhPhungPC Logo" style="width: 100%;">
+                    <img src="../assets/images/logo/logo_light.png" alt="MinhPhungPC Logo" style="width: 100%;">
                 </a>
             </div>
             <div class="col-12 col-md-4 mb-4 mb-md-0">
